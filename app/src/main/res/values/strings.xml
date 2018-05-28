@@ -19,4 +19,6 @@
     <string name="A_intro_therdTitle">استفاده راحت</string>
     <string name="A_intro_therdText">لذت استفاده از پیام رسان نور الصالحین با رابط کاربری ساده و زیبا</string>
     <string name="No_Internet">عدم درسترسی به اینترنت</string>
+
+    <string name="l_verifty_wrongNumber"><u> شماره اشتباه ؟</u></string>
 </resources>

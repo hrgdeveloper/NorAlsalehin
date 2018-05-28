@@ -16,11 +16,13 @@
             app:theme="@style/ThemeOverlay.AppCompat.Dark"
 
             >
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_gravity="center"
+                android:layout_centerInParent="true"
                 android:layout_marginTop="@dimen/_20sdp"
                 android:text="@string/l_register_title"
                 android:id="@+id/tv_lable_1"
@@ -28,6 +30,7 @@
                 android:textSize="@dimen/_16sdp"
                 android:textColor="@color/titleColor"
                 />
+            </RelativeLayout>
         </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>
@@ -80,6 +83,8 @@
                 android:layout_marginLeft="@dimen/_35sdp"
                 android:layout_marginRight="@dimen/_35sdp"
                 android:gravity="left"
+                android:drawableRight="@android:drawable/ic_menu_call"
+                android:drawableTint="@android:color/black"
                 app:counterEnabled="true"
                 app:counterMaxLength="11"
                 android:maxLines="1"
