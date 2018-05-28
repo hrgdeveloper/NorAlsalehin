@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">NorAlsalehin</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="l_intro_skip">پرش</string>
+    <string name="l_intro_next">بعدی</string>
+
+    <string name="l_register_title">تایید شماره تماس شما</string>
+    <string name="l_register_text">اپلیکیشن نور الصالحین یک پیامک حاوی کد ورد شما ارسال خواهد کرد . لطفا شماره موبایل خود را در کادر زیر وارد نمایید</string>
+    <string name="l_register_hint_phone">شماره موبایل</string>
+    <string name="l_register_sendSms">ارسال پیامک</string>
+
+    <string name="A_intro_firstTitle">پیام رسان نور الصالحین</string>
+    <string name="A_intro_firstText">پیام رسان عقیدتی و مذهبی نور الصالحین ، پیام رسانی که قابلت دریافت مطالب را برای شما فراهم میسازد</string>
+    <string name="A_intro_secondTitle">محتوای مذهبی و دینی</string>
+    <string name="A_intro_secondText">مطالب اعتقادی و مذهبی ، سخنرانی بزگان و علمای شیعه و درس های حضرت استاد حاج محمد علی ارزیده</string>
+    <string name="A_intro_therdTitle">استفاده راحت</string>
+    <string name="A_intro_therdText">لذت استفاده از پیام رسان نور الصالحین با رابط کاربری ساده و زیبا</string>
+    <string name="No_Internet">عدم درسترسی به اینترنت</string>
+</resources>
