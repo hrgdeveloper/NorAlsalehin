@@ -19,6 +19,9 @@ import com.developer.hrg.noralsalehin.Helps.SimpleResponse;
 import com.developer.hrg.noralsalehin.Helps.UserInfo;
 import com.developer.hrg.noralsalehin.R;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 
 import retrofit2.Call;
@@ -76,12 +79,22 @@ public class Register_fragment extends Fragment  {
                         public void onResponse(Call<SimpleResponse> call, Response<SimpleResponse> response) {
                             if (!response.isSuccessful()) {
                                 try {
-                                    Toast.makeText(getActivity(), response.errorBody().string(), Toast.LENGTH_SHORT).show();
+                                    JSONObject jsonObject = new JSONObject(response.errorBody().string());
+                                    String message = jsonObject.getString("message");
+                                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
                             }else {
-                                Toast.makeText(getActivity(),response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                                boolean error = response.body().isError();
+                                if (error) {
+                                    Toast.makeText
+                                            (getActivity(),response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                                }else {
+
+                                }
                             }
                         }
 
