@@ -62,7 +62,7 @@ public class Register_fragment extends Fragment  {
         }
         userInfo=new UserInfo(getActivity());
         progress=new ProgressDialog(getActivity());
-        progress.setTitle("Loading");
+        progress.setMessage("در حال ارسال");
 
     }
 

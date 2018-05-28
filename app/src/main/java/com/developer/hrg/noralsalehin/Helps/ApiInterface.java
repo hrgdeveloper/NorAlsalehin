@@ -14,4 +14,9 @@ public interface ApiInterface {
     @POST("register")
     Call<SimpleResponse> register(@Field("mobile") String mobile);
 
+    @FormUrlEncoded
+    @POST("verify")
+    Call<SimpleResponse> verify(@Field("mobile") String mobile , @Field("otp") String otp);
+
+
 }

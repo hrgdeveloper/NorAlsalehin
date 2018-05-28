@@ -1,5 +1,7 @@
 package com.developer.hrg.noralsalehin.Helps;
 
+import com.developer.hrg.noralsalehin.Models.User;
+
 /**
  * Created by hamid on 5/25/2018.
  */
@@ -7,6 +9,15 @@ package com.developer.hrg.noralsalehin.Helps;
 public class SimpleResponse {
     boolean error ;
     String message ;
+    User user;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     public boolean isError() {
         return error;
