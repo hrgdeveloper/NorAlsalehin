@@ -8,6 +8,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
 import com.developer.hrg.noralsalehin.Helps.UserInfo;
+import com.developer.hrg.noralsalehin.Main.MainActivity;
 import com.developer.hrg.noralsalehin.SmsHandeling.SmsActivity;
 
 public class SplashActivity extends AppCompatActivity {

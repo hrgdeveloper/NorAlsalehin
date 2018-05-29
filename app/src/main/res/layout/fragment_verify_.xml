@@ -27,7 +27,7 @@
                 android:id="@+id/tv_lable_1"
                 android:textStyle="bold"
                 android:layout_centerInParent="true"
-                android:textSize="@dimen/_16sdp"
+                android:textSize="20sp"
                 android:textColor="@color/titleColor"
                 />
 </RelativeLayout>
@@ -54,7 +54,7 @@
                 android:layout_alignParentRight="true"
                 android:padding="@dimen/_10sdp"
                 android:textColor="@android:color/black"
-                android:textSize="@dimen/_14sdp"
+                android:textStyle="normal"
                 />
 
             <android.support.design.widget.TextInputLayout

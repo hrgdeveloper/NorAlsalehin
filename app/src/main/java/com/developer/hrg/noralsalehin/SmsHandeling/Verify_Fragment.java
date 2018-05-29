@@ -2,6 +2,7 @@ package com.developer.hrg.noralsalehin.SmsHandeling;
 
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -19,7 +20,9 @@ import com.developer.hrg.noralsalehin.Helps.ApiInterface;
 import com.developer.hrg.noralsalehin.Helps.Apiclient;
 import com.developer.hrg.noralsalehin.Helps.InternetCheck;
 import com.developer.hrg.noralsalehin.Helps.SimpleResponse;
+import com.developer.hrg.noralsalehin.Helps.UserData;
 import com.developer.hrg.noralsalehin.Helps.UserInfo;
+import com.developer.hrg.noralsalehin.Main.MainActivity;
 import com.developer.hrg.noralsalehin.R;
 
 import org.json.JSONException;
@@ -39,6 +42,7 @@ public class Verify_Fragment extends Fragment {
     EditText et_verify ;
     Button btn_verify ;
  UserInfo userInfo;
+    UserData userData;
     ProgressDialog progress;
     public Verify_Fragment() {
         // Required empty public constructor
@@ -48,6 +52,7 @@ public class Verify_Fragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         userInfo=new UserInfo(getActivity());
+        userData=new UserData(getActivity());
         progress=new ProgressDialog(getActivity());
         progress.setMessage("در حال ارسال..");
     }
@@ -117,9 +122,10 @@ public class Verify_Fragment extends Fragment {
                                             (getActivity(),response.body().getMessage(), Toast.LENGTH_SHORT).show();
                                     progress.cancel();
                                 }else {
-                                    Toast.makeText(getActivity(),response.body().getUser().getApikey() , Toast.LENGTH_SHORT).show();
-                                    progress.cancel();
-
+                                 userData.addUser(response.body().getUser());
+                                    userInfo.set_IsLogged_in(true);
+                                    startActivity(new Intent(getActivity(), MainActivity.class));
+                                    Toast.makeText(getActivity(), "خوش آمدید", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         }
