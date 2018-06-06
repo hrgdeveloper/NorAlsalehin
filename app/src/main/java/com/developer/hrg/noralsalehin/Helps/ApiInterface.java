@@ -3,6 +3,8 @@ package com.developer.hrg.noralsalehin.Helps;
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 
 /**
@@ -18,5 +20,6 @@ public interface ApiInterface {
     @POST("verify")
     Call<SimpleResponse> verify(@Field("mobile") String mobile , @Field("otp") String otp);
 
-
+    @GET("getAllChanelsUser")
+    Call<SimpleResponse> getAllChanels(@Header("Authorization") String header);
 }

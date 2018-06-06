@@ -23,6 +23,7 @@ import com.developer.hrg.noralsalehin.Helps.SimpleResponse;
 import com.developer.hrg.noralsalehin.Helps.UserData;
 import com.developer.hrg.noralsalehin.Helps.UserInfo;
 import com.developer.hrg.noralsalehin.Main.MainActivity;
+import com.developer.hrg.noralsalehin.Models.User;
 import com.developer.hrg.noralsalehin.R;
 
 import org.json.JSONException;

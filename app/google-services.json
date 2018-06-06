@@ -1,0 +1,59 @@
+{
+  "project_info": {
+    "project_number": "986401936540",
+    "firebase_url": "https://noorproject-63227.firebaseio.com",
+    "project_id": "noorproject-63227",
+    "storage_bucket": "noorproject-63227.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:986401936540:android:b54737c8f0ffa58a",
+        "android_client_info": {
+          "package_name": "com.developer.hrg.noralsalehin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "986401936540-vurr1ldpo8sab5qoreqo54hc5kn1l5ta.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.developer.hrg.noralsalehin",
+            "certificate_hash": "23ad16b0ade19fa071423c58c30947a357867993"
+          }
+        },
+        {
+          "client_id": "986401936540-m91qmh4tokm4g7ertjavuqa68i5h4gvl.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "986401936540-m91qmh4tokm4g7ertjavuqa68i5h4gvl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbuVJ-bUxx9PwA31feuEihT3wNt0choy4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "986401936540-m91qmh4tokm4g7ertjavuqa68i5h4gvl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

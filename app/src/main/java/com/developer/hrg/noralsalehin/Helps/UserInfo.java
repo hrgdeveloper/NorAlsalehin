@@ -8,6 +8,8 @@ import android.content.SharedPreferences;
  */
 
 public class UserInfo {
+
+    // vase moshakhas karde inke aya user sms dade . ya logine va ...
     Context context;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor ;
@@ -15,6 +17,7 @@ public class UserInfo {
     public static final String MOBILE_NUMBER = "mobilenumber";
     public static final String ISLOGGEDIN= "isLoggedIn";
     public static final String ISFIRSTTIME="firstTime";
+    public static final String ISFIRSTTIMEMAIN="firstTimeMain";
     public  UserInfo(Context context) {
         this.context=context;
         sharedPreferences=context.getSharedPreferences("userInfo",Context.MODE_PRIVATE);
@@ -56,6 +59,15 @@ public class UserInfo {
    public void deletMobileNumber() {
       editor.remove(MOBILE_NUMBER);
        editor.apply();
+   }
+   public void set_isFirstTimeMain(boolean situtation) {
+       editor.putBoolean(ISFIRSTTIMEMAIN,situtation);
+       editor.apply();
+   }
+
+
+   public boolean get_IsFirstTimeMain()  {
+       return sharedPreferences.getBoolean(ISFIRSTTIMEMAIN,true);
    }
 
 }

@@ -22,7 +22,7 @@ public class UserData extends SQLiteOpenHelper {
     public static final String CREATED_AT="created_At" ;
     String CREATE_TABLE= "CREATE TABLE " + TABLE_USER+ " ("+USER_ID+" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
             +MOBILE+" TEXT NOT NULL , "
-            +APIKEY+ "TEXT NOT NULL , " +
+            +APIKEY+ " TEXT NOT NULL , " +
             CREATED_AT+" TEXT NOT NULL )";
 
     public UserData(Context context) {
@@ -56,7 +56,7 @@ public class UserData extends SQLiteOpenHelper {
         User user = new User(cursor.getInt(cursor.getColumnIndexOrThrow(USER_ID)),
                 cursor.getString(cursor.getColumnIndexOrThrow(MOBILE)),
                 cursor.getString(cursor.getColumnIndexOrThrow(APIKEY)),
-                cursor.getString(cursor.getColumnIndexOrThrow(CREATE_TABLE))
+                cursor.getString(cursor.getColumnIndexOrThrow(CREATED_AT))
                 );
         return user;
     }
