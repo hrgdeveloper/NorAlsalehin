@@ -1,6 +1,7 @@
 package com.developer.hrg.noralsalehin.Helps;
 
 import com.developer.hrg.noralsalehin.Models.Chanel;
+import com.developer.hrg.noralsalehin.Models.UnRead;
 import com.developer.hrg.noralsalehin.Models.User;
 import com.google.gson.annotations.SerializedName;
 
@@ -15,8 +16,19 @@ public class SimpleResponse {
     String message ;
     User user;
 
+    public ArrayList<UnRead> getUnReads() {
+        return unReads;
+    }
+
+    public void setUnReads(ArrayList<UnRead> unReads) {
+        this.unReads = unReads;
+    }
+
     @SerializedName("chanels")
+
     ArrayList<Chanel> chanels ;
+    @SerializedName("unreads")
+    ArrayList<UnRead> unReads;
 
     public ArrayList<Chanel> getChanels() {
         return chanels;

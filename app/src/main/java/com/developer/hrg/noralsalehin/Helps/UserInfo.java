@@ -18,6 +18,7 @@ public class UserInfo {
     public static final String ISLOGGEDIN= "isLoggedIn";
     public static final String ISFIRSTTIME="firstTime";
     public static final String ISFIRSTTIMEMAIN="firstTimeMain";
+    public static final String ISUNREAD_FETCHED="is_unread_fetched";
     public  UserInfo(Context context) {
         this.context=context;
         sharedPreferences=context.getSharedPreferences("userInfo",Context.MODE_PRIVATE);
@@ -69,5 +70,15 @@ public class UserInfo {
    public boolean get_IsFirstTimeMain()  {
        return sharedPreferences.getBoolean(ISFIRSTTIMEMAIN,true);
    }
+
+    public void set_inUnreadFetched(boolean situtation) {
+        editor.putBoolean(ISUNREAD_FETCHED,situtation);
+        editor.apply();
+    }
+
+
+    public boolean get_inUnreadFetched()  {
+        return sharedPreferences.getBoolean(ISUNREAD_FETCHED,false);
+    }
 
 }

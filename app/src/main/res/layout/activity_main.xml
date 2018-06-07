@@ -11,12 +11,26 @@
         android:layout_height="wrap_content">
         <android.support.v7.widget.Toolbar
             android:layout_width="match_parent"
-
-            android:background="@color/colorPrimary"
+            android:background="@android:color/holo_green_dark"
             android:layout_height="?attr/actionBarSize"
             app:theme="@style/ThemeOverlay.AppCompat.Dark"
             >
-
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textColor="@android:color/white"
+    android:textStyle="bold"
+    android:layout_marginRight="@dimen/_5sdp"
+    android:textSize="@dimen/_14sdp"
+    android:id="@+id/tv_toolbar"
+    android:layout_centerVertical="true"
+    android:layout_alignParentRight="true"
+    android:text="@string/toolbar_text"
+    />
+            </RelativeLayout>
         </android.support.v7.widget.Toolbar>
 
 

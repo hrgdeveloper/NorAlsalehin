@@ -3,6 +3,7 @@ package com.developer.hrg.noralsalehin.Main;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.developer.hrg.noralsalehin.Helps.Config;
 import com.developer.hrg.noralsalehin.Models.Chanel;
+import com.developer.hrg.noralsalehin.Models.UnRead;
 import com.developer.hrg.noralsalehin.R;
 
 import java.text.ParseException;
@@ -23,10 +25,12 @@ public class GetChanelsAdapter extends RecyclerView.Adapter<GetChanelsAdapter.Ho
 
     Context context ;
     ArrayList<Chanel> chanels;
+    ArrayList<UnRead> unReads ;
     MyClickListener myClickListener;
-        public GetChanelsAdapter(Context context , ArrayList<Chanel> chanels) {
+        public GetChanelsAdapter(Context context , ArrayList<Chanel> chanels , ArrayList<UnRead> unReads) {
             this.context=context;
             this.chanels=chanels;
+            this.unReads=unReads;
         }
  public interface MyClickListener{
      public void chanel_clicked(int position, View view) ;
@@ -52,6 +56,9 @@ public class GetChanelsAdapter extends RecyclerView.Adapter<GetChanelsAdapter.Ho
     public void onBindViewHolder(Holder holder, int position) {
         String time = " " ;
         Chanel chanel = chanels.get(position);
+        UnRead unRead = unReads.get(position);
+        Log.e("databasecheckDate" ,chanel.getUpdated_at()==null ? "null" : chanel.getUpdated_at());
+        Log.e("databasecheckType" , chanel.getType()+""==null ? "null" : chanel.getType()+"");
    if (chanel.getUpdated_at()!=null) {
        Date date = null;
        try {
@@ -63,7 +70,14 @@ public class GetChanelsAdapter extends RecyclerView.Adapter<GetChanelsAdapter.Ho
    }else {
        time = "";
    }
+      if (unRead.getCount()>0 || unReads==null)
+      {
+          holder.tv_count.setVisibility(View.VISIBLE);
+          holder.tv_count.setText(unRead.getCount()+" ");
 
+      }else {
+          holder.tv_count.setVisibility(View.INVISIBLE);
+      }
 
 
         holder.tv_name.setText(chanel.getName());
@@ -100,7 +114,12 @@ public class GetChanelsAdapter extends RecyclerView.Adapter<GetChanelsAdapter.Ho
             tv_last=(TextView)itemView.findViewById(R.id.tv_custom_chanel_last);
             tv_count=(TextView)itemView.findViewById(R.id.tv_custom_chanel_count);
             tv_time=(TextView)itemView.findViewById(R.id.tv_custom_chanel_time);
-
+               itemView.setOnClickListener(new View.OnClickListener() {
+                   @Override
+                   public void onClick(View view) {
+                       myClickListener.chanel_clicked(getAdapterPosition(),view);
+                   }
+               });
 
         }
     }

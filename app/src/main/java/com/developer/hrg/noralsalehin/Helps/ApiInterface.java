@@ -22,4 +22,6 @@ public interface ApiInterface {
 
     @GET("getAllChanelsUser")
     Call<SimpleResponse> getAllChanels(@Header("Authorization") String header);
+    @GET("getUnRead")
+    Call<SimpleResponse> getUnread(@Header("Authorization") String header);
 }

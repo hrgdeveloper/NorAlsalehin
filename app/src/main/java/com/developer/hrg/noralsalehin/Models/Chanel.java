@@ -9,7 +9,7 @@ import com.google.gson.annotations.SerializedName;
 public class Chanel {
 
     @SerializedName("chanel_id")
-    String chanel_id ;
+    int chanel_id ;
     @SerializedName("name")
     String name ;
     @SerializedName("description")
@@ -21,8 +21,27 @@ public class Chanel {
     String last_message ;
     @SerializedName("type")
     Integer type ;
+    @SerializedName("count")
+    int count ;
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public int getChanel_id() {
+        return chanel_id;
+    }
+
+    public void setChanel_id(int chanel_id) {
+        this.chanel_id = chanel_id;
+    }
 
     @SerializedName("updated_at")
+
     String updated_at ;
 
     public String getUpdated_at() {
@@ -53,13 +72,7 @@ public class Chanel {
         this.type = type;
     }
 
-    public String getChanel_id() {
-        return chanel_id;
-    }
 
-    public void setChanel_id(String chanel_id) {
-        this.chanel_id = chanel_id;
-    }
 
     public String getName() {
         return name;
@@ -89,13 +102,13 @@ public class Chanel {
 
 
 
-    public Chanel(String chanel_id, String name, String description, String thumb, String updated_at, String created_at, String username ,
+    public Chanel(int chanel_id, String name, String description, String thumb, String updated_at, String username ,
                   String lase_message , Integer type) {
         this.chanel_id = chanel_id;
         this.name = name;
         this.description = description;
         this.thumb = thumb;
-
+        this.updated_at=updated_at;
         this.username = username;
         this.last_message=lase_message;
         this.type=type;
@@ -104,6 +117,7 @@ public class Chanel {
 
     public String getStringFromType() {
         String typee ;
+
         switch (type) {
             case 1 :
                 typee= "متن";
