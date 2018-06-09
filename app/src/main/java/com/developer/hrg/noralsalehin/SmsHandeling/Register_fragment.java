@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.developer.hrg.noralsalehin.Helps.ApiInterface;
 import com.developer.hrg.noralsalehin.Helps.Apiclient;
 import com.developer.hrg.noralsalehin.Helps.InternetCheck;
+import com.developer.hrg.noralsalehin.Helps.MyAlert;
 import com.developer.hrg.noralsalehin.Helps.SimpleResponse;
 import com.developer.hrg.noralsalehin.Helps.UserInfo;
 import com.developer.hrg.noralsalehin.R;
@@ -133,7 +134,7 @@ public class Register_fragment extends Fragment  {
 
                         @Override
                         public void onFailure(Call<SimpleResponse> call, Throwable t) {
-                            Toast.makeText(getActivity(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                            MyAlert.showAlert(getActivity(),"خطا","خطای " +"\n" + t.getMessage() );
                             progress.cancel();
                         }
                     });

@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.developer.hrg.noralsalehin.Helps.Config;
 import com.developer.hrg.noralsalehin.Models.Chanel;
 import com.developer.hrg.noralsalehin.Models.UnRead;
@@ -57,9 +58,7 @@ public class GetChanelsAdapter extends RecyclerView.Adapter<GetChanelsAdapter.Ho
         String time = " " ;
         Chanel chanel = chanels.get(position);
         UnRead unRead = unReads.get(position);
-        Log.e("databasecheckDate" ,chanel.getUpdated_at()==null ? "null" : chanel.getUpdated_at());
-        Log.e("databasecheckType" , chanel.getType()+""==null ? "null" : chanel.getType()+"");
-   if (chanel.getUpdated_at()!=null) {
+   if (chanel.getUpdated_at()!=null && !chanel.getUpdated_at().equals("")) {
        Date date = null;
        try {
            date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(chanel.getUpdated_at());
@@ -93,7 +92,7 @@ public class GetChanelsAdapter extends RecyclerView.Adapter<GetChanelsAdapter.Ho
         }else {
             holder.tv_last.setText(chanel.getLast_message());
         }
-        Glide.with(context).load(Config.CHANEL_THUMB_BASE+chanel.getThumb()).into(holder.iv_profile);
+        Glide.with(context).load(Config.CHANEL_THUMB_BASE_OFFLINE+chanel.getThumb()).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.iv_profile);
 
 
     }

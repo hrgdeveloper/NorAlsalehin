@@ -3,6 +3,7 @@ package com.developer.hrg.noralsalehin.Helps;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -41,6 +42,7 @@ public class UserData extends SQLiteOpenHelper {
     public static final String CHANEL_UPDATED_AT="updated_at";
     public static final String CHANEL_LAST_MESSAGE="last_message";
     public static final String CHANEL_TYPE="type";
+    public static final String CHANEL_COUNT="count";
     String CREATE_TABLE_CHANEL = "CREATE TABLE " + TABLE_CHANEL+"( "+ID+ " INTEGER PRIMARY KEY AUTOINCREMENT , "+
             CHANEL_ID+ " INTEGER NOT NULL ,"+
             CHANEL_NAME+ " TEXT NOT NULL ,"+
@@ -49,22 +51,26 @@ public class UserData extends SQLiteOpenHelper {
             CHANEL_USERNAME+ " TEXT NOT NULL , " +
             CHANEL_UPDATED_AT + " TEXT  ," +
             CHANEL_LAST_MESSAGE + " TEXT ," +
-            CHANEL_TYPE + " INTEGER  )";
+            CHANEL_TYPE + " INTEGER ," +
+            CHANEL_COUNT+" INTEGER )"
+            ;
 
     public static final String TABLE_UNREAD="unread_Table" ;
     public static final String ID_UNREAD="unread_id" ;
     public static final String UNREAD_CHANEL_ID="unread_chanel_id" ;
     public static final String UNREAD_COUNT="unread_cout" ;
-
+    public static final String READ_COUNT="read_count" ;
     String CREATE_TABLE_UNREAD= "CREATE TABLE " + TABLE_UNREAD+ " ("+ID_UNREAD+" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
             +UNREAD_CHANEL_ID+" INTEGER NOT NULL , "
-            +UNREAD_COUNT+ " INTEGER NOT NULL)" ;
+            +UNREAD_COUNT+ " INTEGER NOT NULL,"+
+            READ_COUNT+ " INTEGER NOT NULL)";
+
 
 
 
 
     public UserData(Context context) {
-        super(context, DB_NAME, null, 2);
+        super(context, DB_NAME, null, 3);
         sqLiteDatabase=this.getWritableDatabase();
     }
 
@@ -122,6 +128,7 @@ public class UserData extends SQLiteOpenHelper {
             contentValues.put(CHANEL_LAST_MESSAGE,chanel.getLast_message());
             contentValues.put(CHANEL_UPDATED_AT,chanel.getUpdated_at());
             contentValues.put(CHANEL_TYPE,chanel.getType());
+            contentValues.put(CHANEL_COUNT,chanel.getCount());
             sqLiteDatabase.insert(TABLE_CHANEL,null,contentValues);
 
 
@@ -138,16 +145,26 @@ public class UserData extends SQLiteOpenHelper {
             contentValues.put(CHANEL_LAST_MESSAGE,chanel.getLast_message());
             contentValues.put(CHANEL_UPDATED_AT,chanel.getUpdated_at());
             contentValues.put(CHANEL_TYPE,chanel.getType());
-
-
+            contentValues.put(CHANEL_COUNT,chanel.getCount());
             sqLiteDatabase.insert(TABLE_CHANEL,null,contentValues);
         }
+    }
+    public boolean hasChanelsData() {
+
+        long cnt  = DatabaseUtils.queryNumEntries(sqLiteDatabase, TABLE_CHANEL);
+        return cnt > 0;
+    }
+
+    public boolean hasUnreadData() {
+        long cnt  = DatabaseUtils.queryNumEntries(sqLiteDatabase, TABLE_UNREAD);
+        return cnt > 0;
 
     }
+
     public ArrayList<Chanel> getAllChanels() {
         ArrayList<Chanel> chanels = new ArrayList<>();
         Cursor cursor = sqLiteDatabase.query(TABLE_CHANEL,new String [] {CHANEL_ID,CHANEL_DESCRIPTION,CHANEL_NAME,CHANEL_USERNAME,
-                CHANEL_THUMB, CHANEL_LAST_MESSAGE,CHANEL_UPDATED_AT,CHANEL_TYPE },null,null,null,null,null);
+                CHANEL_THUMB, CHANEL_LAST_MESSAGE,CHANEL_UPDATED_AT,CHANEL_TYPE,CHANEL_COUNT },null,null,null,null,null);
         if (cursor.getCount()>0) {
             cursor.moveToFirst();
             do {
@@ -159,9 +176,9 @@ public class UserData extends SQLiteOpenHelper {
                 String updated_at = cursor.getString(cursor.getColumnIndexOrThrow(CHANEL_UPDATED_AT));
                 String thumb = cursor.getString(cursor.getColumnIndexOrThrow(CHANEL_THUMB));
                 Integer type  = cursor.getInt(cursor.getColumnIndexOrThrow(CHANEL_TYPE));
+                Integer count  = cursor.getInt(cursor.getColumnIndexOrThrow(CHANEL_COUNT));
 
-
-                Chanel chanel = new Chanel(chanel_id,name,description,thumb,updated_at,username,last_message,type);
+                Chanel chanel = new Chanel(chanel_id,name,description,thumb,updated_at,username,last_message,type,count);
                 chanels.add(chanel);
             }while (cursor.moveToNext());
            return chanels;
@@ -180,6 +197,7 @@ public class UserData extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put(UNREAD_CHANEL_ID,unread.getChanel_id());
         contentValues.put(UNREAD_COUNT,unread.getCount());
+        contentValues.put(READ_COUNT,unread.getReadCount());
         sqLiteDatabase.insert(TABLE_UNREAD,null,contentValues);
 
 
@@ -190,24 +208,38 @@ public class UserData extends SQLiteOpenHelper {
             ContentValues contentValues = new ContentValues();
             contentValues.put(UNREAD_CHANEL_ID,unread.getChanel_id());
             contentValues.put(UNREAD_COUNT,unread.getCount());
+            contentValues.put(READ_COUNT,unread.getReadCount());
             sqLiteDatabase.insert(TABLE_UNREAD,null,contentValues);
         }
 
     }
     public ArrayList<UnRead> getAllunReads() {
         ArrayList<UnRead> unReads = new ArrayList<>();
-        Cursor cursor = sqLiteDatabase.query(TABLE_UNREAD,new String [] {UNREAD_CHANEL_ID,UNREAD_COUNT},null,null,null,null,null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_UNREAD,new String [] {UNREAD_CHANEL_ID,UNREAD_COUNT,READ_COUNT},null,null,null,null,null);
         if (cursor.getCount()>0) {
             cursor.moveToFirst();
             do {
                 int chanel_id = cursor.getInt(cursor.getColumnIndexOrThrow(UNREAD_CHANEL_ID));
                 int count  = cursor.getInt(cursor.getColumnIndexOrThrow(UNREAD_COUNT));
-                UnRead unRead = new UnRead(chanel_id,count);
+                int readCount = cursor.getInt(cursor.getColumnIndexOrThrow(READ_COUNT));
+                UnRead unRead = new UnRead(chanel_id,count,readCount);
                 unReads.add(unRead);
             }while (cursor.moveToNext());
             return unReads;
         }else {
             return  null ;
         }
+    }
+    public void updateUnread(int count , int chanel_id) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(UNREAD_COUNT,count);
+        sqLiteDatabase.update(TABLE_UNREAD,contentValues,UNREAD_CHANEL_ID+ " like ? " ,new String[]{String.valueOf(chanel_id)});
+
+    }
+    public void updateRead(int unReadCount , int readCount , int chanel_id) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(READ_COUNT,unReadCount + readCount);
+        contentValues.put(UNREAD_COUNT,0);
+        sqLiteDatabase.update(TABLE_UNREAD,contentValues,UNREAD_CHANEL_ID+ " like ? " ,new String[]{String.valueOf(chanel_id)});
     }
 }

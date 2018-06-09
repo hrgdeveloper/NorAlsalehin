@@ -19,6 +19,8 @@ public class UserInfo {
     public static final String ISFIRSTTIME="firstTime";
     public static final String ISFIRSTTIMEMAIN="firstTimeMain";
     public static final String ISUNREAD_FETCHED="is_unread_fetched";
+
+    public static final String USER_COUNT="user_count";
     public  UserInfo(Context context) {
         this.context=context;
         sharedPreferences=context.getSharedPreferences("userInfo",Context.MODE_PRIVATE);
@@ -79,6 +81,15 @@ public class UserInfo {
 
     public boolean get_inUnreadFetched()  {
         return sharedPreferences.getBoolean(ISUNREAD_FETCHED,false);
+    }
+    public void setUserCount (int count) {
+        editor.putInt(USER_COUNT,count);
+        editor.apply();
+
+    }
+
+    public int getUserCount () {
+      return   sharedPreferences.getInt(USER_COUNT,0);
     }
 
 }

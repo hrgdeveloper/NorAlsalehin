@@ -15,6 +15,16 @@ public class SimpleResponse {
     boolean error ;
     String message ;
     User user;
+    @SerializedName("user_count")
+    int user_count ;
+
+    public int getUser_count() {
+        return user_count;
+    }
+
+    public void setUser_count(int user_count) {
+        this.user_count = user_count;
+    }
 
     public ArrayList<UnRead> getUnReads() {
         return unReads;

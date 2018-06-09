@@ -1,12 +1,15 @@
 package com.developer.hrg.noralsalehin.Models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by hamid on 6/5/2018.
  */
 
-public class Chanel {
+public class Chanel implements Parcelable {
 
     @SerializedName("chanel_id")
     int chanel_id ;
@@ -18,11 +21,15 @@ public class Chanel {
     String username;
     @SerializedName("thumb")
     String thumb ;
+    @SerializedName("last_message")
     String last_message ;
     @SerializedName("type")
     Integer type ;
     @SerializedName("count")
     int count ;
+    @SerializedName("updated_at")
+    String updated_at ;
+
 
     public int getCount() {
         return count;
@@ -40,9 +47,7 @@ public class Chanel {
         this.chanel_id = chanel_id;
     }
 
-    @SerializedName("updated_at")
 
-    String updated_at ;
 
     public String getUpdated_at() {
         return updated_at;
@@ -52,7 +57,7 @@ public class Chanel {
         this.updated_at = updated_at;
     }
 
-    @SerializedName("last_message")
+
 
 
 
@@ -103,7 +108,7 @@ public class Chanel {
 
 
     public Chanel(int chanel_id, String name, String description, String thumb, String updated_at, String username ,
-                  String lase_message , Integer type) {
+                  String lase_message , Integer type , int count ) {
         this.chanel_id = chanel_id;
         this.name = name;
         this.description = description;
@@ -112,6 +117,7 @@ public class Chanel {
         this.username = username;
         this.last_message=lase_message;
         this.type=type;
+        this.count=count;
     }
     // in mothod vase ine ke ba tavajoh be meghdare type yek string ke message az che noie bar migardone
 
@@ -137,7 +143,7 @@ public class Chanel {
             case 6 :
                 typee=  "فایل" ;
                 default:
-                    typee = "فرمت ناشناس";
+                    typee ="بدون پیام";
 
         }
 
@@ -145,5 +151,53 @@ public class Chanel {
 
     }
 
+
+    protected Chanel(Parcel in) {
+        chanel_id = in.readInt();
+        name = in.readString();
+        description = in.readString();
+        username = in.readString();
+        thumb = in.readString();
+        last_message = in.readString();
+        type = in.readByte() == 0x00 ? null : in.readInt();
+        count = in.readInt();
+        updated_at = in.readString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(chanel_id);
+        dest.writeString(name);
+        dest.writeString(description);
+        dest.writeString(username);
+        dest.writeString(thumb);
+        dest.writeString(last_message);
+        if (type == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeInt(type);
+        }
+        dest.writeInt(count);
+        dest.writeString(updated_at);
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<Chanel> CREATOR = new Parcelable.Creator<Chanel>() {
+        @Override
+        public Chanel createFromParcel(Parcel in) {
+            return new Chanel(in);
+        }
+
+        @Override
+        public Chanel[] newArray(int size) {
+            return new Chanel[size];
+        }
+    };
 
 }

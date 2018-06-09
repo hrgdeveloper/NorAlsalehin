@@ -7,5 +7,16 @@
     android:id="@+id/rv_main"
     >
 
+
 </android.support.v7.widget.RecyclerView>
+
+    <android.support.v7.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="هیچ کانالی ثبت نگردیده است"
+        android:textStyle="bold"
+        android:id="@+id/tv_main_noChanel"
+        android:visibility="gone"
+        />
 </RelativeLayout>

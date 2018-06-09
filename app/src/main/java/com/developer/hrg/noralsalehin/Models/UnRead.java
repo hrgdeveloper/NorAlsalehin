@@ -22,9 +22,10 @@ public class UnRead {
         return count;
     }
 
-    public UnRead(int chanel_id, int count) {
+    public UnRead(int chanel_id, int count , int read ) {
         this.chanel_id = chanel_id;
         this.count = count;
+        this.read = read;
     }
 
     public void setCount(int count) {
@@ -34,4 +35,13 @@ public class UnRead {
     @SerializedName("count")
 
     int count ;
+    int read ;
+
+    public int getReadCount() {
+        return read;
+    }
+
+    public void setRead(int read) {
+        this.read = read;
+    }
 }

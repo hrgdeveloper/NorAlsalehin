@@ -16,7 +16,7 @@ public class MyApplication extends Application {
 
 
     private static MyApplication mInstance;
-
+      UserInfo userInfo ;
 
 
     @Override
@@ -27,6 +27,13 @@ public class MyApplication extends Application {
 
     public static synchronized MyApplication getInstance() {
         return mInstance;
+    }
+
+    public UserInfo getUserInfo () {
+        if (userInfo==null) {
+            userInfo=new UserInfo(this);
+        }
+        return userInfo;
     }
 
 

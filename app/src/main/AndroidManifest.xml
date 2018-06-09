@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.developer.hrg.noralsalehin">
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <!--
      needed for older devices -
@@ -21,36 +21,41 @@
     <uses-permission android:name="com.developer.hrg.clousmessageing.permission.C2D_MESSAGE" />
 
     <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="false"
         android:name=".Helps.MyApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/noralmobin_icon"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/noralmobin_icon"
+        android:supportsRtl="false"
         android:theme="@style/AppTheme">
-        <activity android:name=".Main.MainActivity" />
+        <activity android:name=".Main.MainActivity" >
+
+        </activity>
         <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity android:name=".Intero_Activity" />
-        <activity android:name=".SmsHandeling.SmsActivity" android:windowSoftInputMode="adjustResize">
 
         </activity>
+        <activity android:name=".Intero_Activity" />
+        <activity
+            android:name=".SmsHandeling.SmsActivity"
+            android:windowSoftInputMode="adjustResize"></activity>
+
         <service android:name=".fcm.MyFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
         <service android:name=".fcm.MyFirebaseInstanceIDService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
+
+        <activity android:name=".InsideChanel.InsideActivity"></activity>
     </application>
 
 </manifest>

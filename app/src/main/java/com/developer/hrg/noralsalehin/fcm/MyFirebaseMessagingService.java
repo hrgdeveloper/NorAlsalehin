@@ -13,8 +13,10 @@ import android.util.Log;
 
 import com.developer.hrg.noralsalehin.Helps.Config;
 import com.developer.hrg.noralsalehin.Main.MainActivity;
+import com.developer.hrg.noralsalehin.Models.Chanel;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,14 +35,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Log.e(TAG, "From: " + remoteMessage.getFrom());
-
+        Log.e("testOmad", "omaaaad");
         if (remoteMessage == null)
             return;
 
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.e(TAG, "Notification Body: " + remoteMessage.getNotification().getBody());
-            handleNotification(remoteMessage.getNotification().getBody());
+           handleNotification(remoteMessage.getNotification().getBody());
         }
 
         // Check if message contains a data payload.
@@ -73,50 +75,91 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private void handleDataMessage(JSONObject json) {
         Log.e(TAG, "push json: " + json.toString());
-        Log.e("kharesho", "kharesho push json: " + json.toString());
-        try {
-            JSONObject data = json.getJSONObject("data");
+        Log.e("omadeee","areeeee");
 
-            String title = data.getString("title");
-            String message = data.getString("message");
-            boolean isBackground = data.getBoolean("is_background");
-            String imageUrl = data.getString("image");
-            String timestamp = data.getString("timestamp");
-            JSONObject payload = data.getJSONObject("payload");
-            Log.e("Gaveeeeeee", "title: " + title);
+            try {
 
-            Log.e(TAG, "title: " + title);
-            Log.e(TAG, "message: " + message);
-            Log.e(TAG, "isBackground: " + isBackground);
-            Log.e(TAG, "payload: " + payload.toString());
-            Log.e(TAG, "imageUrl: " + imageUrl);
-            Log.e(TAG, "timestamp: " + timestamp);
+                JSONObject data = json.getJSONObject("data");
+                String flag   = data.getString("flag");
+                if (Integer.valueOf(flag)==Config.PUSH_NEW_CHANEL_FLAG) {
+                    Log.e("omadeeeFlag","areeeee");
+                    JSONObject payload = data.getJSONObject("payload");
+                    Log.e("newChanel",payload.getString("name"));
+                    Gson gson = new Gson();
+                    Chanel chanel = gson.fromJson(payload.toString(),Chanel.class);
+                    chanel.setCount(0);
+
+//                    Chanel chanel = new Chanel(payload.getInt("chanel_id"),payload.getString("name"),payload.getString("description"),
+//                            payload.getString("thumb"),payload.getString("updated_at"),payload.getString("username"),payload.getString("last_message"),
+//                            payload.getInt("type"),0
+//                    );
+//                    Log.e("myjson",payload.toString());
+//                    Log.e("namesh2",payload.getString("description"));
+//                    Log.e("namesh2",payload.getString("name"));
+//                    Log.e("namesh2",payload.getString("chanel_id"));
+//                    Log.e("namesh2",payload.getString("updated_at"));
+//                    Log.e("namesh2",payload.getString("thumb"));
+//                    Log.e("namesh2",payload.getString("last_message"));
+//                    Log.e("namesh2",payload.getString("type"));
+//                    Log.e("namesh2",payload.getString("username"));
 
 
-            if (!NotificationUtils.isAppIsInBackground(getApplicationContext())) {
-                // app is in foreground, broadcast the push message
-                Log.e("Gaveeeeeee", "BACK NIST: " + title);
-                Intent pushNotification = new Intent(Config.PUSH_NOTIFICATION);
-                pushNotification.putExtra("message", message);
-                LocalBroadcastManager.getInstance(this).sendBroadcast(pushNotification);
+//                    Log.e("namesh2",chanel.getUpdated_at());
+//                    Log.e("namesh2",chanel.getLast_message());
+//                    Log.e("namesh2",chanel.getType()+"");
 
-                // play notification sound
-                NotificationUtils notificationUtils = new NotificationUtils(getApplicationContext());
-                notificationUtils.playNotificationSound();
-            } else {
-                Log.e("Gaveeeeeee", "BACK HAST: " + title);
-                // app is in background, show the notification in notification tray
-                Intent resultIntent = new Intent(getApplicationContext(), MainActivity.class);
-                resultIntent.putExtra("message", message);
 
-                // check for image attachment
-                if (TextUtils.isEmpty(imageUrl)) {
-                    showNotificationMessage(getApplicationContext(), title, message, timestamp, resultIntent);
-                } else {
-                    // image is present, show notification with image
-                    showNotificationMessageWithBigImage(getApplicationContext(), title, message, timestamp, resultIntent, imageUrl);
+
+
+                    Intent intent = new Intent(Config.PUSH_NEW_CHANEL);
+                    intent.putExtra("chanel",chanel);
+                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+                }else {
+
+                    String title = data.getString("title");
+                    String message = data.getString("message");
+                    boolean isBackground = data.getBoolean("is_background");
+                    String imageUrl = data.getString("image");
+                    String timestamp = data.getString("timestamp");
+                    JSONObject payload = data.getJSONObject("payload");
+                    Log.e("Gaveeeeeee", "title: " + title);
+                    Log.e(TAG, "title: " + title);
+                    Log.e(TAG, "message: " + message);
+                    Log.e(TAG, "isBackground: " + isBackground);
+                    Log.e(TAG, "payload: " + payload.toString());
+                    Log.e(TAG, "imageUrl: " + imageUrl);
+                    Log.e(TAG, "timestamp: " + timestamp);
+                    if (!NotificationUtils.isAppIsInBackground(getApplicationContext())) {
+                        Log.e("toyeroo",message);
+                        Log.e("toyeroo",payload.toString());
+                        Intent pushNotification = new Intent(Config.PUSH_NOTIFICATION);
+                        pushNotification.putExtra("message", message);
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(pushNotification);
+
+                        // play notification sound
+                        NotificationUtils notificationUtils = new NotificationUtils(getApplicationContext());
+                        notificationUtils.playNotificationSound();
+                    } else {
+                        Log.e("toyeback",message);
+                        Log.e("toyeback",payload.toString());
+                        // app is in background, show the notification in notification tray
+                        Intent resultIntent = new Intent(getApplicationContext(), MainActivity.class);
+                        resultIntent.putExtra("message", message);
+
+                        // check for image attachment
+                        if (TextUtils.isEmpty(imageUrl)) {
+                            showNotificationMessage(getApplicationContext(), title, message, timestamp, resultIntent);
+                        } else {
+                            // image is present, show notification with image
+                            showNotificationMessageWithBigImage(getApplicationContext(), title, message, timestamp, resultIntent, imageUrl);
+                        }
+                    }
+
                 }
-            }
+
+
+
+
         } catch (JSONException e) {
             Log.e("Gaveeeeeee", "Json Exception: " + e.getMessage());
             Log.e("Gaveeeeeee", "Exceptionnnnnnnnnnnnnnnnnn: " );

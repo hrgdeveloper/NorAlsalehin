@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.developer.hrg.noralsalehin.InsideChanel.InsideActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <android.support.v7.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:id="@+id/toolbar_inside"
+            android:background="@color/colorPrimary"
+
+            >
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/iv_inside_thumb"
+                    android:layout_width="@dimen/_50sdp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginBottom="@dimen/_3sdp"
+                    android:layout_marginRight="@dimen/_20sdp"
+                    android:src="@drawable/noor_splash" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/iv_inside_thumb"
+                    android:layout_marginRight="@dimen/_5sdp"
+                    android:textColor="@android:color/white"
+                    android:text="نورالصالحین"
+                    android:id="@+id/tv_inside_chanelName"
+                    android:layout_marginTop="@dimen/_5sdp"
+                    android:textStyle="bold"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/iv_inside_thumb"
+                    android:layout_marginRight="@dimen/_5sdp"
+                    android:layout_below="@+id/tv_inside_chanelName"
+                    android:textColor="@android:color/white"
+                    android:text="تعداد کابران : 200 "
+                    android:id="@+id/tv_inside_users"
+                    android:layout_marginTop="@dimen/_2sdp"
+
+                    />
+            </RelativeLayout>
+
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:layout_height="match_parent">
+
+    </FrameLayout>
+
+</android.support.design.widget.CoordinatorLayout>

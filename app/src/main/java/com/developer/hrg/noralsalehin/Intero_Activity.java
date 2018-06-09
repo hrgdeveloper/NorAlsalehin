@@ -2,6 +2,7 @@ package com.developer.hrg.noralsalehin;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +16,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.developer.hrg.noralsalehin.Helps.UserInfo;
+import com.developer.hrg.noralsalehin.Main.MainActivity;
 import com.developer.hrg.noralsalehin.SmsHandeling.SmsActivity;
 
 import java.util.ArrayList;
@@ -45,8 +47,9 @@ public class Intero_Activity extends AppCompatActivity {
 
                if (viewPager.getCurrentItem()+1==introes.size()) {
 
-                   startActivity(new Intent(Intero_Activity.this,SmsActivity.class));
+                   startActivity(new Intent(Intero_Activity.this, SmsActivity.class));
                     userInfo.set_isFirstTime(false);
+                   finish();
                }else {
                    int current = viewPager.getCurrentItem();
                    viewPager.setCurrentItem(current+1);
@@ -59,6 +62,7 @@ public class Intero_Activity extends AppCompatActivity {
             public void onClick(View view) {
                 startActivity(new Intent(Intero_Activity.this,SmsActivity.class));
               userInfo.set_isFirstTime(false);
+                finish();
             }
         });
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -87,6 +91,11 @@ public class Intero_Activity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+    }
 
     public void defineList () {
         Intro intro = new Intro(getString(R.string.A_intro_firstTitle),getString(R.string.A_intro_firstText),R.drawable.paper_plane,android.R.color.holo_red_light);

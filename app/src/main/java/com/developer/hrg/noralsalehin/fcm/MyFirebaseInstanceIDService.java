@@ -4,6 +4,10 @@ package com.developer.hrg.noralsalehin.fcm;
  * Created by hamid on 6/3/2018.
  */
 
+import android.content.Intent;
+
+import com.developer.hrg.noralsalehin.Helps.Config;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 
 
@@ -17,8 +21,8 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
     @Override
     public void onTokenRefresh() {
         super.onTokenRefresh();
-//        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-//
+        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+
 //        // Saving reg id to shared preferences
 //        storeRegIdInPref(refreshedToken);
 //
@@ -31,15 +35,15 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
 //        LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
     }
 
-//    private void sendRegistrationToServer(final String token) {
-//        // sending gcm token to server
-//        Log.e(TAG, "sendRegistrationToServer: " + token);
-//    }
+    private void sendRegistrationToServer(final String token) {
+        // sending gcm token to server
+      //  Log.e(TAG, "sendRegistrationToServer: " + token);
+    }
 
-//    private void storeRegIdInPref(String token) {
+    private void storeRegIdInPref(String token) {
 //        SharedPreferences pref = getApplicationContext().getSharedPreferences(Config.SHARED_PREF, 0);
 //        SharedPreferences.Editor editor = pref.edit();
 //        editor.putString("regId", token);
 //        editor.commit();
-//    }
+    }
 }
