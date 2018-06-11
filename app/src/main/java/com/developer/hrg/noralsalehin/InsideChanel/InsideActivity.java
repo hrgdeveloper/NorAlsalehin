@@ -3,14 +3,17 @@ package com.developer.hrg.noralsalehin.InsideChanel;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.developer.hrg.noralsalehin.Helps.ApiInterface;
 import com.developer.hrg.noralsalehin.Helps.Apiclient;
 import com.developer.hrg.noralsalehin.Helps.Config;
@@ -42,7 +45,9 @@ public class InsideActivity extends AppCompatActivity {
         Intent intent = getIntent();
         chanel=intent.getParcelableExtra("chanel");
         tv_chanelName.setText(chanel.getName());
-        Glide.with(InsideActivity.this).load(Config.CHANEL_THUMB_BASE_OFFLINE+chanel.getThumb()).into(iv_thumb);
+        Glide.with(InsideActivity.this).load(Config.CHANEL_THUMB_BASE_OFFLINE+chanel.getThumb()).apply(new RequestOptions().placeholder(R.drawable.broadcast)
+        .error(R.drawable.broadcast)
+        ).into(iv_thumb);
         if (InternetCheck.isOnline(InsideActivity.this)) {
             ApiInterface api = Apiclient.getClient().create(ApiInterface.class);
             Call<SimpleResponse> call = api.getUserCount();
@@ -79,7 +84,17 @@ public class InsideActivity extends AppCompatActivity {
             tv_tedad.setText("تعداد اعضا : "+ user_count);
         }
 
+toolbar.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
+        fragmentTransaction.replace(R.id.container_inside,new Fragment_insideToolbar());
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+
+    }
+});
 
 
 
@@ -106,5 +121,8 @@ public class InsideActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+    public Chanel getChanel(){
+        return  chanel;
     }
 }

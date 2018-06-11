@@ -230,12 +230,8 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
             @Override
             public void onFailure(Call<SimpleResponse> call, Throwable t) {
                 tv_toolbar.setText(R.string.toolbar_text);
-              Log.e(TAG,t.getMessage());
-                if (userData.hasUnreadData() && userData.hasChanelsData()) {
-                    unreads.addAll(userData.getAllunReads());
-                    chanels.addAll(userData.getAllChanels());
-                    adaptetChanels.notifyDataSetChanged();
-                }else {
+              Log.e(TAG,t.getMessage()+" ");
+                if (!userData.hasUnreadData() && !userData.hasChanelsData()) {
                     tv_noChanel.setVisibility(View.VISIBLE);
                 }
 
