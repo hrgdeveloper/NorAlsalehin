@@ -28,6 +28,8 @@ import com.developer.hrg.noralsalehin.Helps.UserData;
 import com.developer.hrg.noralsalehin.Helps.UserInfo;
 import com.developer.hrg.noralsalehin.InsideChanel.InsideActivity;
 import com.developer.hrg.noralsalehin.Models.Chanel;
+import com.developer.hrg.noralsalehin.Models.Message;
+import com.developer.hrg.noralsalehin.Models.Notify;
 import com.developer.hrg.noralsalehin.Models.UnRead;
 import com.developer.hrg.noralsalehin.Models.User;
 import com.developer.hrg.noralsalehin.R;
@@ -68,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         recyclerView.setAdapter(adaptetChanels);
 
-        if (userData.hasUnreadData() && userData.hasChanelsData()) {
+        if (userData.hasUnreadData() && userData.hasChanelsData() && userData.hasNotifyData()) {
             unreads.addAll(userData.getAllunReads());
             chanels.addAll(userData.getAllChanels());
             adaptetChanels.notifyDataSetChanged();
@@ -102,6 +104,11 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                 if (intent.getAction().equals(Config.PUSH_NEW_CHANEL)) {
                       handleNewChanel(intent);
 
+                }else if (intent.getAction().equals(Config.PUSH_NEW_MESSAGE))
+                {
+                    Message message = intent.getParcelableExtra("message");
+
+                     updateRows(message);
                 }
 
             }
@@ -116,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(networkChangeReceiver, filter);
         LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(reciverChanelsTask,new IntentFilter(Config.PUSH_NEW_CHANEL));
+        LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(reciverChanelsTask,new IntentFilter(Config.PUSH_NEW_MESSAGE));
 
         if (firstTimeLunchForOnResume) {
             firstTimeLunchForOnResume=false;
@@ -140,8 +148,39 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     protected void onPause() {
         unregisterReceiver(networkChangeReceiver);
         LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(reciverChanelsTask);
+
         super.onPause();
 
+    }
+
+    public void updateRows(Message message) {
+        for (Chanel chanel : chanels) {
+            if (chanel.getChanel_id()==message.getChanel_id()) {
+                int index = chanels.indexOf(chanel);
+
+
+                chanel.setUsername(message.getAdmin_name());
+                chanel.setLast_message(message.getMessage());
+                chanel.setType(message.getType());
+                chanel.setUpdated_at(message.getUpdated_at());
+                chanel.setCount(chanel.getCount()+1);
+                chanels.set(index,chanel);
+                userData.updateChanel(chanel);
+
+
+                int unreadCount = userData.getUnreadCount(message.getChanel_id());
+                unreadCount++;
+                UnRead unRead = unreads.get(index);
+                unRead.setCount(unreadCount);
+                unreads.set(index,unRead);
+                userData.updateUnread(unreadCount,message.getChanel_id());
+
+
+
+                break;
+            }
+        }
+        adaptetChanels.notifyDataSetChanged();
     }
 
     public void defineView() {
@@ -186,19 +225,22 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                         chanels.clear();
                         chanels.addAll(response.body().getChanels());
                         userData.addChanels(chanels);
-                        if (!userInfo.get_inUnreadFetched()) {
-                            for (Chanel chanel : chanels) {
-                                UnRead unRead = new UnRead(chanel.getChanel_id(), chanel.getCount(),0);
-                                unreads.add(unRead);
-                                userInfo.set_inUnreadFetched(true);
-
-                            }
-                            userData.addUnReads(unreads);
-                        } else {
+//                        if (!userInfo.get_inUnreadFetched()) {
+//                            for (Chanel chanel : chanels) {
+//                                //meghdare akhare meghdare tedade payame khonde shode hast va vase avalin bar 0 mishe chon hich payami khone nashode
+//                                UnRead unRead = new UnRead(chanel.getChanel_id(), chanel.getCount(),0);
+//                                unreads.add(unRead);
+//                                userInfo.set_inUnreadFetched(true);
+//
+//                            }
+//                            userData.addUnReads(unreads);
+                  //      } else {
                             if (unreads.size() < chanels.size()) {
                                 for (int i = unreads.size() ; i < chanels.size(); i++) {
                                     UnRead unRead = new UnRead(chanels.get(i).getChanel_id(), chanels.get(i).getCount(),0);
                                     userData.addUnread(unRead);
+                                    Notify notify = new Notify(chanels.get(i).getChanel_id(),1,1);
+                                    userData.addNotify(notify);
                                //     unreads.add(unRead);
 
                                 }
@@ -206,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                                 unreads.addAll(userData.getAllunReads());
                             }
 
+                       // in qestmat vase ine ke agar moghei ke offline boodim payame jadidi ezafe shode check kone bebine chnata payam jadid ezaf shode
 
                        for (int i=0 ; i<unreads.size() ; i++) {
                             int sum = unreads.get(i).getCount()+unreads.get(i).getReadCount();
@@ -220,7 +263,8 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
 
 
-                        }
+          //              }
+                        subscribeToAllChanels(chanels);
                         adaptetChanels.notifyDataSetChanged();
                     }
                 }
@@ -241,13 +285,27 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
     }
 
+
+
+    public void subscribeToAllChanels(ArrayList<Chanel> chanels){
+    for (Chanel chanel : chanels) {
+        FirebaseMessaging.getInstance().subscribeToTopic(Config.TOPIC_CHANEL+chanel.getChanel_id());
+
+    }
+    }
+
+    // az recivver akharin chanele ezafe shodaro migirim o be list ezafe mionim
+
     public void handleNewChanel(Intent intent) {
         Chanel chanel = (Chanel) intent.getParcelableExtra("chanel");
         chanels.add(chanel);
+        // meghdare khande shodaro barabe ba 0 mizarim chon hanooz messagi khande nashode
         UnRead unread = new UnRead(chanel.getChanel_id(),chanel.getCount(),0);
+        Notify notify = new Notify(chanel.getChanel_id(),1,1);
         unreads.add(unread);
         userData.addChanel(chanel);
         userData.addUnread(unread);
+        userData.addNotify(notify);
         adaptetChanels.notifyDataSetChanged();
     }
 
@@ -260,6 +318,8 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         userData.updateRead(unreads.get(position).getCount(), unreads.get(position).getReadCount(), unreads.get(position).getChanel_id());
 
     }
+
+    // vase zamani ke dobare connect mishe . check mikonim age activiry bare avaleshe run shode in code ejra nashe
 
     public class NetworkChangeReceiver extends BroadcastReceiver {
 

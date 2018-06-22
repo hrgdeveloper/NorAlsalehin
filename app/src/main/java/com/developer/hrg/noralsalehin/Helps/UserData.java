@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.developer.hrg.noralsalehin.Models.Chanel;
+import com.developer.hrg.noralsalehin.Models.Notify;
 import com.developer.hrg.noralsalehin.Models.UnRead;
 import com.developer.hrg.noralsalehin.Models.User;
 
@@ -43,6 +44,11 @@ public class UserData extends SQLiteOpenHelper {
     public static final String CHANEL_LAST_MESSAGE="last_message";
     public static final String CHANEL_TYPE="type";
     public static final String CHANEL_COUNT="count";
+
+
+
+
+
     String CREATE_TABLE_CHANEL = "CREATE TABLE " + TABLE_CHANEL+"( "+ID+ " INTEGER PRIMARY KEY AUTOINCREMENT , "+
             CHANEL_ID+ " INTEGER NOT NULL ,"+
             CHANEL_NAME+ " TEXT NOT NULL ,"+
@@ -52,8 +58,11 @@ public class UserData extends SQLiteOpenHelper {
             CHANEL_UPDATED_AT + " TEXT  ," +
             CHANEL_LAST_MESSAGE + " TEXT ," +
             CHANEL_TYPE + " INTEGER ," +
-            CHANEL_COUNT+" INTEGER )"
-            ;
+            CHANEL_COUNT+" INTEGER )";
+
+
+
+
 
     public static final String TABLE_UNREAD="unread_Table" ;
     public static final String ID_UNREAD="unread_id" ;
@@ -68,9 +77,19 @@ public class UserData extends SQLiteOpenHelper {
 
 
 
+    public static final String TABLE_NOTIFY = "notify_table";
+    public static final String NOTIFYI_D="notify_id";
+    public static final String NOTIFY_CHANEL_ID="notify_chanel_id";
+    public static final String NOTIFY_SHOW_NOTIFY="notify_show_notify";
+    public static final String NOTIFY_PLAY_SOUND="notify_play_sound";
 
+    String CREATE_TABLE_NOTIFY= "CREATE TABLE " + TABLE_NOTIFY+ " ("+NOTIFYI_D+" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+            +NOTIFY_CHANEL_ID+" INTEGER NOT NULL , "
+            +NOTIFY_SHOW_NOTIFY+ " INTEGER default 1,"+
+            NOTIFY_PLAY_SOUND+ " INTEGER DEFAULT 1)";
     public UserData(Context context) {
-        super(context, DB_NAME, null, 3);
+        super(context, DB_NAME, null, 4);
+
         sqLiteDatabase=this.getWritableDatabase();
     }
 
@@ -79,6 +98,7 @@ public class UserData extends SQLiteOpenHelper {
        sqLiteDatabase.execSQL(CREATE_TABLE);
         sqLiteDatabase.execSQL(CREATE_TABLE_CHANEL);
         sqLiteDatabase.execSQL(CREATE_TABLE_UNREAD);
+        sqLiteDatabase.execSQL(CREATE_TABLE_NOTIFY);
     }
 
     @Override
@@ -86,6 +106,7 @@ public class UserData extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_USER);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_CHANEL);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_UNREAD);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_NOTIFY);
         onCreate(sqLiteDatabase);
 
     }
@@ -117,8 +138,10 @@ public class UserData extends SQLiteOpenHelper {
 
     }
 
-    public void addChanel(Chanel chanel) {
 
+    //////////////////////////////////////////////////////////ChanelFUNCTIONs\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+    public void addChanel(Chanel chanel) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(CHANEL_ID,chanel.getChanel_id());
             contentValues.put(CHANEL_DESCRIPTION,chanel.getDescription());
@@ -149,17 +172,34 @@ public class UserData extends SQLiteOpenHelper {
             sqLiteDatabase.insert(TABLE_CHANEL,null,contentValues);
         }
     }
+     public String getChanelNameByid(int chanel_id){
+         Cursor cursor = sqLiteDatabase.query(TABLE_CHANEL,new String[]{CHANEL_NAME},CHANEL_ID+" LIKE ? " , new String[]{String.valueOf(chanel_id)},null,
+                 null,null);
+         cursor.moveToFirst();
+         return  cursor.getString(cursor.getColumnIndexOrThrow(CHANEL_NAME));
+
+     }
+
+    public void updateChanel(Chanel chanel) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(CHANEL_USERNAME,chanel.getUsername());
+        contentValues.put(CHANEL_LAST_MESSAGE,chanel.getLast_message());
+        contentValues.put(CHANEL_UPDATED_AT,chanel.getUpdated_at());
+        contentValues.put(CHANEL_TYPE,chanel.getType());
+        contentValues.put(CHANEL_COUNT,chanel.getCount());
+        sqLiteDatabase.update(TABLE_CHANEL,contentValues,CHANEL_ID+" LIKE ? ", new String[]{String.valueOf(chanel.getChanel_id())});
+
+        }
+
     public boolean hasChanelsData() {
 
         long cnt  = DatabaseUtils.queryNumEntries(sqLiteDatabase, TABLE_CHANEL);
         return cnt > 0;
     }
 
-    public boolean hasUnreadData() {
-        long cnt  = DatabaseUtils.queryNumEntries(sqLiteDatabase, TABLE_UNREAD);
-        return cnt > 0;
 
-    }
+
+
 
     public ArrayList<Chanel> getAllChanels() {
         ArrayList<Chanel> chanels = new ArrayList<>();
@@ -191,17 +231,23 @@ public class UserData extends SQLiteOpenHelper {
     }
 
 
+    ///////////////////////////////////////////////UnreadFunctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    public boolean hasUnreadData() {
+        long cnt  = DatabaseUtils.queryNumEntries(sqLiteDatabase, TABLE_UNREAD);
+        return cnt > 0;
+
+    }
 
     public void addUnread(UnRead unread) {
-
         ContentValues contentValues = new ContentValues();
         contentValues.put(UNREAD_CHANEL_ID,unread.getChanel_id());
         contentValues.put(UNREAD_COUNT,unread.getCount());
         contentValues.put(READ_COUNT,unread.getReadCount());
         sqLiteDatabase.insert(TABLE_UNREAD,null,contentValues);
-
-
     }
+
+
+
 
     public void addUnReads(ArrayList<UnRead> unReads) {
         for (UnRead unread : unReads) {
@@ -234,12 +280,70 @@ public class UserData extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put(UNREAD_COUNT,count);
         sqLiteDatabase.update(TABLE_UNREAD,contentValues,UNREAD_CHANEL_ID+ " like ? " ,new String[]{String.valueOf(chanel_id)});
-
     }
+    public int getUnreadCount(int chanel_id) {
+        Cursor cursor = sqLiteDatabase.query(TABLE_UNREAD,new String[]{UNREAD_COUNT},UNREAD_CHANEL_ID+ " like ? ",new String[]{String.valueOf(chanel_id)},
+                null,null,null);
+        cursor.moveToFirst();
+        int count = cursor.getInt(cursor.getColumnIndexOrThrow(UNREAD_COUNT));
+        return count;
+    }
+
     public void updateRead(int unReadCount , int readCount , int chanel_id) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(READ_COUNT,unReadCount + readCount);
         contentValues.put(UNREAD_COUNT,0);
         sqLiteDatabase.update(TABLE_UNREAD,contentValues,UNREAD_CHANEL_ID+ " like ? " ,new String[]{String.valueOf(chanel_id)});
     }
+
+
+/////////////////////////////////////////////////////////////////NotifyFunctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
+    public void addNotify(Notify notify) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(NOTIFY_CHANEL_ID,notify.getChanel_id());
+        contentValues.put(NOTIFY_SHOW_NOTIFY,notify.getShow_notify());
+        contentValues.put(NOTIFY_PLAY_SOUND,notify.getPlay_sound());
+        sqLiteDatabase.insert(TABLE_NOTIFY,null,contentValues);
+    }
+
+    public boolean hasNotifyData() {
+        long cnt  = DatabaseUtils.queryNumEntries(sqLiteDatabase, TABLE_NOTIFY);
+        return cnt > 0;
+
+    }
+
+
+
+    public int updateChanelnotifyState (int chanel_id , int state) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(NOTIFY_SHOW_NOTIFY,state);
+        return sqLiteDatabase.update(TABLE_NOTIFY,contentValues,NOTIFY_CHANEL_ID+" LIKE ? ", new String[]{String.valueOf(chanel_id)});
+    }
+
+    public int updateChanelSoundState (int chanel_id , int state) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(NOTIFY_PLAY_SOUND,state);
+        return sqLiteDatabase.update(TABLE_NOTIFY,contentValues,NOTIFY_CHANEL_ID+" LIKE ? ", new String[]{String.valueOf(chanel_id)});
+    }
+
+
+    public Integer getChanelNotifyState(int chanel_id) {
+        Cursor cursor = sqLiteDatabase.query(TABLE_NOTIFY,new String[] {NOTIFY_SHOW_NOTIFY},NOTIFY_CHANEL_ID+" LIKE ? ",new String[]{String.valueOf(chanel_id)} ,
+                null,null,null);
+        cursor.moveToFirst();
+        return cursor.getInt(cursor.getColumnIndexOrThrow(NOTIFY_SHOW_NOTIFY));
+
+    }
+
+    public Integer getChanelSoundState(int chanel_id) {
+        Cursor cursor = sqLiteDatabase.query(TABLE_NOTIFY,new String[] {NOTIFY_PLAY_SOUND},NOTIFY_CHANEL_ID+" LIKE ? ",new String[]{String.valueOf(chanel_id)} ,
+                null,null,null);
+        cursor.moveToFirst();
+        return cursor.getInt(cursor.getColumnIndexOrThrow(NOTIFY_PLAY_SOUND));
+
+    }
+
+
 }

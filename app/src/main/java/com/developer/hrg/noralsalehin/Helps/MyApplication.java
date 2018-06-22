@@ -17,6 +17,7 @@ public class MyApplication extends Application {
 
     private static MyApplication mInstance;
       UserInfo userInfo ;
+    UserData userData ;
 
 
     @Override
@@ -36,5 +37,10 @@ public class MyApplication extends Application {
         return userInfo;
     }
 
-
+       public UserData getUserData() {
+           if (userData==null) {
+               userData=new UserData(this);
+           }
+           return userData;
+       }
 }

@@ -4,11 +4,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -28,12 +30,13 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class InsideActivity extends AppCompatActivity {
+public class InsideActivity extends AppCompatActivity implements View.OnClickListener {
   TextView tv_chanelName , tv_tedad ;
     ImageView iv_thumb ;
     RecyclerView recyclerView ;
     Chanel chanel ;
     Toolbar toolbar ;
+    Button btn_mute ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,19 +87,11 @@ public class InsideActivity extends AppCompatActivity {
             tv_tedad.setText("تعداد اعضا : "+ user_count);
         }
 
-toolbar.setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View view) {
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-
-        fragmentTransaction.replace(R.id.container_inside,new Fragment_insideToolbar());
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
-
-    }
-});
+toolbar.setOnClickListener(this);
+        btn_mute.setOnClickListener(this);
 
 
+        updateSoundState();
 
 
     }
@@ -107,10 +102,22 @@ toolbar.setOnClickListener(new View.OnClickListener() {
         iv_thumb=(ImageView) findViewById(R.id.iv_inside_thumb);
         recyclerView=(RecyclerView)findViewById(R.id.recycverview_inside);
         toolbar=(Toolbar)findViewById(R.id.toolbar_inside);
+        btn_mute=(Button)findViewById(R.id.btn_inside_mute);
 
     }
     public void defineClass() {
 
+    }
+
+    public void updateSoundState() {
+        if (MyApplication.getInstance().getUserData().getChanelSoundState(chanel.getChanel_id())==1)
+        {
+            btn_mute.setText("بیصدا کردن");
+
+        }else {
+            btn_mute.setText("روشن کردن صدا");
+
+        }
     }
 
     @Override
@@ -122,7 +129,28 @@ toolbar.setOnClickListener(new View.OnClickListener() {
 
         return super.onOptionsItemSelected(item);
     }
+
+    //vase inke toye fragmentemoon az tarighe in method be chanel dastresi dashte bashim
     public Chanel getChanel(){
         return  chanel;
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (view==toolbar) {
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.container_inside,new Fragment_insideToolbar());
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+        }else if (view==btn_mute) {
+            int currentState = MyApplication.getInstance().getUserData().getChanelSoundState(chanel.getChanel_id());
+            if (currentState==1) {
+                currentState=0;
+            }else {
+                currentState = 1;
+            }
+            MyApplication.getInstance().getUserData().updateChanelSoundState(chanel.getChanel_id(),currentState);
+            updateSoundState();
+        }
     }
 }

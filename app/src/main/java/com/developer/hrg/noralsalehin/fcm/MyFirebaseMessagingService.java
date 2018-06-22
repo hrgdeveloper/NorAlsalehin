@@ -9,11 +9,16 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 
 import com.developer.hrg.noralsalehin.Helps.Config;
+import com.developer.hrg.noralsalehin.Helps.MyApplication;
+import com.developer.hrg.noralsalehin.Helps.UserData;
 import com.developer.hrg.noralsalehin.Main.MainActivity;
 import com.developer.hrg.noralsalehin.Models.Chanel;
+import com.developer.hrg.noralsalehin.Models.Message;
+import com.developer.hrg.noralsalehin.Models.UnRead;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
@@ -31,6 +36,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = MyFirebaseMessagingService.class.getSimpleName();
 
     private NotificationUtils notificationUtils;
+
+
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -82,39 +89,63 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 JSONObject data = json.getJSONObject("data");
                 String flag   = data.getString("flag");
                 if (Integer.valueOf(flag)==Config.PUSH_NEW_CHANEL_FLAG) {
-                    Log.e("omadeeeFlag","areeeee");
+
                     JSONObject payload = data.getJSONObject("payload");
                     Log.e("newChanel",payload.getString("name"));
                     Gson gson = new Gson();
                     Chanel chanel = gson.fromJson(payload.toString(),Chanel.class);
+                    // vase inke chaneli ke taze sakhte shode hich payami tosh nadare tedad payam ro 0 mizarim
                     chanel.setCount(0);
-
-//                    Chanel chanel = new Chanel(payload.getInt("chanel_id"),payload.getString("name"),payload.getString("description"),
-//                            payload.getString("thumb"),payload.getString("updated_at"),payload.getString("username"),payload.getString("last_message"),
-//                            payload.getInt("type"),0
-//                    );
-//                    Log.e("myjson",payload.toString());
-//                    Log.e("namesh2",payload.getString("description"));
-//                    Log.e("namesh2",payload.getString("name"));
-//                    Log.e("namesh2",payload.getString("chanel_id"));
-//                    Log.e("namesh2",payload.getString("updated_at"));
-//                    Log.e("namesh2",payload.getString("thumb"));
-//                    Log.e("namesh2",payload.getString("last_message"));
-//                    Log.e("namesh2",payload.getString("type"));
-//                    Log.e("namesh2",payload.getString("username"));
-
-
-//                    Log.e("namesh2",chanel.getUpdated_at());
-//                    Log.e("namesh2",chanel.getLast_message());
-//                    Log.e("namesh2",chanel.getType()+"");
-
-
-
-
                     Intent intent = new Intent(Config.PUSH_NEW_CHANEL);
                     intent.putExtra("chanel",chanel);
                     LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-                }else {
+                }else if (Integer.valueOf(flag)==Config.PUSH_NEW_MESSAGE_FLAG) {
+                    Log.e("newMessage","areeeee");
+                    JSONObject payload = data.getJSONObject("payload");
+                    Log.e("newMessage",payload.toString());
+                    Gson gson = new Gson();
+                    Message message = gson.fromJson(payload.toString(),Message.class);
+                    if (!NotificationUtils.isAppIsInBackground(getApplicationContext())) {
+                        Intent intent = new Intent(Config.PUSH_NEW_MESSAGE);
+                        intent.putExtra("message",message);
+                        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+
+
+                    }else
+                        {
+                            Log.e("Backeee" , "backeee");
+                            Log.e("Backeee",message.getMessage());
+
+                            if (MyApplication.getInstance().getUserData().getChanelNotifyState(message.getChanel_id())==1) {
+                                Log.e("okeye","okeyee");
+                                String chanel_name = MyApplication.getInstance().getUserData().getChanelNameByid(message.getChanel_id());
+                                int  unread_count = MyApplication.getInstance().getUserData().getUnreadCount(message.getChanel_id());
+                                unread_count++;
+                                MyApplication.getInstance().getUserData().updateUnread(unread_count,message.getChanel_id());
+                                Intent resultIntent = new Intent(getApplicationContext(), MainActivity.class);
+                                resultIntent.putExtra("chanel_id", message.getChanel_id());
+                                showNotificationMessage(getApplicationContext(),"نور الصالحین", unread_count+   "پیام جدید در " + chanel_name, message.getUpdated_at(), resultIntent);
+
+
+
+
+                            }else {
+                                int  unread_count = MyApplication.getInstance().getUserData().getUnreadCount(message.getChanel_id());
+                                unread_count++;
+                                MyApplication.getInstance().getUserData().updateUnread(unread_count,message.getChanel_id());
+
+                            }
+
+
+
+
+                    }
+
+
+                }
+
+
+                else {
 
                     String title = data.getString("title");
                     String message = data.getString("message");
