@@ -1,0 +1,89 @@
+<android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_alignParentRight="true"
+    android:layout_gravity="right"
+    card_view:cardCornerRadius="@dimen/_5sdp"
+    android:layout_marginRight="@dimen/_10sdp"
+    android:layout_marginLeft="@dimen/_10sdp"
+    android:layout_marginTop="@dimen/_5sdp"
+    card_view:cardElevation="@dimen/_4sdp"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iv_custom_image"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/_200sdp"
+                android:layout_alignParentRight="true"
+                android:layout_margin="@dimen/_5sdp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
+                android:src="@android:drawable/ic_menu_camera" />
+
+            <com.mikhaellopez.circularprogressbar.CircularProgressBar
+                android:layout_width="@dimen/_40sdp"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_gravity="center"
+                android:id="@+id/cp_picture"
+                app:cpb_background_progressbar_color="#FFCDD2"
+                app:cpb_background_progressbar_width="5dp"
+                app:cpb_progressbar_color="#F44336"
+                app:cpb_progressbar_width="10dp" />
+
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tv_custom_picture_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/iv_custom_image"
+            android:layout_gravity="right"
+            android:layout_marginRight="@dimen/_3sdp"
+            android:layout_marginTop="@dimen/_3sdp"
+            android:text="بهترن "
+            android:textColor="@color/cardview_dark_background" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_2sdp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_input_add" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:src="@android:drawable/ic_menu_call"
+
+                />
+
+            <TextView
+                android:id="@+id/tv_custom_picture_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:text="12:25"
+
+                />
+        </RelativeLayout>
+
+    </LinearLayout>
+</android.support.v7.widget.CardView>

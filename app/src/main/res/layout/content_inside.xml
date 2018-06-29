@@ -1,10 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<FrameLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android" >
 <android.support.v7.widget.RecyclerView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/recycverview_inside"
-    ></android.support.v7.widget.RecyclerView>
-</LinearLayout>
+    android:id="@+id/recycler_messages"
+    />
+<android.support.v7.widget.AppCompatButton
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:textColor="@android:color/white"
+android:layout_alignParentBottom="true"
+android:text="بی صدا کردن "
+    android:layout_gravity="bottom"
+android:id="@+id/btn_inside_mute"
+android:background="@color/circleColor"/>
+
+    /</FrameLayout>

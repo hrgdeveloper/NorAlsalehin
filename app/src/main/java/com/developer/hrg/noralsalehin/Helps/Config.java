@@ -14,6 +14,10 @@ public class Config {
     public static final String CHANEL_PIC_BASE_OFFLINE = "http://192.168.1.147/noor/uploads/chanel_pics/";
     public static final String CHANEL__PIC_BASE_ONLINE = "http://keepwords.ir/noor/uploads/chanel_pics/";
 
+    public static final String MESSAGE_PIC_ADDRES = "http://192.168.1.147/noor/uploads/message/pic/";
+    public static final String MESSAGE_THUMB_ADDRESS = "http://192.168.1.147/noor/uploads/message/pic_thumb/";
+
+
     public static final String TOPIC_GLOBAL = "global";
     public static final String PUSH_NOTIFICATION = "pushNotification";
 
@@ -28,4 +32,13 @@ public class Config {
     public static final String TOPIC_CHANEL = "chanel_";
     public static final int NOTIFICATION_ID = 100;
     public static final int NOTIFICATION_ID_BIG_IMAGE = 101;
+
+
+
+   public class Folders  {
+       public static final String IMAGES = "Images";
+       public static final String AUDIOS = "Auidos";
+       public static final String VIDEOS = "Videos";
+       public static final String DOCUMENTS = "Documnets";
+   }
 }

@@ -18,7 +18,7 @@ public class Message implements Parcelable {
     int chanel_id ;
     @SerializedName("message")
     String message ;
-    @SerializedName("thumb")
+    @SerializedName("pic_thumb")
     String thumb ;
     @SerializedName("type")
     int type ;
@@ -38,6 +38,21 @@ public class Message implements Parcelable {
 
     public Message(int message_id, int admin_id, int chanel_id, String message, String thumb, int type, int lenth, String time, String url
     , String admin_name , String updated_at) {
+        this.message_id = message_id;
+        this.admin_id = admin_id;
+        this.chanel_id = chanel_id;
+        this.message = message;
+        this.thumb = thumb;
+        this.type = type;
+        this.lenth = lenth;
+        this.time = time;
+        this.url = url;
+        this.admin_name=admin_name;
+        this.updated_at=updated_at;
+    }
+
+    public Message(int message_id, int admin_id, int chanel_id, String message, String thumb, int type, int lenth, String time, String url
+            , String updated_at) {
         this.message_id = message_id;
         this.admin_id = admin_id;
         this.chanel_id = chanel_id;

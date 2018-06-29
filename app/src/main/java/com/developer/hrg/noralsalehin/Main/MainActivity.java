@@ -1,11 +1,18 @@
 package com.developer.hrg.noralsalehin.Main;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.os.Build;
+import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -35,6 +42,7 @@ import com.developer.hrg.noralsalehin.Models.User;
 import com.developer.hrg.noralsalehin.R;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -56,10 +64,13 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     private BroadcastReceiver reciverChanelsTask;
     NetworkChangeReceiver networkChangeReceiver ;
     TextView tv_noChanel ;
+    public static final int STORAGE_REQUEST =100;
     private String TAG = MainActivity.class.getSimpleName();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setContentView(R.layout.activity_main);
         FirebaseMessaging.getInstance().subscribeToTopic(Config.TOPIC_GLOBAL);
         defineView();
@@ -87,16 +98,6 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
         }
 
-//        else {
-//            if (userData.hasChanelsData()) {
-//                chanels.addAll(userData.getAllChanels());
-//                adaptetChanels.notifyDataSetChanged();
-//            }else {
-//                tv_noChanel.setVisibility(View.VISIBLE);
-//            }
-//
-//
-//        }
 
         reciverChanelsTask=new BroadcastReceiver() {
             @Override
@@ -120,6 +121,13 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (Build.VERSION.SDK_INT>=23) {
+            askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,STORAGE_REQUEST);
+        }else {
+
+            creatFolders();
+        }
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(networkChangeReceiver, filter);
         LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(reciverChanelsTask,new IntentFilter(Config.PUSH_NEW_CHANEL));
@@ -142,6 +150,66 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
 
 
+    }
+
+
+    private void askForPermission(String permission, Integer requestCode) {
+        if (requestCode==STORAGE_REQUEST){
+
+            if (ContextCompat.checkSelfPermission(MainActivity.this, permission) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission)) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
+
+                } else {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
+                }
+            } else {
+
+                       creatFolders();
+            }
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+
+
+            case STORAGE_REQUEST:
+                if(ActivityCompat.checkSelfPermission(MainActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED ) {
+                   creatFolders();
+
+                }else {
+                    Log.e("Premission","Storrage is not Granted");
+                }
+
+
+        }
+    }
+
+    public void creatFolders() {
+        File mainfoldrs = new File(Environment.getExternalStorageDirectory(),"NoorAlSalehin");
+        File images = new File(mainfoldrs,"Images");
+        File autdios = new File(mainfoldrs,"Auidos");
+        File videos = new File(mainfoldrs,"Videos");
+        File doucmnets = new File(mainfoldrs,"Documnets");
+        if (!mainfoldrs.exists()) {
+            mainfoldrs.mkdir();
+        }
+        if (!images.exists()) {
+            images.mkdir();
+        }
+        if (!autdios.exists()) {
+            autdios.mkdir();
+        }
+        if (!videos.exists()) {
+            videos.mkdir();
+        }
+        if (!doucmnets.exists()) {
+            doucmnets.mkdir();
+        }
     }
 
     @Override
@@ -170,6 +238,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
                 int unreadCount = userData.getUnreadCount(message.getChanel_id());
                 unreadCount++;
+                Toast.makeText(MainActivity.this,unreadCount+"",Toast.LENGTH_LONG).show();
                 UnRead unRead = unreads.get(index);
                 unRead.setCount(unreadCount);
                 unreads.set(index,unRead);

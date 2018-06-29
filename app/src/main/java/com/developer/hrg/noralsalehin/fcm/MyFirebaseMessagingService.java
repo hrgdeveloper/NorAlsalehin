@@ -111,16 +111,19 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
 
 
+
                     }else
                         {
                             Log.e("Backeee" , "backeee");
-                            Log.e("Backeee",message.getMessage());
+
 
                             if (MyApplication.getInstance().getUserData().getChanelNotifyState(message.getChanel_id())==1) {
                                 Log.e("okeye","okeyee");
                                 String chanel_name = MyApplication.getInstance().getUserData().getChanelNameByid(message.getChanel_id());
                                 int  unread_count = MyApplication.getInstance().getUserData().getUnreadCount(message.getChanel_id());
+                                Log.e("newMessage",unread_count+"");
                                 unread_count++;
+                                Log.e("newMessage",unread_count+"");
                                 MyApplication.getInstance().getUserData().updateUnread(unread_count,message.getChanel_id());
                                 Intent resultIntent = new Intent(getApplicationContext(), MainActivity.class);
                                 resultIntent.putExtra("chanel_id", message.getChanel_id());

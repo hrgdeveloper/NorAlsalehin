@@ -1,6 +1,7 @@
 package com.developer.hrg.noralsalehin.Helps;
 
 import com.developer.hrg.noralsalehin.Models.Chanel;
+import com.developer.hrg.noralsalehin.Models.Message;
 import com.developer.hrg.noralsalehin.Models.UnRead;
 import com.developer.hrg.noralsalehin.Models.User;
 import com.google.gson.annotations.SerializedName;
@@ -14,10 +15,21 @@ import java.util.ArrayList;
 public class SimpleResponse {
     boolean error ;
     String message ;
+
     User user;
     @SerializedName("user_count")
     int user_count ;
 
+    public ArrayList<Message> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(ArrayList<Message> messages) {
+        this.messages = messages;
+    }
+
+    @SerializedName("messages")
+   ArrayList<Message> messages ;
     public int getUser_count() {
         return user_count;
     }
@@ -35,10 +47,11 @@ public class SimpleResponse {
     }
 
     @SerializedName("chanels")
-
     ArrayList<Chanel> chanels ;
     @SerializedName("unreads")
     ArrayList<UnRead> unReads;
+
+
 
     public ArrayList<Chanel> getChanels() {
         return chanels;

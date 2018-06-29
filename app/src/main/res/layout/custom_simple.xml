@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="end"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:card_view="http://schemas.android.com/apk/res-auto"
+android:orientation="vertical"
+android:layout_width="wrap_content"
+card_view:cardCornerRadius="@dimen/_5sdp"
+android:layout_alignParentRight="true"
+android:layout_margin="@dimen/_5sdp"
+card_view:cardElevation="@dimen/_2sdp"
+android:layout_height="wrap_content">
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="right"
+    android:text="سلام"
+    android:textColor="@color/cardview_dark_background"
+    android:id="@+id/tv_custom_simple_text"
+    android:layout_margin="@dimen/_5sdp"
+
+    />
+</android.support.v7.widget.CardView>
+    </RelativeLayout>

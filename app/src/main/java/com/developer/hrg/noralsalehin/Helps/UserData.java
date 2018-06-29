@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.developer.hrg.noralsalehin.Models.Chanel;
+import com.developer.hrg.noralsalehin.Models.Message;
 import com.developer.hrg.noralsalehin.Models.Notify;
 import com.developer.hrg.noralsalehin.Models.UnRead;
 import com.developer.hrg.noralsalehin.Models.User;
@@ -22,6 +23,9 @@ import java.util.ArrayList;
 public class UserData extends SQLiteOpenHelper {
     public static final String DB_NAME="user_data";
     SQLiteDatabase sqLiteDatabase;
+
+
+    /////////////////////////////////////////////////USerTable\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     public static final String TABLE_USER="user_table" ;
     public static final String USER_ID="user_id" ;
     public static final String MOBILE="mobile" ;
@@ -32,6 +36,9 @@ public class UserData extends SQLiteOpenHelper {
             +APIKEY+ " TEXT NOT NULL , " +
             CREATED_AT+" TEXT NOT NULL )";
 
+
+
+    /////////////////////////////////////////////////ChaneeTable\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
     public static final String TABLE_CHANEL="Chanel_table" ;
     public static final String ID="_id" ;
@@ -62,7 +69,7 @@ public class UserData extends SQLiteOpenHelper {
 
 
 
-
+/////////////////////////////////////////////////UnreadTable\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
     public static final String TABLE_UNREAD="unread_Table" ;
     public static final String ID_UNREAD="unread_id" ;
@@ -76,7 +83,7 @@ public class UserData extends SQLiteOpenHelper {
 
 
 
-
+    /////////////////////////////////////////////////NotificationTable\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     public static final String TABLE_NOTIFY = "notify_table";
     public static final String NOTIFYI_D="notify_id";
     public static final String NOTIFY_CHANEL_ID="notify_chanel_id";
@@ -87,6 +94,41 @@ public class UserData extends SQLiteOpenHelper {
             +NOTIFY_CHANEL_ID+" INTEGER NOT NULL , "
             +NOTIFY_SHOW_NOTIFY+ " INTEGER default 1,"+
             NOTIFY_PLAY_SOUND+ " INTEGER DEFAULT 1)";
+
+    /////////////////////////////////////////////////MessageTable\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+    public static final String TABLE_MESSAGE="message_table" ;
+    public static final String MESSAGE_ID="_id" ;
+    public static final String MESSAGE_MESSAGE_ID="message_id" ;
+    public static final String MESSAGE_ADMIN_ID="admin_id" ;
+    public static final String MESSAGE_CHANEL_ID="chanel_id" ;
+    public static final String MESSAGE_MESSAGE="message";
+    public static final String MESSAGE_THUMB="thumb";
+    public static final String MESSAGE_TYPE="type";
+    public static final String MESSAGE_LENTH="lenth";
+    public static final String MESSAGE_TIME="time";
+    public static final String MESSAGE_URL="url";
+    public static final String MESSAGE_UPDATED_AT="updated_at";
+
+    String CREATE_TABLE_MESSAGE = "CREATE TABLE " + TABLE_MESSAGE+"( "+MESSAGE_ID+ " INTEGER PRIMARY KEY AUTOINCREMENT , "+
+            MESSAGE_MESSAGE_ID+ " INTEGER NOT NULL ,"+
+            MESSAGE_ADMIN_ID+ " INTEGER NOT NULL ,"+
+            MESSAGE_CHANEL_ID+ " INTEGER NOT NULL  ," +
+            MESSAGE_MESSAGE+ " TEXT , " +
+            MESSAGE_THUMB+ " TEXT , " +
+            MESSAGE_TYPE + " INTEGER NOT NULL  ," +
+            MESSAGE_LENTH + " INTEGER ," +
+            MESSAGE_TIME + " TEXT ," +
+            MESSAGE_URL+" TEXT ," +
+            MESSAGE_UPDATED_AT + " TIMESTAMP NOT NULL)"
+            ;
+
+
+
+
+
+
+
     public UserData(Context context) {
         super(context, DB_NAME, null, 4);
 
@@ -99,6 +141,7 @@ public class UserData extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_TABLE_CHANEL);
         sqLiteDatabase.execSQL(CREATE_TABLE_UNREAD);
         sqLiteDatabase.execSQL(CREATE_TABLE_NOTIFY);
+        sqLiteDatabase.execSQL(CREATE_TABLE_MESSAGE);
     }
 
     @Override
@@ -107,6 +150,7 @@ public class UserData extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_CHANEL);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_UNREAD);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_NOTIFY);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_MESSAGE);
         onCreate(sqLiteDatabase);
 
     }
@@ -345,5 +389,81 @@ public class UserData extends SQLiteOpenHelper {
 
     }
 
+/////////////////////////////////////////////////////////////////NotifyFunctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    public void insertIntoMessage(Message message) {
+        ContentValues contentValues =new ContentValues();
+        contentValues.put(MESSAGE_MESSAGE_ID,message.getMessage_id());
+        contentValues.put(MESSAGE_ADMIN_ID,message.getAdmin_id());
+        contentValues.put(MESSAGE_CHANEL_ID,message.getChanel_id());
+        contentValues.put(MESSAGE_MESSAGE,message.getMessage());
+        contentValues.put(MESSAGE_THUMB,message.getThumb());
+        contentValues.put(MESSAGE_TYPE,message.getType());
+        contentValues.put(MESSAGE_LENTH,message.getLenth());
+        contentValues.put(MESSAGE_TIME,message.getTime());
+        contentValues.put(MESSAGE_URL,message.getUrl());
+        contentValues.put(MESSAGE_UPDATED_AT,message.getUpdated_at());
+        sqLiteDatabase.insert(TABLE_MESSAGE,null,contentValues);
+    }
+
+    public void insertIntoMessage(ArrayList<Message> messages) {
+        for (Message message : messages) {
+            ContentValues contentValues =new ContentValues();
+            contentValues.put(MESSAGE_MESSAGE_ID,message.getMessage_id());
+            contentValues.put(MESSAGE_ADMIN_ID,message.getAdmin_id());
+            contentValues.put(MESSAGE_CHANEL_ID,message.getChanel_id());
+            contentValues.put(MESSAGE_MESSAGE,message.getMessage());
+            contentValues.put(MESSAGE_THUMB,message.getThumb());
+            contentValues.put(MESSAGE_TYPE,message.getType());
+            contentValues.put(MESSAGE_LENTH,message.getLenth());
+            contentValues.put(MESSAGE_TIME,message.getTime());
+            contentValues.put(MESSAGE_URL,message.getUrl());
+            contentValues.put(MESSAGE_UPDATED_AT,message.getUpdated_at());
+            sqLiteDatabase.insert(TABLE_MESSAGE,null,contentValues);
+        }
+    }
+    public boolean hasMessageData(int chanel_id) {
+        long cnt  = DatabaseUtils.queryNumEntries(sqLiteDatabase, TABLE_MESSAGE , MESSAGE_CHANEL_ID+" LIKE ? " ,new String[] {String.valueOf(chanel_id)});
+        return cnt > 0;
+    }
+
+    public ArrayList<Message> getAllMessages(int chanel_id) {
+       ArrayList<Message> messages = new ArrayList<>();
+
+        Cursor cursor = sqLiteDatabase.query(TABLE_MESSAGE,new String[]{MESSAGE_MESSAGE_ID,MESSAGE_ADMIN_ID,MESSAGE_CHANEL_ID,MESSAGE_MESSAGE
+                ,MESSAGE_THUMB,MESSAGE_TYPE,MESSAGE_LENTH,MESSAGE_TIME,MESSAGE_URL,MESSAGE_UPDATED_AT},MESSAGE_CHANEL_ID+" LIKE ? ",
+                new String[] {String.valueOf(chanel_id)},null,null,null,null
+
+                );
+        if (cursor.getCount()>0) {
+            cursor.moveToFirst();
+            do {
+
+
+                int message_id = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_MESSAGE_ID));
+                int admin_id = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_ADMIN_ID));
+                int chanel_id_temp = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_CHANEL_ID));
+                String message = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_MESSAGE));
+                String thumb = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_THUMB));
+                int type = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_TYPE));
+                int lenth = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_LENTH));
+                String time = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_TIME));
+                String url = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_URL));
+                String updated_at  = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_UPDATED_AT));
+                Message message_temp = new Message(message_id,admin_id,chanel_id_temp,message,thumb,type,lenth,time,url,updated_at);
+                messages.add(message_temp);
+            }while (cursor.moveToNext());
+            return messages;
+        }else {
+            return  null;
+        }
+
+    }
+    public  int getLastMessage_id(int chanel_id) {
+        Cursor cursor = sqLiteDatabase.query(TABLE_MESSAGE,new String[]{MESSAGE_MESSAGE_ID},MESSAGE_CHANEL_ID+" like ? " ,new String[]{String.valueOf(chanel_id)},null
+                ,null,MESSAGE_MESSAGE_ID+" DESC","0,1"
+                );
+        cursor.moveToFirst();
+        return  cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_MESSAGE_ID));
+    }
 
 }

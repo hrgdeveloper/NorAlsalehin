@@ -1,5 +1,8 @@
 package com.developer.hrg.noralsalehin.Helps;
 
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
@@ -13,8 +16,16 @@ public class Apiclient {
 
     public static Retrofit getClient() {
         if (retrofit==null) {
+
+            final OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .writeTimeout(10, TimeUnit.MINUTES)
+                    .readTimeout(10, TimeUnit.MINUTES)
+                    .build();
+
             retrofit=new Retrofit.Builder()
                     .baseUrl(Config.OFFLINE_URL)
+                    .client(okHttpClient)
                     .addConverterFactory(ScalarsConverterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
