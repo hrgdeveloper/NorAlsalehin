@@ -123,17 +123,20 @@ public class Verify_Fragment extends Fragment {
                                             (getActivity(),response.body().getMessage(), Toast.LENGTH_SHORT).show();
                                     progress.cancel();
                                 }else {
+                                    progress.cancel();
                                  userData.addUser(response.body().getUser());
                                     userInfo.set_IsLogged_in(true);
                                     startActivity(new Intent(getActivity(), MainActivity.class));
                                     Toast.makeText(getActivity(), "خوش آمدید", Toast.LENGTH_SHORT).show();
+
                                 }
                             }
                         }
 
                         @Override
                         public void onFailure(Call<SimpleResponse> call, Throwable t) {
-
+                            progress.cancel();
+                            Toast.makeText(getActivity(), "خطا در برقراری ارتباط", Toast.LENGTH_SHORT).show();
                         }
                     });
                 }

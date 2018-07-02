@@ -10,17 +10,27 @@ import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +52,9 @@ import com.developer.hrg.noralsalehin.Models.User;
 import com.developer.hrg.noralsalehin.R;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -59,23 +72,32 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     GetChanelsAdapter adaptetChanels;
     UserInfo userInfo;
     TextView tv_toolbar;
+    Toolbar toolbar;
     boolean firstTimeLunchForBroadCast = true  ;
     boolean firstTimeLunchForOnResume = true  ;
     private BroadcastReceiver reciverChanelsTask;
     NetworkChangeReceiver networkChangeReceiver ;
     TextView tv_noChanel ;
+    DrawerLayout drawerLayout ;
+    NavigationView navigationView ;
+    ActionBarDrawerToggle drawerToggle;
     public static final int STORAGE_REQUEST =100;
     private String TAG = MainActivity.class.getSimpleName();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
         setContentView(R.layout.activity_main);
         FirebaseMessaging.getInstance().subscribeToTopic(Config.TOPIC_GLOBAL);
+
+
         defineView();
         defineClasees();
-        user = userData.getUser();
+        headerFunction();
+
+        drawerToggle=new ActionBarDrawerToggle(MainActivity.this,drawerLayout,toolbar,R.string.app_name,R.string.app_name);
+        drawerToggle.syncState();
+
+
         adaptetChanels = new GetChanelsAdapter(MainActivity.this, chanels, unreads);
         adaptetChanels.setMyClickListener(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
@@ -115,6 +137,16 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
             }
         };
 
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(Gravity.LEFT)) {
+            drawerLayout.closeDrawer(Gravity.LEFT);
+        }else {
+            super.onBackPressed();
+        }
 
     }
 
@@ -224,9 +256,10 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     public void updateRows(Message message) {
         for (Chanel chanel : chanels) {
             if (chanel.getChanel_id()==message.getChanel_id()) {
+                // aval chaneli ke payam omade vasaho migirim
                 int index = chanels.indexOf(chanel);
 
-
+             //moshakhaste chanel ro ba tavajoh be message update mikonim
                 chanel.setUsername(message.getAdmin_name());
                 chanel.setLast_message(message.getMessage());
                 chanel.setType(message.getType());
@@ -235,10 +268,10 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                 chanels.set(index,chanel);
                 userData.updateChanel(chanel);
 
-
+                 //tedade payam haye khonde nashode on chanel ro migirim
                 int unreadCount = userData.getUnreadCount(message.getChanel_id());
+                //yeki behesh ezafe mikonim  o to database va to list update mikoim
                 unreadCount++;
-                Toast.makeText(MainActivity.this,unreadCount+"",Toast.LENGTH_LONG).show();
                 UnRead unRead = unreads.get(index);
                 unRead.setCount(unreadCount);
                 unreads.set(index,unRead);
@@ -256,11 +289,15 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         tv_toolbar = (TextView) findViewById(R.id.tv_toolbar);
         tv_noChanel=(TextView)findViewById(R.id.tv_main_noChanel);
         recyclerView = (RecyclerView) findViewById(R.id.rv_main);
+        drawerLayout=(DrawerLayout)findViewById(R.id.drawerlayout);
+        navigationView=(NavigationView)findViewById(R.id.navigationview);
+        toolbar=(Toolbar)findViewById(R.id.toolbar_main);
     }
     public void defineClasees() {
         networkChangeReceiver = new NetworkChangeReceiver();
         userData = new UserData(MainActivity.this);
         userInfo = new UserInfo(MainActivity.this);
+        user = userData.getUser();
     }
 
     @Override
@@ -413,6 +450,86 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
             }
 
         }
+
+
+    }
+    public void  headerFunction() {
+        View view = navigationView.getHeaderView(0);
+        String username = userData.getUser().getUsername();
+        LinearLayout linearlayout = (LinearLayout)view.findViewById(R.id.linear_header);
+        Button btn_send=(Button)view.findViewById(R.id.btn_header_sendusername);
+        TextView tv_username = (TextView)view.findViewById(R.id.tv_header_username);
+        TextView tv_number = (TextView)view.findViewById(R.id.tv_header_number);
+    final       EditText et_username = (EditText)view.findViewById(R.id.et_header_username);
+        tv_number.setText(user.getMobile());
+
+        if (username.equalsIgnoreCase("e")) {
+            linearlayout.setVisibility(View.VISIBLE);
+            btn_send.setVisibility(View.VISIBLE);
+            et_username.setVisibility(View.VISIBLE);
+            tv_username.setVisibility(View.GONE);
+           btn_send.setOnClickListener(new View.OnClickListener() {
+               @Override
+               public void onClick(View view) {
+                  if (!InternetCheck.isOnline(MainActivity.this)) {
+                      Toast.makeText(getApplication(), "عدم دسترسی به اینترنت", Toast.LENGTH_SHORT).show();
+                  }else {
+                      final String typed_username = et_username.getText().toString();
+                      if (TextUtils.isEmpty(typed_username)) {
+                          Toast.makeText(getApplication(), "نام کاربری نمیتواند خالی بماند", Toast.LENGTH_SHORT).show();
+
+                      }else if (typed_username.equalsIgnoreCase("e")) {
+                          Toast.makeText(getApplication(), "این نام کاربری قابل انتخاب نیست", Toast.LENGTH_SHORT).show();
+                      }else {
+                          ApiInterface api = Apiclient.getClient().create(ApiInterface.class);
+                          Call<SimpleResponse> call = api.updateUsername(user.getApikey(),typed_username);
+                          call.enqueue(new Callback<SimpleResponse>() {
+                              @Override
+                              public void onResponse(Call<SimpleResponse> call, Response<SimpleResponse> response) {
+                                  if (!response.isSuccessful()) {
+                                      try {
+                                          JSONObject jsonObject = new JSONObject(response.errorBody().string());
+                                          String message = jsonObject.getString("message");
+                                          Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+
+                                      } catch (JSONException e) {
+                                          e.printStackTrace();
+                                      } catch (IOException e) {
+                                          e.printStackTrace();
+                                      }
+                                  } else {
+                                      if (response.body().isError()) {
+                                          Toast.makeText(MainActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                                      } else {
+                                          userData.updateUsername(typed_username);
+                                          user=userData.getUser();
+                                          headerFunction();
+                                      }
+                                  }
+                              }
+
+
+                              @Override
+                              public void onFailure(Call<SimpleResponse> call, Throwable t) {
+
+                                  Toast.makeText(getApplicationContext(), "خطای برقراری ارتباط", Toast.LENGTH_SHORT).show();
+                              }
+                          });
+                      }
+
+
+                  }
+               }
+           });
+
+        }else {
+            et_username.setVisibility(View.GONE);
+            linearlayout.setVisibility(View.INVISIBLE);
+            btn_send.setVisibility(View.GONE);
+            tv_username.setVisibility(View.VISIBLE);
+            tv_username.setText(username);
+        }
+
 
 
     }

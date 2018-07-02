@@ -15,6 +15,16 @@ public class User {
     String apikey ;
     @SerializedName("created_at")
     String created_at;
+    @SerializedName("username")
+    String username ;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public int getId() {
         return id;
@@ -48,10 +58,11 @@ public class User {
         this.created_at = created_at;
     }
 
-    public User(int id, String mobile, String apikey, String created_at) {
+    public User(int id, String mobile, String apikey, String created_at , String username) {
         this.id = id;
         this.mobile = mobile;
         this.apikey = apikey;
         this.created_at = created_at;
+        this.username=username;
     }
 }

@@ -1,7 +1,10 @@
 package com.developer.hrg.noralsalehin.InsideChanel;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +16,8 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.developer.hrg.noralsalehin.Helps.Config;
 import com.developer.hrg.noralsalehin.Models.Message;
 import com.developer.hrg.noralsalehin.R;
@@ -51,6 +56,13 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return new SimpleHolder(view);
         }else if (viewType==2) {
             View view = LayoutInflater.from(context).inflate(R.layout.custom_picture,parent,false);
+            CircularProgressBar circularProgressBar = (CircularProgressBar)view.findViewById(R.id.cp_picture);
+            circularProgressBar.setColor(ContextCompat.getColor(context,android.R.color.holo_blue_dark));
+            circularProgressBar.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_blue_dark));
+            circularProgressBar.setProgressBarWidth(10);
+            circularProgressBar.setBackgroundProgressBarWidth(5);
+        //    int animationDuration = 2500; // 2500ms = 2,5s
+       //     circularProgressBar.setProgressWithAnimation(65, animationDuration);
             return new ImageHolder(view);
         }else  {
             throw new RuntimeException("The type has to be ONE or TWO");
@@ -59,12 +71,11 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         Message message = messages.get(position);
            switch (holder.getItemViewType()) {
                case 1 :
                    SimpleHolder  simpleHolder = (SimpleHolder)holder;
-
                    simpleHolder.tv_text.setText(message.getMessage());
                    break;
                case 2 :
@@ -72,14 +83,23 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                    //in method esme folder va esme aks ro migire o check mikone bebine mojode ya na
                     if (isFileExists(Config.Folders.IMAGES ,message.getUrl())) {
                         imageHolder.circularProgressBar.setVisibility(View.GONE);
+                        imageHolder.iv_download.setVisibility(View.GONE);
                         Glide.with(context).load(getFile(Config.Folders.IMAGES,message.getUrl())).apply(new RequestOptions()
                                 .diskCacheStrategy(DiskCacheStrategy.ALL)
 
-                        ).into(imageHolder.iv_picture);
+                        ) .into(new SimpleTarget<Drawable>() {
+                            @Override
+                            public void onResourceReady(Drawable resource, Transition<? super Drawable> transition) {
+                                ((ImageHolder) holder).iv_picture.setImageDrawable(resource);
+                            }
+                        });
+                    //    imageHolder.iv_picture.setImageURI(Uri.fromFile(getFile(Config.Folders.IMAGES,message.getUrl())));
                     }else {
+                        imageHolder.iv_download.setVisibility(View.VISIBLE);
                         imageHolder.circularProgressBar.setVisibility(View.VISIBLE);
                         Glide.with(context).load(Config.MESSAGE_THUMB_ADDRESS+message.getThumb()).apply(new RequestOptions()
                                 .diskCacheStrategy(DiskCacheStrategy.ALL)
+                                .placeholder(ContextCompat.getDrawable(context,R.drawable.white))
                         ).into(imageHolder.iv_picture);
                     }
 
@@ -131,6 +151,11 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
     class SimpleHolder extends RecyclerView.ViewHolder {
    TextView tv_text ;
         public SimpleHolder(View itemView) {
@@ -139,13 +164,13 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
     class ImageHolder extends RecyclerView.ViewHolder {
-      ImageView iv_picture ;
+      ImageView iv_picture , iv_download ;
         TextView tv_text ;
         TextView tv_percent;
         CircularProgressBar circularProgressBar ;
         public ImageHolder(View itemView) {
             super(itemView);
-
+            iv_download=(ImageView)itemView.findViewById(R.id.iv_picture_download);
             iv_picture=(ImageView)itemView.findViewById(R.id.iv_custom_image);
              circularProgressBar=(CircularProgressBar)itemView.findViewById(R.id.cp_picture);
             tv_text=(TextView)itemView.findViewById(R.id.tv_custom_picture_text);

@@ -29,7 +29,9 @@
         android:roundIcon="@drawable/noralmobin_icon"
         android:supportsRtl="false"
         android:theme="@style/AppTheme">
-        <activity android:name=".Main.MainActivity" >
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".Main.MainActivity" >
 
         </activity>
         <activity android:name=".SplashActivity">
@@ -42,6 +44,7 @@
         </activity>
         <activity android:name=".Intero_Activity" />
         <activity
+            android:screenOrientation="portrait"
             android:name=".SmsHandeling.SmsActivity"
             android:windowSoftInputMode="adjustResize"></activity>
 
@@ -56,7 +59,9 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".InsideChanel.InsideActivity"></activity>
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".InsideChanel.InsideActivity"></activity>
     </application>
 
 </manifest>

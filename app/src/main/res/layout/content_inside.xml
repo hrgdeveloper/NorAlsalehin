@@ -1,19 +1,62 @@
-<FrameLayout android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android" >
-<android.support.v7.widget.RecyclerView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/recycler_messages"
-    />
-<android.support.v7.widget.AppCompatButton
-android:layout_width="match_parent"
-android:layout_height="wrap_content"
-android:textColor="@android:color/white"
-android:layout_alignParentBottom="true"
-android:text="بی صدا کردن "
-    android:layout_gravity="bottom"
-android:id="@+id/btn_inside_mute"
-android:background="@color/circleColor"/>
 
-    /</FrameLayout>
+
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_messages"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true" />
+
+        <ProgressBar
+            android:id="@+id/myprogressbar"
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="-7dp"
+            android:backgroundTint="@android:color/white"
+            android:indeterminate="true"
+            android:indeterminateTint="#1a09d6"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tv_inside_lable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textColor="@android:color/black"
+            android:textStyle="normal"
+            android:visibility="invisible" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/btn_inside_mute"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="#f9f8f8"
+            android:text="بی صدا کردن "
+            android:textColor="#7B1FA2" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="@dimen/_35sdp"
+            android:layout_height="wrap_content"
+            android:id="@+id/floating_inside"
+            android:src="@drawable/down"
+
+            app:backgroundTint="@android:color/white"
+            app:borderWidth="0dp"
+            android:layout_above="@+id/btn_inside_mute"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_5sdp"
+
+            />
+    </RelativeLayout>

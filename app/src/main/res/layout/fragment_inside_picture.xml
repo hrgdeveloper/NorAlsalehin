@@ -1,0 +1,57 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:background="@android:color/black"
+    android:clickable="true"
+
+    android:id="@+id/coordinate_picture_fragment"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+    <com.developer.hrg.noralsalehin.Helps.TouchImageView
+        android:id="@+id/iv_picFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        />
+
+
+    <RelativeLayout
+      android:layout_width="match_parent"
+      android:background="#88000000"
+        android:layout_gravity="top"
+      android:layout_height="@dimen/_40sdp">
+
+      <ImageView
+          android:layout_width="@dimen/_20sdp"
+          android:layout_height="@dimen/_20sdp"
+           android:src="@drawable/back"
+          android:tint="@android:color/white"
+          android:id="@+id/iv_back_insidepicture"
+          android:layout_centerVertical="true"
+          android:layout_marginLeft="@dimen/_8sdp"
+          />
+  </RelativeLayout>
+
+
+
+
+
+
+        <TextView
+            android:id="@+id/tv_fragmentpic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="#88000000"
+            android:gravity="right"
+            android:layout_gravity="bottom"
+            android:padding="@dimen/_5sdp"
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/white"
+            android:hint="متن پیام"
+            android:minLines="3" />
+
+
+</FrameLayout>

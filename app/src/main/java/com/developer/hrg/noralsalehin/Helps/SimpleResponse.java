@@ -13,9 +13,16 @@ import java.util.ArrayList;
  */
 
 public class SimpleResponse {
+    @SerializedName("error")
     boolean error ;
-    String message ;
 
+    @SerializedName("error_type")
+
+    int errortype ;
+
+    @SerializedName("message")
+    String message ;
+    @SerializedName("user")
     User user;
     @SerializedName("user_count")
     int user_count ;
@@ -83,6 +90,13 @@ public class SimpleResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+    public int getErrortype() {
+        return errortype;
+    }
+
+    public void setErrortype(int errortype) {
+        this.errortype = errortype;
     }
 
     public SimpleResponse(boolean error, String message) {

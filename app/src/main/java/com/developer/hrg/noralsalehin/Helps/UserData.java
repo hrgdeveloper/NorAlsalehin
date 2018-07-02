@@ -30,10 +30,12 @@ public class UserData extends SQLiteOpenHelper {
     public static final String USER_ID="user_id" ;
     public static final String MOBILE="mobile" ;
     public static final String APIKEY="apikey" ;
+    public static final String USERNAME="username" ;
     public static final String CREATED_AT="created_At" ;
     String CREATE_TABLE= "CREATE TABLE " + TABLE_USER+ " ("+USER_ID+" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
             +MOBILE+" TEXT NOT NULL , "
             +APIKEY+ " TEXT NOT NULL , " +
+            USERNAME+" TEXT , " +
             CREATED_AT+" TEXT NOT NULL )";
 
 
@@ -126,6 +128,16 @@ public class UserData extends SQLiteOpenHelper {
 
 
 
+//////////////////////////////////////////////PositionTable\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    public static final String TABLE_POSITION = "position_table";
+    public static final String POSITION_ID="_id";
+    public static final String POSITION_CHANEL_ID="position_chanel_id";
+    public static final String POSITION_NUMBER="position_number";
+
+
+    String CREATE_TABLE_POSITION= "CREATE TABLE " + TABLE_POSITION+ " ("+POSITION_ID+" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+            +POSITION_CHANEL_ID+" INTEGER NOT NULL , "
+            +POSITION_NUMBER+ " INTEGER )" ;
 
 
 
@@ -142,6 +154,7 @@ public class UserData extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_TABLE_UNREAD);
         sqLiteDatabase.execSQL(CREATE_TABLE_NOTIFY);
         sqLiteDatabase.execSQL(CREATE_TABLE_MESSAGE);
+        sqLiteDatabase.execSQL(CREATE_TABLE_POSITION);
     }
 
     @Override
@@ -151,6 +164,7 @@ public class UserData extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_UNREAD);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_NOTIFY);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_MESSAGE);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_POSITION);
         onCreate(sqLiteDatabase);
 
     }
@@ -159,28 +173,37 @@ public class UserData extends SQLiteOpenHelper {
         contentValues.put(USER_ID,user.getId());
         contentValues.put(MOBILE,user.getMobile());
         contentValues.put(APIKEY,user.getApikey());
+        contentValues.put(USERNAME,user.getUsername());
         contentValues.put(CREATED_AT,user.getCreated_at());
         sqLiteDatabase.insert(TABLE_USER,null,contentValues);
 
     }
     public User getUser() {
-        Cursor cursor = sqLiteDatabase.query(TABLE_USER,new String[]{USER_ID,MOBILE,APIKEY,CREATED_AT},null,null,null,null,null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_USER,new String[]{USER_ID,MOBILE,APIKEY,USERNAME,CREATED_AT},null,null,null,null,null);
         cursor.moveToFirst();
         User user = new User(cursor.getInt(cursor.getColumnIndexOrThrow(USER_ID)),
                 cursor.getString(cursor.getColumnIndexOrThrow(MOBILE)),
                 cursor.getString(cursor.getColumnIndexOrThrow(APIKEY)),
-                cursor.getString(cursor.getColumnIndexOrThrow(CREATED_AT))
-                );
+                cursor.getString(cursor.getColumnIndexOrThrow(CREATED_AT)
+                ),cursor.getString(cursor.getColumnIndexOrThrow(USERNAME)
+                ));
         return user;
     }
     public void deleteuser() {
         sqLiteDatabase.delete(TABLE_USER,null,null);
     }
-    public boolean hasUserData(){
-        Cursor cursor =   sqLiteDatabase.query(TABLE_USER,new String[] {USER_ID},null,null,null,null,null);
-        return  cursor.getCount() > 0 ;
+    public boolean hasUserData() {
+        Cursor cursor = sqLiteDatabase.query(TABLE_USER, new String[]{USER_ID}, null, null, null, null, null);
+        return cursor.getCount() > 0;
 
     }
+
+    public void  updateUsername(String username) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(USERNAME,username);
+        sqLiteDatabase.update(TABLE_USER,contentValues,null,null);
+    }
+
 
 
     //////////////////////////////////////////////////////////ChanelFUNCTIONs\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -323,13 +346,22 @@ public class UserData extends SQLiteOpenHelper {
     public void updateUnread(int count , int chanel_id) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(UNREAD_COUNT,count);
-        sqLiteDatabase.update(TABLE_UNREAD,contentValues,UNREAD_CHANEL_ID+ " like ? " ,new String[]{String.valueOf(chanel_id)});
+        sqLiteDatabase.update(TABLE_UNREAD,contentValues,UNREAD_CHANEL_ID+ " LIKE ? " ,new String[]{String.valueOf(chanel_id)});
     }
     public int getUnreadCount(int chanel_id) {
-        Cursor cursor = sqLiteDatabase.query(TABLE_UNREAD,new String[]{UNREAD_COUNT},UNREAD_CHANEL_ID+ " like ? ",new String[]{String.valueOf(chanel_id)},
+
+        Cursor cursor = sqLiteDatabase.query(TABLE_UNREAD,new String[]{UNREAD_COUNT},UNREAD_CHANEL_ID+ " LIKE ? ",new String[]{String.valueOf(chanel_id)},
                 null,null,null);
         cursor.moveToFirst();
         int count = cursor.getInt(cursor.getColumnIndexOrThrow(UNREAD_COUNT));
+        return count;
+    }
+
+    public int getReadcount(int chanel_id) {
+        Cursor cursor = sqLiteDatabase.query(TABLE_UNREAD,new String[]{READ_COUNT},UNREAD_CHANEL_ID+ " LIKE ? ",new String[]{String.valueOf(chanel_id)},
+                null,null,null);
+        cursor.moveToFirst();
+        int count = cursor.getInt(cursor.getColumnIndexOrThrow(READ_COUNT));
         return count;
     }
 
@@ -337,7 +369,7 @@ public class UserData extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put(READ_COUNT,unReadCount + readCount);
         contentValues.put(UNREAD_COUNT,0);
-        sqLiteDatabase.update(TABLE_UNREAD,contentValues,UNREAD_CHANEL_ID+ " like ? " ,new String[]{String.valueOf(chanel_id)});
+        sqLiteDatabase.update(TABLE_UNREAD,contentValues,UNREAD_CHANEL_ID+ " LIKE ? " ,new String[]{String.valueOf(chanel_id)});
     }
 
 
@@ -389,7 +421,7 @@ public class UserData extends SQLiteOpenHelper {
 
     }
 
-/////////////////////////////////////////////////////////////////NotifyFunctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+/////////////////////////////////////////////////////////////////MessageFunction\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     public void insertIntoMessage(Message message) {
         ContentValues contentValues =new ContentValues();
         contentValues.put(MESSAGE_MESSAGE_ID,message.getMessage_id());
@@ -459,11 +491,47 @@ public class UserData extends SQLiteOpenHelper {
 
     }
     public  int getLastMessage_id(int chanel_id) {
-        Cursor cursor = sqLiteDatabase.query(TABLE_MESSAGE,new String[]{MESSAGE_MESSAGE_ID},MESSAGE_CHANEL_ID+" like ? " ,new String[]{String.valueOf(chanel_id)},null
+        Cursor cursor = sqLiteDatabase.query(TABLE_MESSAGE,new String[]{MESSAGE_MESSAGE_ID},MESSAGE_CHANEL_ID+" LIKE ? " ,new String[]{String.valueOf(chanel_id)},null
                 ,null,MESSAGE_MESSAGE_ID+" DESC","0,1"
                 );
         cursor.moveToFirst();
         return  cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_MESSAGE_ID));
+    }
+
+
+    ///////////////////////////////////positionFunction\\\\\\\\\\\\\\\\\\\\\\\
+  //  check mikonim mibinim age dash ke update she age nadasht besaze
+    public void addPosition(int chanel_id , int position , boolean updateshe) {
+        if (!updateshe) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(POSITION_NUMBER,position);
+            contentValues.put(POSITION_CHANEL_ID,chanel_id);
+            sqLiteDatabase.insert(TABLE_POSITION,null,contentValues);
+        }else {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(POSITION_NUMBER,position);
+            sqLiteDatabase.update(TABLE_POSITION,contentValues,POSITION_CHANEL_ID+
+            " LIKE ? " ,new String[]{String.valueOf(chanel_id)}
+            );
+
+        }
+
+    }
+
+    public boolean hasPositionData(int chanel_id) {
+        long cnt  = DatabaseUtils.queryNumEntries(sqLiteDatabase, TABLE_POSITION,
+                POSITION_CHANEL_ID+ " LIKE ?" ,new String[]{String.valueOf(chanel_id)}
+                );
+        return cnt > 0;
+    }
+
+    public Integer getLastPosition(int chanel_id) {
+        Cursor cursor = sqLiteDatabase.query(TABLE_POSITION,new String[]{POSITION_NUMBER},
+                POSITION_CHANEL_ID+ " LIKE ? ",new String[]{String.valueOf(chanel_id)},
+                null,null,null
+                );
+        cursor.moveToFirst();
+        return  cursor.getInt(cursor.getColumnIndexOrThrow(POSITION_NUMBER));
     }
 
 }

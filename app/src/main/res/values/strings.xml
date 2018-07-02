@@ -22,4 +22,6 @@
 
     <string name="l_verifty_wrongNumber"><u> شماره اشتباه ؟</u></string>
     <string name="toolbar_text">نورالصالحین</string>
+
+    <string name="headerhint"><font size="12">یک نام کاربری انتخاب کنید</font></string>
 </resources>

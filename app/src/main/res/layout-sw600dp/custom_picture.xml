@@ -1,17 +1,16 @@
-
 <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/tools"
-android:orientation="vertical"
-android:layout_width="wrap_content"
-android:layout_alignParentRight="true"
-
-card_view:cardCornerRadius="@dimen/_5sdp"
-android:layout_marginRight="@dimen/_10sdp"
-android:layout_marginLeft="@dimen/_10sdp"
-android:layout_marginTop="@dimen/_5sdp"
-card_view:cardElevation="@dimen/_4sdp"
-android:layout_height="wrap_content">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_alignParentRight="true"
+    android:layout_gravity="right"
+    card_view:cardCornerRadius="@dimen/_5sdp"
+    android:layout_marginRight="@dimen/_10sdp"
+    android:layout_marginLeft="@dimen/_10sdp"
+    android:layout_marginTop="@dimen/_5sdp"
+    card_view:cardElevation="@dimen/_4sdp"
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -29,26 +28,26 @@ android:layout_height="wrap_content">
                 android:layout_alignParentRight="true"
                 android:layout_margin="@dimen/_5sdp"
                 android:adjustViewBounds="true"
-                android:layout_gravity="center"
                 android:scaleType="fitXY"
                 android:src="@android:drawable/ic_menu_camera" />
 
             <com.mikhaellopez.circularprogressbar.CircularProgressBar
-                android:id="@+id/cp_picture"
                 android:layout_width="@dimen/_40sdp"
                 android:layout_height="@dimen/_40sdp"
                 android:layout_gravity="center"
+                android:id="@+id/cp_picture"
                 app:cpb_background_progressbar_color="#FFCDD2"
                 app:cpb_background_progressbar_width="5dp"
                 app:cpb_progressbar_color="#F44336"
                 app:cpb_progressbar_width="10dp" />
 
             <ImageView
-                android:id="@+id/iv_picture_download"
                 android:layout_width="@dimen/_25sdp"
                 android:layout_height="@dimen/_25sdp"
                 android:layout_gravity="center"
-                android:src="@drawable/download" />
+                android:src="@drawable/download"
+                android:id="@+id/iv_picture_download"
+                />
         </FrameLayout>
 
         <TextView
@@ -69,40 +68,17 @@ android:layout_height="wrap_content">
             android:layout_marginTop="@dimen/_2sdp">
 
             <ImageView
-                android:layout_width="@dimen/_15sdp"
-                android:layout_height="@dimen/_15sdp"
-                android:layout_marginRight="@dimen/_5sdp"
-                android:layout_toLeftOf="@+id/tv_custom_picture_comment"
-                android:src="@drawable/like"
-                android:id="@+id/iv_custom_picture_like"
-                />
-
-            <TextView
-                android:id="@+id/tv_custom_picture_like"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toLeftOf="@+id/iv_custom_picture_like"
-                android:text="15" />
-
+                android:src="@android:drawable/ic_input_add" />
 
             <ImageView
-                android:id="@+id/iv_custom_picture_comment"
-                android:layout_width="@dimen/_15sdp"
-                android:layout_height="@dimen/_15sdp"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="@dimen/_10sdp"
-                android:layout_toLeftOf="@+id/tv_custom_picture_time"
-                android:src="@drawable/comment" />
-
-            <TextView
-                android:id="@+id/tv_custom_picture_comment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toLeftOf="@+id/iv_custom_picture_comment"
-                android:text="4" />
+                android:layout_centerHorizontal="true"
+                android:src="@android:drawable/ic_menu_call"
+
+                />
 
             <TextView
                 android:id="@+id/tv_custom_picture_time"
@@ -111,7 +87,6 @@ android:layout_height="wrap_content">
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:text="12:25"
-                android:textColor="@android:color/holo_green_dark"
 
                 />
         </RelativeLayout>

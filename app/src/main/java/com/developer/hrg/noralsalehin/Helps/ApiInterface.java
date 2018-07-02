@@ -7,6 +7,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.Streaming;
@@ -24,6 +25,11 @@ public interface ApiInterface {
     @FormUrlEncoded
     @POST("verify")
     Call<SimpleResponse> verify(@Field("mobile") String mobile , @Field("otp") String otp);
+
+    @FormUrlEncoded
+    @PUT("updateUsername")
+    Call<SimpleResponse> updateUsername(@Header("Authorization") String header ,@Field("username") String username );
+
 
     @GET("getAllChanelsUser")
     Call<SimpleResponse> getAllChanels(@Header("Authorization") String header);

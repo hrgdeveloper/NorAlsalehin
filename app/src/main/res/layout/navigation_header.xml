@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="@color/colorPrimary"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/_130sdp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:layout_width="@dimen/_70sdp"
+        android:layout_height="@dimen/_70sdp"
+        android:layout_marginLeft="@dimen/_5sdp"
+        android:id="@+id/iv_header_profilePic"
+         android:src="@drawable/profile"
+         android:layout_marginTop="@dimen/_5sdp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:text="احمد رضا"
+        android:layout_below="@+id/tv_header_number"
+        android:id="@+id/tv_header_username"
+        android:layout_alignParentRight="true"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_margin="@dimen/_8sdp"
+        android:text="09357273422"
+        android:textColor="@android:color/white"
+
+        android:id="@+id/tv_header_number" />
+
+    <LinearLayout
+        android:background="@android:color/white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="4"
+        android:id="@+id/linear_header"
+        android:layout_alignParentBottom="true"
+        >
+
+    <EditText
+        android:layout_width="0dp"
+        android:layout_weight="3"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:background="@null"
+        android:layout_toRightOf="@+id/btn_header_sendusername"
+        android:paddingRight="@dimen/_2sdp"
+        android:singleLine="true"
+        android:layout_margin="@dimen/_2sdp"
+        android:hint="@string/headerhint"
+        android:textColorHint="@android:color/black"
+        android:id="@+id/et_header_username"
+        android:layout_alignParentBottom="true"
+
+        />
+
+        <Button
+            android:id="@+id/btn_header_sendusername"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_weight="1"
+            android:background="@null"
+            android:text="ارسال"
+            android:textColor="#7B1FA2" />
+    </LinearLayout>
+</RelativeLayout>
