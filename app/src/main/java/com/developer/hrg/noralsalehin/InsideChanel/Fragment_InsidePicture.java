@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.developer.hrg.noralsalehin.Helps.Config;
@@ -41,6 +42,8 @@ public class Fragment_InsidePicture extends Fragment {
     ImageView iv_back;
     TextView tv_text ;
     Toolbar toolbar ;
+    boolean hide = false ;
+    RelativeLayout relativeLayout_top ;
 
     public Fragment_InsidePicture() {
         // Required empty public constructor
@@ -73,8 +76,10 @@ public class Fragment_InsidePicture extends Fragment {
         View view = inflater.inflate(R.layout.fragment_inside_picture, container, false);
 
         iv_pic=(TouchImageView)view.findViewById(R.id.iv_picFragment);
-        tv_text=(TextView)view.findViewById(R.id.tv_fragmentpic);
+        tv_text=(TextView)view.findViewById(R.id.tv_inside_picture_bottom);
         iv_back=(ImageView)view.findViewById(R.id.iv_back_insidepicture);
+        relativeLayout_top=(RelativeLayout)view.findViewById(R.id.relative_inside_picture_top);
+
 
         return  view;
     }
@@ -95,6 +100,25 @@ public class Fragment_InsidePicture extends Fragment {
             @Override
             public void onClick(View view) {
                 ((InsideActivity)getActivity()).onBackPressed();
+            }
+        });
+        iv_pic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!hide) {
+                    tv_text.setVisibility(View.INVISIBLE);
+                    tv_text.animate().translationY(view.getHeight());
+
+                    relativeLayout_top.setVisibility(View.INVISIBLE);
+                    relativeLayout_top.animate().translationX(view.getHeight());
+                }else {
+                    tv_text.setVisibility(View.VISIBLE);
+                    relativeLayout_top.setVisibility(View.VISIBLE);
+                    tv_text.animate().translationY(0);
+                    relativeLayout_top.animate().translationX(0);
+                }
+                hide=!hide;
+
             }
         });
 

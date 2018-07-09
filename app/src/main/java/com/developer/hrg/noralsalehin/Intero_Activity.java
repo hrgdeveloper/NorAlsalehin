@@ -98,9 +98,9 @@ public class Intero_Activity extends AppCompatActivity {
     }
 
     public void defineList () {
-        Intro intro = new Intro(getString(R.string.A_intro_firstTitle),getString(R.string.A_intro_firstText),R.drawable.paper_plane,android.R.color.holo_red_light);
-        Intro intro2 = new Intro(getString(R.string.A_intro_secondTitle),getString(R.string.A_intro_secondText),R.drawable.speak,android.R.color.holo_green_light);
-        Intro intro3 = new Intro(getString(R.string.A_intro_therdTitle),getString(R.string.A_intro_therdText),R.drawable.easyuse,android.R.color.holo_orange_dark);
+        Intro intro = new Intro(getString(R.string.A_intro_firstTitle),getString(R.string.A_intro_firstText),R.drawable.paper_plane,R.color.bg_screen1);
+        Intro intro2 = new Intro(getString(R.string.A_intro_secondTitle),getString(R.string.A_intro_secondText),R.drawable.speak,R.color.bg_screen2);
+        Intro intro3 = new Intro(getString(R.string.A_intro_therdTitle),getString(R.string.A_intro_therdText),R.drawable.easyuse,R.color.bg_screen3);
         introes.add(intro);
         introes.add(intro2);
         introes.add(intro3);

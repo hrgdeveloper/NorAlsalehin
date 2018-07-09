@@ -105,6 +105,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     Log.e("newMessage",payload.toString());
                     Gson gson = new Gson();
                     Message message = gson.fromJson(payload.toString(),Message.class);
+                    message.setLiked(0);
                     if (!NotificationUtils.isAppIsInBackground(getApplicationContext())) {
                         Intent intent = new Intent(Config.PUSH_NEW_MESSAGE);
                         intent.putExtra("message",message);

@@ -17,6 +17,26 @@ public class User {
     String created_at;
     @SerializedName("username")
     String username ;
+    @SerializedName("pic")
+    String pic ;
+    @SerializedName("pic_thumb")
+    String pic_thumb;
+
+    public String getPic() {
+        return pic;
+    }
+
+    public void setPic(String pic) {
+        this.pic = pic;
+    }
+
+    public String getPic_thumb() {
+        return pic_thumb;
+    }
+
+    public void setPic_thumb(String pic_thumb) {
+        this.pic_thumb = pic_thumb;
+    }
 
     public String getUsername() {
         return username;
@@ -58,11 +78,13 @@ public class User {
         this.created_at = created_at;
     }
 
-    public User(int id, String mobile, String apikey, String created_at , String username) {
+    public User(int id, String mobile, String apikey, String created_at , String username, String pic , String pic_thumb) {
         this.id = id;
         this.mobile = mobile;
         this.apikey = apikey;
         this.created_at = created_at;
         this.username=username;
+        this.pic=pic;
+        this.pic_thumb=pic_thumb;
     }
 }

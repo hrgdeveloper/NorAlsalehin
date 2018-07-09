@@ -1,14 +1,20 @@
 package com.developer.hrg.noralsalehin.Main;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -26,20 +32,27 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.developer.hrg.noralsalehin.Helps.ApiInterface;
 import com.developer.hrg.noralsalehin.Helps.Apiclient;
 import com.developer.hrg.noralsalehin.Helps.Config;
+import com.developer.hrg.noralsalehin.Helps.ImageCompression;
 import com.developer.hrg.noralsalehin.Helps.InternetCheck;
 import com.developer.hrg.noralsalehin.Helps.MyAlert;
+import com.developer.hrg.noralsalehin.Helps.MyProgress;
 import com.developer.hrg.noralsalehin.Helps.SimpleResponse;
 import com.developer.hrg.noralsalehin.Helps.UserData;
 import com.developer.hrg.noralsalehin.Helps.UserInfo;
@@ -59,11 +72,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements GetChanelsAdapter.MyClickListener {
+    public final int GALLERY_REQUEST = 100 ;
+    public final int  RESULT_LOAD_IMG_Gallery = 101 ;
+    CircleImageView iv_profile ;
+    File profile_file = null ;
     RecyclerView recyclerView;
     User user;
     UserData userData;
@@ -81,7 +102,9 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     DrawerLayout drawerLayout ;
     NavigationView navigationView ;
     ActionBarDrawerToggle drawerToggle;
-    public static final int STORAGE_REQUEST =100;
+    ImageCompression imageCompression ;
+    public static final int STORAGE_REQUEST =102;
+
     private String TAG = MainActivity.class.getSimpleName();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +119,6 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
         drawerToggle=new ActionBarDrawerToggle(MainActivity.this,drawerLayout,toolbar,R.string.app_name,R.string.app_name);
         drawerToggle.syncState();
-
 
         adaptetChanels = new GetChanelsAdapter(MainActivity.this, chanels, unreads);
         adaptetChanels.setMyClickListener(this);
@@ -142,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
     @Override
     public void onBackPressed() {
+        profile_file=null;
         if (drawerLayout.isDrawerOpen(Gravity.LEFT)) {
             drawerLayout.closeDrawer(Gravity.LEFT);
         }else {
@@ -185,41 +208,9 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     }
 
 
-    private void askForPermission(String permission, Integer requestCode) {
-        if (requestCode==STORAGE_REQUEST){
-
-            if (ContextCompat.checkSelfPermission(MainActivity.this, permission) != PackageManager.PERMISSION_GRANTED) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission)) {
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
-
-                } else {
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
-                }
-            } else {
-
-                       creatFolders();
-            }
-        }
-
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
 
 
-            case STORAGE_REQUEST:
-                if(ActivityCompat.checkSelfPermission(MainActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED ) {
-                   creatFolders();
 
-                }else {
-                    Log.e("Premission","Storrage is not Granted");
-                }
-
-
-        }
-    }
 
     public void creatFolders() {
         File mainfoldrs = new File(Environment.getExternalStorageDirectory(),"NoorAlSalehin");
@@ -297,6 +288,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         networkChangeReceiver = new NetworkChangeReceiver();
         userData = new UserData(MainActivity.this);
         userInfo = new UserInfo(MainActivity.this);
+        imageCompression=new ImageCompression(MainActivity.this);
         user = userData.getUser();
     }
 
@@ -425,6 +417,8 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
     }
 
+
+
     // vase zamani ke dobare connect mishe . check mikonim age activiry bare avaleshe run shode in code ejra nashe
 
     public class NetworkChangeReceiver extends BroadcastReceiver {
@@ -455,12 +449,23 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     }
     public void  headerFunction() {
         View view = navigationView.getHeaderView(0);
-        String username = userData.getUser().getUsername();
+         CircleImageView iv_profile = (CircleImageView)view.findViewById(R.id.iv_header_profilePic);
+
+
+        if (user.getPic_thumb()!=null) {
+
+            Glide.with(MainActivity.this).load(Config.PROFILE_PIC_THUMB_ADDRESS+user.getPic_thumb()).apply(new RequestOptions().placeholder(R.drawable.profile).error(R.drawable.profile)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+            ).into(iv_profile);
+        }
+
+
+        final String username = userData.getUser().getUsername();
         LinearLayout linearlayout = (LinearLayout)view.findViewById(R.id.linear_header);
         Button btn_send=(Button)view.findViewById(R.id.btn_header_sendusername);
         TextView tv_username = (TextView)view.findViewById(R.id.tv_header_username);
         TextView tv_number = (TextView)view.findViewById(R.id.tv_header_number);
-    final       EditText et_username = (EditText)view.findViewById(R.id.et_header_username);
+        final       EditText et_username = (EditText)view.findViewById(R.id.et_header_username);
         tv_number.setText(user.getMobile());
 
         if (username.equalsIgnoreCase("e")) {
@@ -530,7 +535,174 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
             tv_username.setText(username);
         }
 
+        iv_profile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                if (!InternetCheck.isOnline(MainActivity.this)) {
+                    Toast.makeText(MainActivity.this, R.string.No_Internet, Toast.LENGTH_SHORT).show();
+                }else {
+                    if (Build.VERSION.SDK_INT>= 23) {
+                        askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,GALLERY_REQUEST);
+
+                    }else {
+                        Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        startActivityForResult(intent, RESULT_LOAD_IMG_Gallery);
+
+                    }
+                }
+            }
+        });
+
+    }
+    public String getRealPathFromURI(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = {MediaStore.Images.Media.DATA};
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RESULT_LOAD_IMG_Gallery && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
+            Uri selectedImage = data.getData();
+            String    realPath=getRealPathFromURI(MainActivity.this,selectedImage);
+            String filePath = imageCompression.compressImage(realPath);
+            profile_file = new File(filePath);
+
+            MyProgress.showProgress(MainActivity.this,"در حال ارسال ...");
+            String last_pic = user.getPic_thumb()==null? "n" : user.getPic_thumb();
+            RequestBody req_lastPicName = RequestBody.create(MediaType.parse("text/plain"),last_pic);
+            RequestBody req_pic = RequestBody.create(MediaType.parse("image/jpeg") , profile_file);
+            MultipartBody.Part part_pic = MultipartBody.Part.createFormData("pic",profile_file.getName(),req_pic);
+
+            ApiInterface api = Apiclient.getClient().create(ApiInterface.class);
+            Call<SimpleResponse> profile_call = api.updateProfile(user.getApikey(),part_pic,req_lastPicName);
+            profile_call.enqueue(new Callback<SimpleResponse>() {
+                @Override
+                public void onResponse(Call<SimpleResponse> call, Response<SimpleResponse> response) {
+                    if (!response.isSuccessful()) {
+                        try {
+                            MyProgress.cancelProgress();
+                            JSONObject jsonobject = new JSONObject(response.errorBody().string());
+                            String message = jsonobject.getString("message");
+                            Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    }else {
+                        boolean error = response.body().isError();
+                        String message = response.body().getMessage();
+                        if (!error) {
+                            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                            MyProgress.cancelProgress();
+                            user.setPic(message);
+                            user.setPic_thumb(message);
+                            userData.updatePicAndThumb(message);
+                        headerFunction();
+
+                        }else {
+                            MyProgress.cancelProgress();
+                            Toast.makeText(MainActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<SimpleResponse> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(), "خطایی پیش آمده لطفا دوباره تلاش کنید", Toast.LENGTH_SHORT).show();
+                    MyProgress.cancelProgress();
+                }
+            });
+
+
+        }
+
 
 
     }
+
+
+
+    private void askForPermission(String permission, Integer requestCode) {
+        if (requestCode==STORAGE_REQUEST){
+
+            if (ContextCompat.checkSelfPermission(MainActivity.this, permission) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission)) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
+
+                } else {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
+                }
+            } else {
+
+                creatFolders();
+            }
+        } else if (requestCode==GALLERY_REQUEST) {
+            if (ContextCompat.checkSelfPermission(MainActivity.this, permission) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission)) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
+
+                } else {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
+                }
+            } else {
+                Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(intent, RESULT_LOAD_IMG_Gallery);
+
+
+            }
+        }
+
+
+
+
+
+
+
+        }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+
+
+            case STORAGE_REQUEST:
+                if(ActivityCompat.checkSelfPermission(MainActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED ) {
+                    creatFolders();
+
+                }else {
+                    Log.e("Premission","Storrage is not Granted");
+                }
+             break;
+
+            case GALLERY_REQUEST:
+                if(ActivityCompat.checkSelfPermission(MainActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED ) {
+                  Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                    Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(intent, RESULT_LOAD_IMG_Gallery);
+
+
+                }else {
+
+                    Toast.makeText(MainActivity.this,"عدم دسترسی به گالری",Toast.LENGTH_LONG).show();
+                }
+
+        }
+    }
+
 }

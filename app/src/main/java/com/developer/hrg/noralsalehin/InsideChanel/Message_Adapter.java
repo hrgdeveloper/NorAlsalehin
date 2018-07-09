@@ -24,7 +24,10 @@ import com.developer.hrg.noralsalehin.R;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by hamid on 6/27/2018.
@@ -40,7 +43,11 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     }
   public interface ClickListener {
-        public void imageClicked(int position,View view,CircularProgressBar circularProgressBar);
+        public void picture_imageClicked(int position,View view,CircularProgressBar circularProgressBar);
+        public void picture_likeClicked(int position,View view);
+        public void picture_commentClicked(int position,View view);
+        public void simple_likeClicked(int position,View view);
+         public void simple_commentClicked(int position,View view);
 
     }
 
@@ -73,12 +80,31 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         Message message = messages.get(position);
+        String time = "00:00" ;
+        Date date = null;
+        try {
+            date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(message.getUpdated_at());
+            time = new SimpleDateFormat("H:mm").format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+
            switch (holder.getItemViewType()) {
                case 1 :
                    SimpleHolder  simpleHolder = (SimpleHolder)holder;
                    simpleHolder.tv_text.setText(message.getMessage());
+                   simpleHolder.tv_time.setText(time);
+                   if (message.getLiked()==0) {
+                       simpleHolder.iv_like.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.unlike));
+                   }else {
+                       simpleHolder.iv_like.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.like));
+                   }
+
                    break;
                case 2 :
+
+
                    ImageHolder imageHolder = (ImageHolder)holder;
                    //in method esme folder va esme aks ro migire o check mikone bebine mojode ya na
                     if (isFileExists(Config.Folders.IMAGES ,message.getUrl())) {
@@ -103,6 +129,8 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                         ).into(imageHolder.iv_picture);
                     }
 
+                    imageHolder.tv_time.setText(time);
+
 
 
 
@@ -111,6 +139,11 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                        imageHolder.tv_text.setText(message.getMessage());
                    }else {
                        imageHolder.tv_text.setVisibility(View.GONE);
+                   }
+                   if (message.getLiked()==0) {
+                       imageHolder.iv_like.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.unlike));
+                   }else {
+                       imageHolder.iv_like.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.like));
                    }
 
                    break;
@@ -157,27 +190,60 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     class SimpleHolder extends RecyclerView.ViewHolder {
-   TextView tv_text ;
+   TextView tv_text , tv_time ;
+        ImageView iv_like , iv_comment ;
+
         public SimpleHolder(View itemView) {
             super(itemView);
             tv_text=(TextView)itemView.findViewById(R.id.tv_custom_simple_text);
+            iv_like=(ImageView)itemView.findViewById(R.id.iv_simple_like);
+            iv_comment=(ImageView)itemView.findViewById(R.id.iv_simple_comment);
+            tv_time=(TextView)itemView.findViewById(R.id.tv_simple_time);
+            iv_like.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    clickListener.simple_likeClicked(getAdapterPosition(),view);
+                }
+            });
+            iv_comment.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    clickListener.simple_commentClicked(getAdapterPosition(),view);
+                }
+            });
         }
     }
     class ImageHolder extends RecyclerView.ViewHolder {
-      ImageView iv_picture , iv_download ;
-        TextView tv_text ;
+        ImageView iv_picture , iv_download  , iv_like , iv_comment;
+        TextView tv_text , tv_time ;
         TextView tv_percent;
         CircularProgressBar circularProgressBar ;
         public ImageHolder(View itemView) {
             super(itemView);
             iv_download=(ImageView)itemView.findViewById(R.id.iv_picture_download);
-            iv_picture=(ImageView)itemView.findViewById(R.id.iv_custom_image);
+            iv_picture=(ImageView)itemView.findViewById(R.id.iv_picture_image);
              circularProgressBar=(CircularProgressBar)itemView.findViewById(R.id.cp_picture);
-            tv_text=(TextView)itemView.findViewById(R.id.tv_custom_picture_text);
+            tv_text=(TextView)itemView.findViewById(R.id.tv_picture_text);
+            iv_comment=(ImageView)itemView.findViewById(R.id.iv_picture_comment);
+            tv_time=(TextView)itemView.findViewById(R.id.tv_picture_time);
             iv_picture.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    clickListener.imageClicked(getAdapterPosition(),view,circularProgressBar);
+                    clickListener.picture_imageClicked(getAdapterPosition(),view,circularProgressBar);
+                }
+            });
+            iv_like=(ImageView)itemView.findViewById(R.id.iv_picture_like);
+            iv_like.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    clickListener.picture_likeClicked(getAdapterPosition(),view);
+                }
+            });
+            iv_comment.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    clickListener.picture_commentClicked(getAdapterPosition(),view);
                 }
             });
         }

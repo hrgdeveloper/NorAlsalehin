@@ -12,10 +12,17 @@ public class Config {
     public static final String CHANEL_THUMB_BASE_ONLINE = "http://keepwords.ir/noor/uploads/chanel_thumb/";
 
     public static final String CHANEL_PIC_BASE_OFFLINE = "http://192.168.1.147/noor/uploads/chanel_pics/";
-    public static final String CHANEL__PIC_BASE_ONLINE = "http://keepwords.ir/noor/uploads/chanel_pics/";
+    public static final String CHANEL_PIC_BASE_ONLINE = "http://keepwords.ir/noor/uploads/chanel_pics/";
 
     public static final String MESSAGE_PIC_ADDRES = "http://192.168.1.147/noor/uploads/message/pic/";
     public static final String MESSAGE_THUMB_ADDRESS = "http://192.168.1.147/noor/uploads/message/pic_thumb/";
+
+    public static final String MESSAGE_PIC_ADDRES_ONLINE = "http://keepwords.ir/noor/uploads/message/pic/";
+    public static final String MESSAGE_THUMB_ADDRESS_ONLINE  = "http://keepwords.ir/noor/uploads/message/pic_thumb/";
+
+
+    public static final String PROFILE_PIC_ADDRESS = "http://192.168.1.147/noor/uploads/user_profile/pic/";
+    public static final String PROFILE_PIC_THUMB_ADDRESS  = "http://192.168.1.147/noor/uploads/user_profile/thumb/";
 
 
     public static final String TOPIC_GLOBAL = "global";

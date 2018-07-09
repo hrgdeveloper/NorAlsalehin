@@ -1,6 +1,7 @@
 package com.developer.hrg.noralsalehin.Helps;
 
 import com.developer.hrg.noralsalehin.Models.Chanel;
+import com.developer.hrg.noralsalehin.Models.Comment;
 import com.developer.hrg.noralsalehin.Models.Message;
 import com.developer.hrg.noralsalehin.Models.UnRead;
 import com.developer.hrg.noralsalehin.Models.User;
@@ -15,9 +16,7 @@ import java.util.ArrayList;
 public class SimpleResponse {
     @SerializedName("error")
     boolean error ;
-
     @SerializedName("error_type")
-
     int errortype ;
 
     @SerializedName("message")
@@ -26,6 +25,28 @@ public class SimpleResponse {
     User user;
     @SerializedName("user_count")
     int user_count ;
+
+    @SerializedName("likes")
+    int likes ;
+    @SerializedName("comments")
+    ArrayList<Comment> comments;
+
+
+    public int getLikes() {
+        return likes;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
+    }
+
+    public ArrayList<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(ArrayList<Comment> comments) {
+        this.comments = comments;
+    }
 
     public ArrayList<Message> getMessages() {
         return messages;

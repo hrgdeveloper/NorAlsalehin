@@ -27,15 +27,19 @@ public class UserData extends SQLiteOpenHelper {
 
     /////////////////////////////////////////////////USerTable\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     public static final String TABLE_USER="user_table" ;
-    public static final String USER_ID="user_id" ;
-    public static final String MOBILE="mobile" ;
-    public static final String APIKEY="apikey" ;
-    public static final String USERNAME="username" ;
+    public static final String USER_USER_ID="user_id" ;
+    public static final String USER_MOBILE="mobile" ;
+    public static final String USER_APIKEY="apikey" ;
+    public static final String USER_USERNAME="username" ;
+    public static final String USER_PIC="pic" ;
+    public static final String USER_PIC_THUMB="pic_thumb" ;
     public static final String CREATED_AT="created_At" ;
-    String CREATE_TABLE= "CREATE TABLE " + TABLE_USER+ " ("+USER_ID+" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
-            +MOBILE+" TEXT NOT NULL , "
-            +APIKEY+ " TEXT NOT NULL , " +
-            USERNAME+" TEXT , " +
+    String CREATE_TABLE= "CREATE TABLE " + TABLE_USER+ " ("+USER_USER_ID+" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+            +USER_MOBILE+" TEXT NOT NULL , "
+            +USER_APIKEY+ " TEXT NOT NULL , " +
+            USER_USERNAME+" TEXT , " +
+            USER_PIC+" TEXT ,"+
+            USER_PIC_THUMB+ " TEXT ,"+
             CREATED_AT+" TEXT NOT NULL )";
 
 
@@ -110,6 +114,7 @@ public class UserData extends SQLiteOpenHelper {
     public static final String MESSAGE_LENTH="lenth";
     public static final String MESSAGE_TIME="time";
     public static final String MESSAGE_URL="url";
+    public static final String MESSAGE_LIKED="liked";
     public static final String MESSAGE_UPDATED_AT="updated_at";
 
     String CREATE_TABLE_MESSAGE = "CREATE TABLE " + TABLE_MESSAGE+"( "+MESSAGE_ID+ " INTEGER PRIMARY KEY AUTOINCREMENT , "+
@@ -122,6 +127,7 @@ public class UserData extends SQLiteOpenHelper {
             MESSAGE_LENTH + " INTEGER ," +
             MESSAGE_TIME + " TEXT ," +
             MESSAGE_URL+" TEXT ," +
+            MESSAGE_LIKED + " smallint ," +
             MESSAGE_UPDATED_AT + " TIMESTAMP NOT NULL)"
             ;
 
@@ -157,6 +163,7 @@ public class UserData extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_TABLE_POSITION);
     }
 
+
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_USER);
@@ -168,43 +175,59 @@ public class UserData extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
 
     }
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////USerFunctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     public void addUser(User user) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(USER_ID,user.getId());
-        contentValues.put(MOBILE,user.getMobile());
-        contentValues.put(APIKEY,user.getApikey());
-        contentValues.put(USERNAME,user.getUsername());
+        contentValues.put(USER_USER_ID,user.getId());
+        contentValues.put(USER_MOBILE,user.getMobile());
+        contentValues.put(USER_APIKEY,user.getApikey());
+        contentValues.put(USER_USERNAME,user.getUsername());
+        contentValues.put(USER_PIC,user.getPic());
+        contentValues.put(USER_PIC_THUMB,user.getPic_thumb());
         contentValues.put(CREATED_AT,user.getCreated_at());
         sqLiteDatabase.insert(TABLE_USER,null,contentValues);
 
     }
     public User getUser() {
-        Cursor cursor = sqLiteDatabase.query(TABLE_USER,new String[]{USER_ID,MOBILE,APIKEY,USERNAME,CREATED_AT},null,null,null,null,null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_USER,new String[]{USER_USER_ID,USER_MOBILE,USER_APIKEY,USER_USERNAME,USER_PIC,USER_PIC_THUMB, CREATED_AT},null,null,null,null,null);
         cursor.moveToFirst();
-        User user = new User(cursor.getInt(cursor.getColumnIndexOrThrow(USER_ID)),
-                cursor.getString(cursor.getColumnIndexOrThrow(MOBILE)),
-                cursor.getString(cursor.getColumnIndexOrThrow(APIKEY)),
+        User user = new User(cursor.getInt(cursor.getColumnIndexOrThrow(USER_USER_ID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(USER_MOBILE)),
+                cursor.getString(cursor.getColumnIndexOrThrow(USER_APIKEY)),
                 cursor.getString(cursor.getColumnIndexOrThrow(CREATED_AT)
-                ),cursor.getString(cursor.getColumnIndexOrThrow(USERNAME)
-                ));
+                ),cursor.getString(cursor.getColumnIndexOrThrow(USER_USERNAME)
+                ),cursor.getString(cursor.getColumnIndexOrThrow(USER_PIC)),
+                cursor.getString(cursor.getColumnIndexOrThrow(USER_PIC_THUMB))
+                );
+
         return user;
     }
     public void deleteuser() {
         sqLiteDatabase.delete(TABLE_USER,null,null);
     }
     public boolean hasUserData() {
-        Cursor cursor = sqLiteDatabase.query(TABLE_USER, new String[]{USER_ID}, null, null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_USER, new String[]{USER_USER_ID}, null, null, null, null, null);
         return cursor.getCount() > 0;
 
     }
 
     public void  updateUsername(String username) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(USERNAME,username);
+        contentValues.put(USER_USERNAME,username);
         sqLiteDatabase.update(TABLE_USER,contentValues,null,null);
     }
 
-
+    public void  updatePicAndThumb(String pic) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(USER_PIC,pic);
+        contentValues.put(USER_PIC_THUMB,pic);
+        sqLiteDatabase.update(TABLE_USER,contentValues,null,null);
+    }
 
     //////////////////////////////////////////////////////////ChanelFUNCTIONs\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
@@ -433,6 +456,7 @@ public class UserData extends SQLiteOpenHelper {
         contentValues.put(MESSAGE_LENTH,message.getLenth());
         contentValues.put(MESSAGE_TIME,message.getTime());
         contentValues.put(MESSAGE_URL,message.getUrl());
+        contentValues.put(MESSAGE_LIKED,message.getLiked()==0 ? 0 : 1);
         contentValues.put(MESSAGE_UPDATED_AT,message.getUpdated_at());
         sqLiteDatabase.insert(TABLE_MESSAGE,null,contentValues);
     }
@@ -449,6 +473,7 @@ public class UserData extends SQLiteOpenHelper {
             contentValues.put(MESSAGE_LENTH,message.getLenth());
             contentValues.put(MESSAGE_TIME,message.getTime());
             contentValues.put(MESSAGE_URL,message.getUrl());
+            contentValues.put(MESSAGE_LIKED,message.getLiked()==0 ? 0 : 1);
             contentValues.put(MESSAGE_UPDATED_AT,message.getUpdated_at());
             sqLiteDatabase.insert(TABLE_MESSAGE,null,contentValues);
         }
@@ -462,7 +487,7 @@ public class UserData extends SQLiteOpenHelper {
        ArrayList<Message> messages = new ArrayList<>();
 
         Cursor cursor = sqLiteDatabase.query(TABLE_MESSAGE,new String[]{MESSAGE_MESSAGE_ID,MESSAGE_ADMIN_ID,MESSAGE_CHANEL_ID,MESSAGE_MESSAGE
-                ,MESSAGE_THUMB,MESSAGE_TYPE,MESSAGE_LENTH,MESSAGE_TIME,MESSAGE_URL,MESSAGE_UPDATED_AT},MESSAGE_CHANEL_ID+" LIKE ? ",
+                ,MESSAGE_THUMB,MESSAGE_TYPE,MESSAGE_LENTH,MESSAGE_TIME,MESSAGE_URL,MESSAGE_LIKED, MESSAGE_UPDATED_AT},MESSAGE_CHANEL_ID+" LIKE ? ",
                 new String[] {String.valueOf(chanel_id)},null,null,null,null
 
                 );
@@ -480,8 +505,9 @@ public class UserData extends SQLiteOpenHelper {
                 int lenth = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_LENTH));
                 String time = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_TIME));
                 String url = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_URL));
+                int liked = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_LIKED));
                 String updated_at  = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_UPDATED_AT));
-                Message message_temp = new Message(message_id,admin_id,chanel_id_temp,message,thumb,type,lenth,time,url,updated_at);
+                Message message_temp = new Message(message_id,admin_id,chanel_id_temp,message,thumb,type,lenth,time,url ,updated_at,liked);
                 messages.add(message_temp);
             }while (cursor.moveToNext());
             return messages;
@@ -498,21 +524,27 @@ public class UserData extends SQLiteOpenHelper {
         return  cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_MESSAGE_ID));
     }
 
-
+    public void setLikeState(int likeState,int message_id) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MESSAGE_LIKED,likeState);
+        sqLiteDatabase.update(TABLE_MESSAGE,contentValues,MESSAGE_MESSAGE_ID+" LIKE ? " , new String[]{String.valueOf(message_id)});
+    }
     ///////////////////////////////////positionFunction\\\\\\\\\\\\\\\\\\\\\\\
   //  check mikonim mibinim age dash ke update she age nadasht besaze
-    public void addPosition(int chanel_id , int position , boolean updateshe) {
+    public Long addPosition(int chanel_id , int position , boolean updateshe) {
         if (!updateshe) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(POSITION_NUMBER,position);
             contentValues.put(POSITION_CHANEL_ID,chanel_id);
-            sqLiteDatabase.insert(TABLE_POSITION,null,contentValues);
+      return       sqLiteDatabase.insert(TABLE_POSITION,null,contentValues);
         }else {
             ContentValues contentValues = new ContentValues();
             contentValues.put(POSITION_NUMBER,position);
-            sqLiteDatabase.update(TABLE_POSITION,contentValues,POSITION_CHANEL_ID+
+       int temp =      sqLiteDatabase.update(TABLE_POSITION,contentValues,POSITION_CHANEL_ID+
             " LIKE ? " ,new String[]{String.valueOf(chanel_id)}
             );
+
+            return Long.valueOf(temp);
 
         }
 

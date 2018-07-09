@@ -34,7 +34,16 @@ public class Message implements Parcelable {
     @SerializedName("updated_at")
     String updated_at ;
 
+    @SerializedName("liked")
+    Integer liked ;
 
+    public Integer getLiked() {
+        return liked;
+    }
+
+    public void setLiked(Integer liked) {
+        this.liked = liked;
+    }
 
     public Message(int message_id, int admin_id, int chanel_id, String message, String thumb, int type, int lenth, String time, String url
     , String admin_name , String updated_at) {
@@ -51,8 +60,10 @@ public class Message implements Parcelable {
         this.updated_at=updated_at;
     }
 
+
+
     public Message(int message_id, int admin_id, int chanel_id, String message, String thumb, int type, int lenth, String time, String url
-            , String updated_at) {
+            , String updated_at , int liked) {
         this.message_id = message_id;
         this.admin_id = admin_id;
         this.chanel_id = chanel_id;
@@ -62,7 +73,7 @@ public class Message implements Parcelable {
         this.lenth = lenth;
         this.time = time;
         this.url = url;
-        this.admin_name=admin_name;
+        this.liked=liked;
         this.updated_at=updated_at;
     }
     public String getUpdated_at() {
@@ -164,6 +175,7 @@ public class Message implements Parcelable {
         url = in.readString();
         admin_name=in.readString();
         updated_at=in.readString();
+        liked=in.readInt();
     }
 
     @Override
@@ -184,6 +196,7 @@ public class Message implements Parcelable {
         dest.writeString(url);
         dest.writeString(admin_name);
         dest.writeString(updated_at);
+        dest.writeInt(liked);
     }
 
     @SuppressWarnings("unused")

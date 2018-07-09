@@ -1,13 +1,17 @@
 package com.developer.hrg.noralsalehin.Helps;
 
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.Streaming;
@@ -44,6 +48,20 @@ public interface ApiInterface {
     @Streaming
     @GET
     Call<ResponseBody> downloadFileWhiturl(@Url String fileUrl);
+    @FormUrlEncoded
+    @POST("likeMessage/{message_id}")
+    Call<SimpleResponse> setLike(@Header("Authorization") String header , @Path("message_id") int message_id , @Field("type") int type
+    );
 
+    @Multipart
+    @POST("updateUserProfile")
+    Call<SimpleResponse> updateProfile(@Header("Authorization") String header , @Part MultipartBody.Part pic , @Part("last_pic") RequestBody content
+                                       );
+    @GET("comment/{message_id}")
+    Call<SimpleResponse> getAllComments(@Header("Authorization") String header , @Path("message_id") int message_id);
+    @FormUrlEncoded
+    @POST("comment/{message_id}")
+    Call<SimpleResponse> sendComment(@Header("Authorization") String header ,  @Path("message_id") int message_id ,@Field("chanel_id") int chanel_id,
+    @Field("text") String text);
 
 }
