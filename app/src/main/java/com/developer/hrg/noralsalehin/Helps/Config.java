@@ -21,6 +21,14 @@ public class Config {
     public static final String MESSAGE_THUMB_ADDRESS_ONLINE  = "http://keepwords.ir/noor/uploads/message/pic_thumb/";
 
 
+
+    public static final String MESSAGE_VIDEO_ADDRESS= "http://192.168.1.147/noor/uploads/videos/video/";
+    public static final String MESSAGE_VIDEO_ADDRESS_ONLINE= "http://keepwords.ir/noor/uploads/videos/video/";
+
+    public static final String VIDEO_PIC_ADDRES= "http://192.168.1.147/noor/uploads/videos/thumb/";
+    public static final String VIDEO_PIC_ADDRES_ONLINE = "http://keepwords.ir/noor/uploads/videos/thumb/";
+
+
     public static final String PROFILE_PIC_ADDRESS = "http://192.168.1.147/noor/uploads/user_profile/pic/";
     public static final String PROFILE_PIC_THUMB_ADDRESS  = "http://192.168.1.147/noor/uploads/user_profile/thumb/";
 

@@ -2,10 +2,10 @@ package com.developer.hrg.noralsalehin.Main;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.Dialog;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
+
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -17,11 +17,11 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.TabLayout;
+
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.ViewPager;
+
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -32,12 +32,11 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
+
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
+
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,7 +50,7 @@ import com.developer.hrg.noralsalehin.Helps.Apiclient;
 import com.developer.hrg.noralsalehin.Helps.Config;
 import com.developer.hrg.noralsalehin.Helps.ImageCompression;
 import com.developer.hrg.noralsalehin.Helps.InternetCheck;
-import com.developer.hrg.noralsalehin.Helps.MyAlert;
+
 import com.developer.hrg.noralsalehin.Helps.MyProgress;
 import com.developer.hrg.noralsalehin.Helps.SimpleResponse;
 import com.developer.hrg.noralsalehin.Helps.UserData;
@@ -132,7 +131,6 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         }
 
 
-     //   user = new User(3,"09357273422","9dab40ec77d921329df0264aa24d0043","2018-05-25 15:46:25");
 
 
 
@@ -165,8 +163,8 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     @Override
     public void onBackPressed() {
         profile_file=null;
-        if (drawerLayout.isDrawerOpen(Gravity.LEFT)) {
-            drawerLayout.closeDrawer(Gravity.LEFT);
+        if (drawerLayout.isDrawerOpen(Gravity.START)) {
+            drawerLayout.closeDrawer(Gravity.START);
         }else {
             super.onBackPressed();
         }
@@ -183,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
             creatFolders();
         }
+
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(networkChangeReceiver, filter);
         LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(reciverChanelsTask,new IntentFilter(Config.PUSH_NEW_CHANEL));
@@ -461,6 +460,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
 
         final String username = userData.getUser().getUsername();
+
         LinearLayout linearlayout = (LinearLayout)view.findViewById(R.id.linear_header);
         Button btn_send=(Button)view.findViewById(R.id.btn_header_sendusername);
         TextView tv_username = (TextView)view.findViewById(R.id.tv_header_username);
@@ -692,7 +692,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
             case GALLERY_REQUEST:
                 if(ActivityCompat.checkSelfPermission(MainActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED ) {
-                  Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+
                     Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                     startActivityForResult(intent, RESULT_LOAD_IMG_Gallery);
 

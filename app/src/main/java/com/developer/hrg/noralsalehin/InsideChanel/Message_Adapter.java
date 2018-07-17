@@ -46,8 +46,13 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         public void picture_imageClicked(int position,View view,CircularProgressBar circularProgressBar);
         public void picture_likeClicked(int position,View view);
         public void picture_commentClicked(int position,View view);
+
         public void simple_likeClicked(int position,View view);
-         public void simple_commentClicked(int position,View view);
+        public void simple_commentClicked(int position,View view);
+
+        public void video_imageClicked(int position,View view,CircularProgressBar circularProgressBar);
+        public void video_likeClicked(int position,View view);
+        public void video_commentClicked(int position,View view);
 
     }
 
@@ -71,7 +76,16 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         //    int animationDuration = 2500; // 2500ms = 2,5s
        //     circularProgressBar.setProgressWithAnimation(65, animationDuration);
             return new ImageHolder(view);
-        }else  {
+        }else if (viewType==3){
+            View view = LayoutInflater.from(context).inflate(R.layout.custom_video,parent,false);
+            CircularProgressBar circularProgressBar = (CircularProgressBar)view.findViewById(R.id.cp_video);
+            circularProgressBar.setColor(ContextCompat.getColor(context,android.R.color.holo_blue_dark));
+            circularProgressBar.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_blue_dark));
+            circularProgressBar.setProgressBarWidth(10);
+            circularProgressBar.setBackgroundProgressBarWidth(5);
+            return new VideoHolder(view);
+        } else
+        {
             throw new RuntimeException("The type has to be ONE or TWO");
         }
 
@@ -130,10 +144,6 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     }
 
                     imageHolder.tv_time.setText(time);
-
-
-
-
                    if (message.getMessage()!=null) {
                        imageHolder.tv_text.setVisibility(View.VISIBLE);
                        imageHolder.tv_text.setText(message.getMessage());
@@ -147,6 +157,45 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                    }
 
                    break;
+               case 3 :
+                   VideoHolder videoHolder = (VideoHolder)holder;
+                   videoHolder.tv_time.setText(time);
+                   if (message.getMessage()!=null) {
+                       videoHolder.tv_text.setVisibility(View.VISIBLE);
+                       videoHolder.tv_text.setText(message.getMessage());
+                   }else {
+                       videoHolder.tv_text.setVisibility(View.GONE);
+                   }
+                   if (message.getLiked()==0) {
+                       videoHolder.iv_like.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.unlike));
+                   }else {
+                       videoHolder.iv_like.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.like));
+                   }
+
+                   Glide.with(context).load(Config.VIDEO_PIC_ADDRES+message.getThumb()).apply(new RequestOptions()
+                           .diskCacheStrategy(DiskCacheStrategy.ALL)
+
+                   ) .into(videoHolder.iv_picture);
+
+
+                   if (isFileExists(Config.Folders.VIDEOS ,message.getUrl())) {
+                       videoHolder.circularProgressBar.setVisibility(View.GONE);
+                       videoHolder.iv_download.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.down));
+
+                       //    imageHolder.iv_picture.setImageURI(Uri.fromFile(getFile(Config.Folders.IMAGES,message.getUrl())));
+                   }else {
+                       videoHolder.iv_download.setVisibility(View.VISIBLE);
+                       videoHolder.circularProgressBar.setVisibility(View.VISIBLE);
+                       videoHolder.iv_download.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.download));
+                   }
+
+                   String  lenth = message.getLenth() < 1024 ? message.getLenth() + " kb" : message.getLenth() / 1024 + " mb";
+                   videoHolder.tv_video_time.setText(message.getTime()+ " | " +lenth );
+
+
+                   break;
+
+
                default:
                    break;
 
@@ -179,6 +228,8 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return 1;
         }else if (type==2) {
             return 2 ;
+        }else if (type==3) {
+            return 3;
         }else {
             return -1;
         }
@@ -216,7 +267,7 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     class ImageHolder extends RecyclerView.ViewHolder {
         ImageView iv_picture , iv_download  , iv_like , iv_comment;
         TextView tv_text , tv_time ;
-        TextView tv_percent;
+
         CircularProgressBar circularProgressBar ;
         public ImageHolder(View itemView) {
             super(itemView);
@@ -248,7 +299,43 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             });
         }
     }
+class VideoHolder extends RecyclerView.ViewHolder {
+    ImageView iv_picture , iv_download  , iv_like , iv_comment;
+    TextView tv_text , tv_time , tv_video_time ;
 
+    CircularProgressBar circularProgressBar ;
+    public VideoHolder(View itemView) {
+        super(itemView);
+        iv_download=(ImageView)itemView.findViewById(R.id.iv_video_download_play);
+        iv_picture=(ImageView)itemView.findViewById(R.id.iv_video_image);
+        circularProgressBar=(CircularProgressBar)itemView.findViewById(R.id.cp_video);
+        tv_text=(TextView)itemView.findViewById(R.id.tv_video_text);
+        iv_comment=(ImageView)itemView.findViewById(R.id.iv_video_comment);
+        tv_time=(TextView)itemView.findViewById(R.id.tv_video_time);
+        iv_picture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                clickListener.video_imageClicked(getAdapterPosition(),view,circularProgressBar);
+            }
+        });
+        tv_video_time=(TextView)itemView.findViewById(R.id.tv_video_video_time);
+        iv_like=(ImageView)itemView.findViewById(R.id.iv_video_like);
+        iv_like.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                clickListener.video_likeClicked(getAdapterPosition(),view);
+            }
+        });
+        iv_comment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                clickListener.video_commentClicked(getAdapterPosition(),view);
+            }
+        });
+
+    }
+}
 
 
 }

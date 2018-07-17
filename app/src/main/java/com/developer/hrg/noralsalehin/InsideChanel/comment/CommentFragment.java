@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
+
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -17,11 +17,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import com.developer.hrg.noralsalehin.Helps.ApiInterface;
 import com.developer.hrg.noralsalehin.Helps.Apiclient;
-import com.developer.hrg.noralsalehin.Helps.InternetCheck;
+
 import com.developer.hrg.noralsalehin.Helps.MySnack;
 import com.developer.hrg.noralsalehin.Helps.SimpleResponse;
 import com.developer.hrg.noralsalehin.Helps.UserData;
@@ -164,8 +164,15 @@ public class CommentFragment extends Fragment  {
 
 
                                 }else {
+                                    if (response.body().isError()) {
+                                        MySnack.showSnack(coordinatorLayout,response.body().getMessage());
+                                    }else {
+                                        MySnack.showSnack(coordinatorLayout,response.body().getMessage());
+                                        et_text.setText("");
+                                    }
 
-                                    MySnack.showSnack(coordinatorLayout,response.body().getMessage());
+
+
                                 }
                             }
 

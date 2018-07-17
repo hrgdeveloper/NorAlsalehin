@@ -41,10 +41,25 @@ public interface ApiInterface {
     @GET("getUserCount")
     Call<SimpleResponse> getUserCount();
 
-    @GET("chanels/{chanel_id}/getMessages/{page}")
-    Call<SimpleResponse> getAllMessages(@Header("Authorization") String header , @Path("chanel_id") int chanel_id , @Path("page") int page,
+    @GET("chanels/{chanel_id}/getMessages")
+    Call<SimpleResponse> getAllMessages(@Header("Authorization") String header , @Path("chanel_id") int chanel_id ,
     @Query("last_id") int last_id
     );
+
+
+
+    @GET("chanels/{chanel_id}/getMessagesTop")
+    Call<SimpleResponse> getAllMessagesTop(@Header("Authorization") String header , @Path("chanel_id") int chanel_id ,
+                                        @Query("top_id") int last_id
+    );
+
+
+
+    @GET("chanels/{chanel_id}/getlastCount")
+    Call<SimpleResponse> getLastCount(@Header("Authorization") String header , @Path("chanel_id") int chanel_id ,
+                                        @Query("last_id") int last_id
+    );
+
     @Streaming
     @GET
     Call<ResponseBody> downloadFileWhiturl(@Url String fileUrl);

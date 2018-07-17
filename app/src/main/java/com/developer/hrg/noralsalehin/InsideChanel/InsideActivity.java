@@ -78,12 +78,13 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     private BroadcastReceiver reciverChanelsTask;
     UserData userdata;
     ArrayList<Message> messages = new ArrayList<>();
-    int last_meesage_id = 1, last_position = 0;
+    int last_meesage_id = 0, last_position = 0;
     Message_Adapter adapter_message;
     ProgressBar progressBar;
     FloatingActionButton fab;
     int like_state;
     public static final int STORAGE_REQUEST = 102;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,9 +101,10 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         //vase inke age position recycler view save shode bood az hamoon ja biad
         if (userdata.hasPositionData(chanel.getChanel_id())) {
             last_position = userdata.getLastPosition(chanel.getChanel_id());
-            Toast.makeText(this, last_position + "", Toast.LENGTH_SHORT).show();
-        }
 
+        }
+           //check mikonim bebin agar qablan payami to databse zakhire shode begrim va akharin idish ro begirim vase query zadan vae gereftan
+         //messagaye bade on id
         if (userdata.hasMessageData(chanel.getChanel_id())) {
             messages.addAll(userdata.getAllMessages(chanel.getChanel_id()));
             //vase in migirim akharin id ro ke to darkhastemoon akharin messagaiai ke bade in hastano begirim
@@ -145,7 +147,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                 }
             });
 
-            Call<SimpleResponse> call_Messages = api.getAllMessages(user.getApikey(), chanel.getChanel_id(), 1, last_meesage_id);
+            Call<SimpleResponse> call_Messages = api.getAllMessages(user.getApikey(), chanel.getChanel_id(), last_meesage_id);
             call_Messages.enqueue(new Callback<SimpleResponse>() {
                 @Override
                 public void onResponse(Call<SimpleResponse> call, Response<SimpleResponse> response) {
@@ -155,8 +157,6 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                             JSONObject jsonObject = new JSONObject(response.errorBody().string());
                             String message = jsonObject.getString("message");
                             Log.e("insideActivity", message);
-
-
                             adapter_message.notifyDataSetChanged();
                             progressBar.setVisibility(View.INVISIBLE);
 
@@ -227,23 +227,81 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-//                 if (newState == RecyclerView.SCROLL_STATE_IDLE)
-//                 {
-//                     fab.show();
-//                 }
-//                 super.onScrollStateChanged(recyclerView,newState);
 
 
             }
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-//                 if (!recyclerView.canScrollVertically(1)) {
-//
-//                     fab.hide();
-//                 }
 
                 LinearLayoutManager layoutManager = LinearLayoutManager.class.cast(recyclerView.getLayoutManager());
+                if (layoutManager.findFirstCompletelyVisibleItemPosition() == 0) {
+                    //this is the top of the RecyclerView
+
+
+
+                        int top_id = messages.get(0).getMessage_id();
+                        Toast.makeText(InsideActivity.this, top_id+" ", Toast.LENGTH_SHORT).show();
+
+
+                            if (InternetCheck.isOnline(InsideActivity.this)) {
+
+                                progressBar.setVisibility(View.VISIBLE);
+                                ApiInterface api = Apiclient.getClient().create(ApiInterface.class);
+                                Call<SimpleResponse> call_Messages = api.getAllMessagesTop(user.getApikey(), chanel.getChanel_id(), top_id);
+                                call_Messages.enqueue(new Callback<SimpleResponse>() {
+                                    @Override
+                                    public void onResponse(Call<SimpleResponse> call, Response<SimpleResponse> response) {
+                                        if (!response.isSuccessful()) {
+                                            try {
+                                                progressBar.setVisibility(View.GONE);
+                                                JSONObject jsonObject = new JSONObject(response.errorBody().string());
+                                                String message = jsonObject.getString("message");
+                                                Log.e("insideActivity", message);
+                                                adapter_message.notifyDataSetChanged();
+                                                progressBar.setVisibility(View.INVISIBLE);
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }else {
+                                            boolean error = response.body().isError();
+                                            if (error) {
+
+                                                progressBar.setVisibility(View.GONE);
+                                          //      Toast.makeText(InsideActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                                            }else {
+
+                                                progressBar.setVisibility(View.GONE);
+                                                messages.addAll(0, response.body().getMessages());
+                                                userdata.insertIntoMessage(response.body().getMessages());
+                                            //    adapter_message.notifyDataSetChanged();
+                                                adapter_message.notifyItemRangeInserted(0,response.body().getMessages().size());
+
+
+
+                                                adapter_message.notifyItemChanged(messages.size());
+                                                last_meesage_id = userdata.getLastMessage_id(chanel.getChanel_id());
+
+                                            }
+
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<SimpleResponse> call, Throwable t) {
+                                   //     MyAlert.showAlert(InsideActivity.this,"eroor",t.getMessage());
+                                        progressBar.setVisibility(View.GONE);
+                                    }
+                                });
+                            }
+
+
+
+
+                }
+
                 int totalItemCount = layoutManager.getItemCount();
                 int lastVisible = layoutManager.findLastVisibleItemPosition();
 
@@ -275,16 +333,16 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
         });
 
-        if (messages.size() > 0 && last_position != 0) {
-            ((LinearLayoutManager) recyclerView.getLayoutManager()).scrollToPositionWithOffset(last_position, 0);
 
-        }
+
+
 
     }
 
-    public void updateRows(Message message) {
+    public void updateRows(final Message message) {
+        // aval check mikonim bebinim aya payami ke omade vase hamin chanele ya na age bood bahash kar darim
+        if (chanel.getChanel_id()==message.getChanel_id()) {
 
-        if (chanel.getChanel_id() == message.getChanel_id()) {
             messages.add(message);
             int readcount = userdata.getReadcount(chanel.getChanel_id());
             readcount++;
@@ -299,14 +357,21 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
             last_meesage_id = message.getMessage_id();
             adapter_message.notifyDataSetChanged();
             tv_label.setVisibility(View.GONE);
-
+            Toast.makeText(InsideActivity.this, "inja ham mishe", Toast.LENGTH_SHORT).show();
         }
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(Config.PUSH_NEW_MESSAGE));
+        //vase raftan be ye akharin positon
+                if (messages.size() > 0 && last_position != 0) {
+            ((LinearLayoutManager) recyclerView.getLayoutManager()).scrollToPositionWithOffset(last_position, 0);
+
+        }
+
     }
 
     @Override
@@ -345,12 +410,22 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     public void defineViews() {
 
         user = MyApplication.getInstance().getUserData().getUser();
+
         tv_chanelName = (TextView) findViewById(R.id.tv_inside_chanelName);
         tv_label = (TextView) findViewById(R.id.tv_inside_lable);
         tv_tedad = (TextView) findViewById(R.id.tv_inside_users);
         iv_thumb = (ImageView) findViewById(R.id.iv_inside_thumb);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_messages);
-        recyclerView.setLayoutManager(new LinearLayoutManager(InsideActivity.this));
+        if (last_meesage_id==0) {
+            LinearLayoutManager linearLayoutManager =new LinearLayoutManager(InsideActivity.this);
+            linearLayoutManager.setStackFromEnd(true);
+            recyclerView.setLayoutManager(linearLayoutManager);
+        }else {
+            recyclerView.setLayoutManager(new LinearLayoutManager(InsideActivity.this));
+        }
+
+
+
         toolbar = (Toolbar) findViewById(R.id.toolbar_inside);
         btn_mute = (Button) findViewById(R.id.btn_inside_mute);
         progressBar = (ProgressBar) findViewById(R.id.myprogressbar);
@@ -411,7 +486,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
             fab.hide();
         }
     }
-
+     /////////////////////////////////////////////////////pictureClicls\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
     public void picture_imageClicked(final int position, View view, final CircularProgressBar circularProgressBar) {
 
@@ -505,7 +580,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     public void picture_commentClicked(int position, View view) {
         openFragment(CommentFragment.getInstance(messages.get(position).getMessage_id(), chanel.getChanel_id()));
     }
-
+    /////////////////////////////////////////////////////simpleClicks\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
     public void simple_likeClicked(int position, View view) {
 
@@ -514,6 +589,71 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void simple_commentClicked(int position, View view) {
         openFragment(CommentFragment.getInstance(messages.get(position).getMessage_id(), chanel.getChanel_id()));
+    }
+
+    /////////////////////////////////////////////////////videoClicls\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    @Override
+    public void video_imageClicked(final int position, View view, final CircularProgressBar circularProgressBar) {
+
+
+
+        if (isFileExists(Config.Folders.VIDEOS, messages.get(position).getUrl())) {
+//            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+//            fragmentTransaction.replace(R.id.container_inside, Fragment_InsidePicture.newInstance(messages.get(position).getUrl(),
+//                    messages.get(position).getMessage()));
+//            fragmentTransaction.addToBackStack(null);
+//            fragmentTransaction.commit();
+
+
+
+
+        } else {
+
+            if (ActivityCompat.checkSelfPermission(InsideActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_REQUEST);
+            } else {
+                ApiInterface apiInterface = Apiclient.getClient().create(ApiInterface.class);
+                Call<ResponseBody> call = apiInterface.downloadFileWhiturl(Config.MESSAGE_VIDEO_ADDRESS + messages.get(position).getUrl());
+                call.enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
+
+                        if (response.isSuccessful()) {
+
+                            new DownloadFile(response.body(), messages.get(position).getUrl(), Config.Folders.VIDEOS, circularProgressBar).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+                        } else {
+                            try {
+
+                                MyAlert.showAlert(InsideActivity.this, "error", response.errorBody().string());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Toast.makeText(getApplicationContext(), "errore", Toast.LENGTH_SHORT).show();
+                        Log.e("errorTodownload", t.getMessage());
+                    }
+                });
+            }
+        }
+
+    }
+
+    @Override
+    public void video_likeClicked(int position, View view) {
+
+
+
+    }
+
+    @Override
+    public void video_commentClicked(int position, View view) {
+
     }
 
     public class DownloadFile extends AsyncTask<Void, String, String> {

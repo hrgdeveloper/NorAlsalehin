@@ -30,7 +30,16 @@ public class SimpleResponse {
     int likes ;
     @SerializedName("comments")
     ArrayList<Comment> comments;
+    @SerializedName("last_count")
+    int last_count ;
 
+    public int getLast_count() {
+        return last_count;
+    }
+
+    public void setLast_count(int last_count) {
+        this.last_count = last_count;
+    }
 
     public int getLikes() {
         return likes;

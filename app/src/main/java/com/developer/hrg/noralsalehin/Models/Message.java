@@ -76,6 +76,7 @@ public class Message implements Parcelable {
         this.liked=liked;
         this.updated_at=updated_at;
     }
+
     public String getUpdated_at() {
         return updated_at;
     }

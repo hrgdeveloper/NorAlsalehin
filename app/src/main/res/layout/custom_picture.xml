@@ -31,10 +31,9 @@
 
             <ImageView
                 android:id="@+id/iv_picture_image"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="@dimen/_200sdp"
                 android:layout_gravity="center"
-
                 android:layout_margin="@dimen/_5sdp"
                 android:adjustViewBounds="true"
                 android:scaleType="fitXY"
@@ -62,8 +61,6 @@
             android:id="@+id/tv_picture_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
-
             android:layout_gravity="right"
             android:layout_marginEnd="@dimen/_3sdp"
             android:layout_marginTop="@dimen/_3sdp"
