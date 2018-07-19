@@ -34,6 +34,17 @@ public class Message implements Parcelable {
     @SerializedName("updated_at")
     String updated_at ;
 
+    @SerializedName("filename")
+    String filename ;
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
     @SerializedName("liked")
     Integer liked ;
 
@@ -45,8 +56,8 @@ public class Message implements Parcelable {
         this.liked = liked;
     }
 
-    public Message(int message_id, int admin_id, int chanel_id, String message, String thumb, int type, int lenth, String time, String url
-    , String admin_name , String updated_at) {
+    public Message(int message_id, int admin_id, int chanel_id, String message, String thumb, int type, int lenth, String time , String filename, String url
+     , String updated_at , int liked) {
         this.message_id = message_id;
         this.admin_id = admin_id;
         this.chanel_id = chanel_id;
@@ -56,8 +67,9 @@ public class Message implements Parcelable {
         this.lenth = lenth;
         this.time = time;
         this.url = url;
-        this.admin_name=admin_name;
+        this.filename=filename;
         this.updated_at=updated_at;
+        this.liked=liked;
     }
 
 
@@ -73,6 +85,7 @@ public class Message implements Parcelable {
         this.lenth = lenth;
         this.time = time;
         this.url = url;
+        this.filename=filename;
         this.liked=liked;
         this.updated_at=updated_at;
     }
@@ -177,6 +190,7 @@ public class Message implements Parcelable {
         admin_name=in.readString();
         updated_at=in.readString();
         liked=in.readInt();
+        filename= in.readString();
     }
 
     @Override
@@ -195,6 +209,7 @@ public class Message implements Parcelable {
         dest.writeInt(lenth);
         dest.writeString(time);
         dest.writeString(url);
+        dest.writeString(filename);
         dest.writeString(admin_name);
         dest.writeString(updated_at);
         dest.writeInt(liked);

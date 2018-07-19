@@ -114,6 +114,7 @@ public class UserData extends SQLiteOpenHelper {
     public static final String MESSAGE_LENTH="lenth";
     public static final String MESSAGE_TIME="time";
     public static final String MESSAGE_URL="url";
+    public static final String MESSAGE_FILE_NAME="filename";
     public static final String MESSAGE_LIKED="liked";
     public static final String MESSAGE_UPDATED_AT="updated_at";
 
@@ -127,6 +128,7 @@ public class UserData extends SQLiteOpenHelper {
             MESSAGE_LENTH + " INTEGER ," +
             MESSAGE_TIME + " TEXT ," +
             MESSAGE_URL+" TEXT ," +
+            MESSAGE_FILE_NAME+ " TEXT , " +
             MESSAGE_LIKED + " smallint ," +
             MESSAGE_UPDATED_AT + " TIMESTAMP NOT NULL)"
             ;
@@ -457,6 +459,7 @@ public class UserData extends SQLiteOpenHelper {
         contentValues.put(MESSAGE_LENTH,message.getLenth());
         contentValues.put(MESSAGE_TIME,message.getTime());
         contentValues.put(MESSAGE_URL,message.getUrl());
+        contentValues.put(MESSAGE_FILE_NAME,message.getFilename());
         contentValues.put(MESSAGE_LIKED,message.getLiked()==0 ? 0 : 1);
         contentValues.put(MESSAGE_UPDATED_AT,message.getUpdated_at());
         sqLiteDatabase.insert(TABLE_MESSAGE,null,contentValues);
@@ -474,6 +477,7 @@ public class UserData extends SQLiteOpenHelper {
             contentValues.put(MESSAGE_LENTH,message.getLenth());
             contentValues.put(MESSAGE_TIME,message.getTime());
             contentValues.put(MESSAGE_URL,message.getUrl());
+            contentValues.put(MESSAGE_FILE_NAME,message.getFilename());
             contentValues.put(MESSAGE_LIKED,message.getLiked()==0 ? 0 : 1);
             contentValues.put(MESSAGE_UPDATED_AT,message.getUpdated_at());
             sqLiteDatabase.insert(TABLE_MESSAGE,null,contentValues);
@@ -489,7 +493,7 @@ public class UserData extends SQLiteOpenHelper {
 
         Cursor cursor =    sqLiteDatabase.rawQuery("select sub."+MESSAGE_MESSAGE_ID+" , sub."+MESSAGE_ADMIN_ID+", sub."+MESSAGE_CHANEL_ID+" ,\n" +
                 "                sub."+MESSAGE_MESSAGE+" , sub."+MESSAGE_TYPE+",sub."+MESSAGE_THUMB+",sub."+MESSAGE_LENTH+"" +
-                ",sub."+MESSAGE_TIME+",sub."+MESSAGE_URL+",sub."+MESSAGE_UPDATED_AT+" , sub."+MESSAGE_LIKED+" from\n" +
+                ",sub."+MESSAGE_TIME+",sub."+MESSAGE_FILE_NAME+",sub."+MESSAGE_URL+",sub."+MESSAGE_UPDATED_AT+" , sub."+MESSAGE_LIKED+" from\n" +
                 "                (select * from " +  TABLE_MESSAGE + " where " + MESSAGE_CHANEL_ID + " like "+ chanel_id+ "  ORDER by "  +  MESSAGE_MESSAGE_ID+ " DESC) sub\n" +
                 "         order by sub." + MESSAGE_MESSAGE_ID+" ASC",null,null);
 
@@ -512,9 +516,10 @@ public class UserData extends SQLiteOpenHelper {
                 int lenth = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_LENTH));
                 String time = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_TIME));
                 String url = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_URL));
+                String filename = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_FILE_NAME));
                 int liked = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_LIKED));
                 String updated_at  = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_UPDATED_AT));
-                Message message_temp = new Message(message_id,admin_id,chanel_id_temp,message,thumb,type,lenth,time,url ,updated_at,liked);
+                Message message_temp = new Message(message_id,admin_id,chanel_id_temp,message,thumb,type,lenth,time,filename, url ,updated_at,liked);
                 messages.add(message_temp);
             }while (cursor.moveToNext());
             return messages;

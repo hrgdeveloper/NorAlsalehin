@@ -1,58 +1,51 @@
 package com.developer.hrg.noralsalehin.InsideChanel;
 
-import android.content.Context;
+
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.MediaController;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.developer.hrg.noralsalehin.Helps.Config;
 import com.developer.hrg.noralsalehin.Helps.TouchImageView;
 import com.developer.hrg.noralsalehin.R;
 
-import org.w3c.dom.Text;
-
 import java.io.File;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
-
-public class Fragment_InsidePicture extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+/**
+ * A simple {@link Fragment} subclass.
+ */
+public class InsideVideoFragment extends Fragment {
     private static final String FILE = "file";
     private static final String TEXT = "text";
 
-    // TODO: Rename and change types of parameters
     private String  file;
     private String text;
-  FrameLayout frameLayout ;
-    TouchImageView iv_pic   ;
+    FrameLayout frameLayout ;
+    VideoView videoView   ;
     ImageView iv_back;
     TextView tv_text ;
     Toolbar toolbar ;
     boolean hide = false ;
     RelativeLayout relativeLayout_top ;
-
-    public Fragment_InsidePicture() {
-        // Required empty public constructor
-    }
+    MediaController mediaController ;
 
 
-    // TODO: Rename and change types and number of parameters
-    public static Fragment_InsidePicture newInstance(String file, String text) {
-        Fragment_InsidePicture fragment = new Fragment_InsidePicture();
+    public static InsideVideoFragment newInstance(String file, String text) {
+        InsideVideoFragment fragment = new InsideVideoFragment();
         Bundle args = new Bundle();
         args.putString(FILE, file);
         args.putString(TEXT, text);
@@ -69,59 +62,70 @@ public class Fragment_InsidePicture extends Fragment {
             text = getArguments().getString(TEXT);
         }
     }
+
+
+    public InsideVideoFragment() {
+        // Required empty public constructor
+    }
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_inside_picture, container, false);
-
-        iv_pic=(TouchImageView)view.findViewById(R.id.iv_picFragment);
-        tv_text=(TextView)view.findViewById(R.id.tv_inside_picture_bottom);
-        iv_back=(ImageView)view.findViewById(R.id.iv_back_insidepicture);
-        relativeLayout_top=(RelativeLayout)view.findViewById(R.id.relative_inside_picture_top);
-
-
-        return  view;
+        View view =  inflater.inflate(R.layout.fragment_inside_video, container, false);
+        videoView=(VideoView) view.findViewById(R.id.videoView);
+        tv_text=(TextView)view.findViewById(R.id.tv_inside_video_bottom);
+        iv_back=(ImageView)view.findViewById(R.id.iv_back_insideVideo);
+        relativeLayout_top=(RelativeLayout)view.findViewById(R.id.relative_inside_video_top);
+        mediaController=new MediaController(getActivity());
+        return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-
-        iv_pic.setImageURI(Uri.fromFile(getFile(Config.Folders.IMAGES,file)));
         if (text!=null) {
             tv_text.setText(text);
         }else {
             tv_text.setVisibility(View.GONE);
         }
 
+        mediaController.setAnchorView(videoView);
+        videoView.setVideoURI(Uri.fromFile(getFile(Config.Folders.VIDEOS,file)));
+        videoView.setMediaController(mediaController);
+        videoView.start();
+//        mediaController.show();
         iv_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ((InsideActivity)getActivity()).onBackPressed();
             }
         });
-        iv_pic.setOnClickListener(new View.OnClickListener() {
+
+        videoView.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View view) {
+            public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (!hide) {
                     tv_text.setVisibility(View.INVISIBLE);
                     tv_text.animate().translationY(view.getHeight());
                     relativeLayout_top.setVisibility(View.INVISIBLE);
                     relativeLayout_top.animate().translationX(view.getHeight());
+                    mediaController.show();
                 }else {
                     tv_text.setVisibility(View.VISIBLE);
                     relativeLayout_top.setVisibility(View.VISIBLE);
                     tv_text.animate().translationY(0);
                     relativeLayout_top.animate().translationX(0);
+                    mediaController.hide();
+
                 }
                 hide=!hide;
-
+                return false;
             }
         });
 
-    }
+}
 
     public File getFile (String folderName, String filename) {
         File file = new File(Environment.getExternalStorageDirectory()+"/NoorAlSalehin/"+folderName,filename);

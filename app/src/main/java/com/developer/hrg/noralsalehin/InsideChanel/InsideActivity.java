@@ -598,11 +598,11 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
 
         if (isFileExists(Config.Folders.VIDEOS, messages.get(position).getUrl())) {
-//            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-//            fragmentTransaction.replace(R.id.container_inside, Fragment_InsidePicture.newInstance(messages.get(position).getUrl(),
-//                    messages.get(position).getMessage()));
-//            fragmentTransaction.addToBackStack(null);
-//            fragmentTransaction.commit();
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.container_inside, InsideVideoFragment.newInstance(messages.get(position).getUrl(),
+                    messages.get(position).getMessage()));
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
 
 
 
