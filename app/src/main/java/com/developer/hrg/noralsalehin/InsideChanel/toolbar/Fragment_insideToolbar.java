@@ -1,10 +1,11 @@
-package com.developer.hrg.noralsalehin.InsideChanel;
+package com.developer.hrg.noralsalehin.InsideChanel.toolbar;
 
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.developer.hrg.noralsalehin.Helps.Config;
 import com.developer.hrg.noralsalehin.Helps.MyApplication;
+import com.developer.hrg.noralsalehin.InsideChanel.InsideActivity;
 import com.developer.hrg.noralsalehin.Models.Chanel;
 import com.developer.hrg.noralsalehin.R;
 
@@ -67,6 +69,8 @@ public class Fragment_insideToolbar extends Fragment implements View.OnClickList
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
          tv_notify_state.setOnClickListener(this);
+        iv_pic.setOnClickListener(this);
+        iv_thumb.setOnClickListener(this);
 
         ((InsideActivity)getActivity()).setSupportActionBar(toolbar);
         ((InsideActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -121,7 +125,23 @@ public class Fragment_insideToolbar extends Fragment implements View.OnClickList
             int currentStateafterChange = MyApplication.getInstance().getUserData().getChanelNotifyState(chanel.getChanel_id());
             Toast.makeText(getActivity(), currentStateafterChange+ " ", Toast.LENGTH_SHORT).show();
             updateNotifyState();
+        }else if (view==iv_pic) {
+
+            openFragment(Profile_Fragment.getInstance(chanel.getChanel_id()));
+
+        }else if (view==iv_thumb) {
+            openFragment(Profile_Fragment.getInstance(chanel.getChanel_id()));
         }
 
     }
+
+    public void openFragment(Fragment fragment) {
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.add(R.id.container_inside, fragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+
+    }
+
+
 }

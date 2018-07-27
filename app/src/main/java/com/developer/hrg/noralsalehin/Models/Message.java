@@ -23,7 +23,7 @@ public class Message implements Parcelable {
     @SerializedName("type")
     int type ;
     @SerializedName("lenth")
-    int lenth ;
+    Long lenth ;
     @SerializedName("time")
     String time ;
     @SerializedName("url")
@@ -56,7 +56,7 @@ public class Message implements Parcelable {
         this.liked = liked;
     }
 
-    public Message(int message_id, int admin_id, int chanel_id, String message, String thumb, int type, int lenth, String time , String filename, String url
+    public Message(int message_id, int admin_id, int chanel_id, String message, String thumb, int type, Long lenth, String time , String filename, String url
      , String updated_at , int liked) {
         this.message_id = message_id;
         this.admin_id = admin_id;
@@ -74,7 +74,7 @@ public class Message implements Parcelable {
 
 
 
-    public Message(int message_id, int admin_id, int chanel_id, String message, String thumb, int type, int lenth, String time, String url
+    public Message(int message_id, int admin_id, int chanel_id, String message, String thumb, int type, Long lenth, String time, String url
             , String updated_at , int liked) {
         this.message_id = message_id;
         this.admin_id = admin_id;
@@ -153,11 +153,11 @@ public class Message implements Parcelable {
         this.type = type;
     }
 
-    public int getLenth() {
+    public Long getLenth() {
         return lenth;
     }
 
-    public void setLenth(int lenth) {
+    public void setLenth(Long lenth) {
         this.lenth = lenth;
     }
 
@@ -184,7 +184,7 @@ public class Message implements Parcelable {
         message = in.readString();
         thumb = in.readString();
         type = in.readInt();
-        lenth = in.readInt();
+        lenth = in.readLong();
         time = in.readString();
         url = in.readString();
         admin_name=in.readString();
@@ -206,7 +206,7 @@ public class Message implements Parcelable {
         dest.writeString(message);
         dest.writeString(thumb);
         dest.writeInt(type);
-        dest.writeInt(lenth);
+        dest.writeLong(lenth);
         dest.writeString(time);
         dest.writeString(url);
         dest.writeString(filename);

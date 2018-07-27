@@ -11,6 +11,10 @@ public class Config {
     public static final String CHANEL_THUMB_BASE_OFFLINE = "http://192.168.1.147/noor/uploads/chanel_thumb/";
     public static final String CHANEL_THUMB_BASE_ONLINE = "http://keepwords.ir/noor/uploads/chanel_thumb/";
 
+    public static final String CHANEL_PIC_BASE_OFFILNE = "http://192.168.1.147/noor/uploads/chanel_pics/";
+    public static final String CHANEL_PIC_BASE_ONLLINE = "http://keepwords.ir/noor/uploads/chanel_pics/";
+
+
     public static final String CHANEL_PIC_BASE_OFFLINE = "http://192.168.1.147/noor/uploads/chanel_pics/";
     public static final String CHANEL_PIC_BASE_ONLINE = "http://keepwords.ir/noor/uploads/chanel_pics/";
 

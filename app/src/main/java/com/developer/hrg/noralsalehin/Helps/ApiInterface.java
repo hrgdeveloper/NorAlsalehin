@@ -53,7 +53,8 @@ public interface ApiInterface {
                                         @Query("top_id") int last_id
     );
 
-
+    @GET("getAllChanelsPhotos/{chanel_id}")
+    Call<SimpleResponse> getAllProfiles(@Path("chanel_id") int chanel_di);
 
     @GET("chanels/{chanel_id}/getlastCount")
     Call<SimpleResponse> getLastCount(@Header("Authorization") String header , @Path("chanel_id") int chanel_id ,

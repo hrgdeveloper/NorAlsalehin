@@ -9,6 +9,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -90,7 +91,7 @@ public class Fragment_InsidePicture extends Fragment {
 
 
         iv_pic.setImageURI(Uri.fromFile(getFile(Config.Folders.IMAGES,file)));
-        if (text!=null) {
+        if (!TextUtils.isEmpty(text)) {
             tv_text.setText(text);
         }else {
             tv_text.setVisibility(View.GONE);

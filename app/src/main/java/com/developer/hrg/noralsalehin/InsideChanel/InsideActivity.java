@@ -1,7 +1,6 @@
 package com.developer.hrg.noralsalehin.InsideChanel;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -43,10 +42,9 @@ import com.developer.hrg.noralsalehin.Helps.MyApplication;
 import com.developer.hrg.noralsalehin.Helps.SimpleResponse;
 import com.developer.hrg.noralsalehin.Helps.UserData;
 import com.developer.hrg.noralsalehin.InsideChanel.comment.CommentFragment;
-import com.developer.hrg.noralsalehin.Main.MainActivity;
+import com.developer.hrg.noralsalehin.InsideChanel.toolbar.Fragment_insideToolbar;
 import com.developer.hrg.noralsalehin.Models.Chanel;
 import com.developer.hrg.noralsalehin.Models.Message;
-import com.developer.hrg.noralsalehin.Models.UnRead;
 import com.developer.hrg.noralsalehin.Models.User;
 import com.developer.hrg.noralsalehin.R;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
@@ -92,6 +90,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         setContentView(R.layout.activity_inside);
         defineViews();
         defineClass();
+
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -171,9 +170,10 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                         boolean error = response.body().isError();
                         if (!error) {
                             progressBar.setVisibility(View.INVISIBLE);
-                            messages.addAll(response.body().getMessages());
+                            messages.addAll(messages.size(),response.body().getMessages());
                             userdata.insertIntoMessage(response.body().getMessages());
-                            adapter_message.notifyDataSetChanged();
+                            adapter_message.notifyItemRangeInserted(messages.size(),response.body().getMessages().size());
+
                             last_meesage_id = userdata.getLastMessage_id(chanel.getChanel_id());
 
                         } else {
@@ -241,7 +241,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
 
                         int top_id = messages.get(0).getMessage_id();
-                        Toast.makeText(InsideActivity.this, top_id+" ", Toast.LENGTH_SHORT).show();
+
 
 
                             if (InternetCheck.isOnline(InsideActivity.this)) {
@@ -258,7 +258,6 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                                                 JSONObject jsonObject = new JSONObject(response.errorBody().string());
                                                 String message = jsonObject.getString("message");
                                                 Log.e("insideActivity", message);
-                                                adapter_message.notifyDataSetChanged();
                                                 progressBar.setVisibility(View.INVISIBLE);
                                             } catch (JSONException e) {
                                                 e.printStackTrace();
@@ -291,7 +290,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
                                     @Override
                                     public void onFailure(Call<SimpleResponse> call, Throwable t) {
-                                   //     MyAlert.showAlert(InsideActivity.this,"eroor",t.getMessage());
+
                                         progressBar.setVisibility(View.GONE);
                                     }
                                 });
@@ -343,7 +342,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         // aval check mikonim bebinim aya payami ke omade vase hamin chanele ya na age bood bahash kar darim
         if (chanel.getChanel_id()==message.getChanel_id()) {
 
-            messages.add(message);
+            messages.add(messages.size(),message);
             int readcount = userdata.getReadcount(chanel.getChanel_id());
             readcount++;
             userdata.updateRead(0, readcount, message.getChanel_id());
@@ -355,9 +354,9 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
             chanel.setCount(chanel.getCount() + 1);
             userdata.updateChanel(chanel);
             last_meesage_id = message.getMessage_id();
-            adapter_message.notifyDataSetChanged();
+            adapter_message.notifyItemInserted(messages.size());
             tv_label.setVisibility(View.GONE);
-            Toast.makeText(InsideActivity.this, "inja ham mishe", Toast.LENGTH_SHORT).show();
+
         }
 
     }
@@ -488,7 +487,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     }
      /////////////////////////////////////////////////////pictureClicls\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
-    public void picture_imageClicked(final int position, View view, final CircularProgressBar circularProgressBar) {
+    public void picture_imageClicked(final int position, View view, final CircularProgressBar circularProgressBar, final ImageView iv_download) {
 
         if (isFileExists(Config.Folders.IMAGES, messages.get(position).getUrl())) {
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -513,22 +512,24 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
                         if (response.isSuccessful()) {
 
-                            new DownloadFile(response.body(), messages.get(position).getUrl(), Config.Folders.IMAGES, circularProgressBar).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                            new DownloadFile(response.body(), messages.get(position).getUrl(), Config.Folders.IMAGES,circularProgressBar,iv_download
+                            ,position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                         } else {
-                            try {
-                                Toast.makeText(getApplicationContext(), "hal nist", Toast.LENGTH_SHORT).show();
-                                MyAlert.showAlert(InsideActivity.this, "error", response.errorBody().string());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+//                            try {
+//
+//                                MyAlert.showAlert(InsideActivity.this, "خطا در دریافت", response.errorBody().string());
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            }
+                            Toast.makeText(InsideActivity.this, "خطا در دریافت", Toast.LENGTH_SHORT).show();
                         }
 
                     }
 
                     @Override
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        Toast.makeText(getApplicationContext(), "errore", Toast.LENGTH_SHORT).show();
+               //         Toast.makeText(getApplicationContext(), "errore", Toast.LENGTH_SHORT).show();
                         Log.e("errorTodownload", t.getMessage());
                     }
                 });
@@ -593,9 +594,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
     /////////////////////////////////////////////////////videoClicls\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
-    public void video_imageClicked(final int position, View view, final CircularProgressBar circularProgressBar) {
-
-
+    public void video_imageClicked(final int position, View view, final CircularProgressBar circularProgressBar, final ImageView iv_download) {
 
         if (isFileExists(Config.Folders.VIDEOS, messages.get(position).getUrl())) {
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -603,9 +602,6 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                     messages.get(position).getMessage()));
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
-
-
-
 
         } else {
 
@@ -620,7 +616,8 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
                         if (response.isSuccessful()) {
 
-                            new DownloadFile(response.body(), messages.get(position).getUrl(), Config.Folders.VIDEOS, circularProgressBar).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                            new DownloadFile(response.body(), messages.get(position).getUrl(), Config.Folders.VIDEOS, circularProgressBar,iv_download
+                            ,position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                         } else {
                             try {
@@ -660,13 +657,26 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         ResponseBody responsebody;
         String filename;
         String foldername;
+        ImageView iv_download;
+        //CircleProgressView circleProgressView;
         CircularProgressBar circularProgressBar;
+        int position ;
 
-        public DownloadFile(ResponseBody responsebody, String fileName, String foldername, CircularProgressBar circularProgressBar) {
+        public DownloadFile(ResponseBody responsebody, String fileName, String foldername, CircularProgressBar circularProgressBar , ImageView iv_download
+        ,int position
+        ) {
             this.responsebody = responsebody;
             this.filename = fileName;
             this.foldername = foldername;
             this.circularProgressBar = circularProgressBar;
+            this.iv_download=iv_download;
+            this.position=position;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            iv_download.setImageDrawable(ContextCompat.getDrawable(InsideActivity.this,R.drawable.pause));
         }
 
         @Override
@@ -717,6 +727,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
         @Override
         protected void onProgressUpdate(String... values) {
+           // circleProgressView.setValue(Integer.parseInt(values[0]));
             circularProgressBar.setProgress(Integer.parseInt(values[0]));
         }
 
@@ -724,14 +735,19 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             if (s == "success") {
-                adapter_message.notifyDataSetChanged();
+
+               adapter_message.notifyItemChanged(position);
             }
-        }
+        } 
     }
 
     public boolean isFileExists(String folderName, String filename) {
         File file = new File(Environment.getExternalStorageDirectory() + "/NoorAlSalehin/" + folderName, filename);
         return file.exists();
+    }
+    public File getFile(String folderName, String filename) {
+        File file = new File(Environment.getExternalStorageDirectory() + "/NoorAlSalehin/" + folderName, filename);
+        return file;
     }
 
     public void openFragment(Fragment fragment) {

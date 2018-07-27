@@ -1,8 +1,9 @@
 <RelativeLayout android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    xmlns:CircleProgressView="http://schemas.android.com/apk/res-auto"
     android:background="@android:color/transparent"
 
-    xmlns:android="http://schemas.android.com/apk/res/android" >
+    xmlns:android="http://schemas.android.com/apk/res/android">
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
@@ -40,7 +41,7 @@
                 android:src="@android:drawable/ic_menu_camera" />
 
             <com.mikhaellopez.circularprogressbar.CircularProgressBar
-                android:id="@+id/cp_picture"
+                android:id="@+id/cp_picturee"
                 android:layout_width="@dimen/_40sdp"
                 android:layout_height="@dimen/_40sdp"
                 android:layout_gravity="center"
@@ -48,6 +49,24 @@
                 app:cpb_background_progressbar_width="5dp"
                 app:cpb_progressbar_color="#F44336"
                 app:cpb_progressbar_width="10dp" />
+
+            <!--<at.grabner.circleprogress.CircleProgressView-->
+                <!--android:layout_width="@dimen/_70sdp"-->
+                <!--android:layout_height="@dimen/_70sdp"-->
+                <!--android:layout_gravity="center"-->
+                <!--CircleProgressView:cpv_textScale="1"-->
+                <!--CircleProgressView:cpv_unitPosition="right_top"-->
+                <!--CircleProgressView:cpv_autoTextSize="true"-->
+                <!--CircleProgressView:cpv_unit="%"-->
+                 <!--android:id="@+id/cp_image_download"-->
+                <!--CircleProgressView:cpv_unitScale="1"-->
+                <!--CircleProgressView:cpv_showUnit="true"-->
+                <!--CircleProgressView:cpv_rimColor="@color/rim_color"-->
+                <!--CircleProgressView:cpv_maxValue="100"-->
+                <!--CircleProgressView:cpv_fillColor="@android:color/white"-->
+                <!--CircleProgressView:cpv_barColor="@color/bar_color"-->
+                <!--CircleProgressView:cpv_seekMode="true"-->
+                <!--/>-->
 
             <ImageView
                 android:id="@+id/iv_picture_download"

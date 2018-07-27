@@ -266,9 +266,6 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                 unRead.setCount(unreadCount);
                 unreads.set(index,unRead);
                 userData.updateUnread(unreadCount,message.getChanel_id());
-
-
-
                 break;
             }
         }
@@ -424,23 +421,26 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            if (InternetCheck.isOnline(MainActivity.this)){
-                if (firstTimeLunchForBroadCast) {
-                    firstTimeLunchForBroadCast=false;
-                }else {
+            if (firstTimeLunchForBroadCast) {
+                firstTimeLunchForBroadCast=false;
 
-                    if (userData.hasUnreadData() && userData.hasChanelsData()) {
-                        unreads.clear();
-                        chanels.clear();
-                        unreads.addAll(userData.getAllunReads());
-                        chanels.addAll(userData.getAllChanels());
-                        adaptetChanels.notifyDataSetChanged();
+            }else
+                {
+                    if (InternetCheck.isOnline(MainActivity.this)){
+
+                            if (userData.hasUnreadData() && userData.hasChanelsData()) {
+                                unreads.clear();
+                                chanels.clear();
+                                unreads.addAll(userData.getAllunReads());
+                                chanels.addAll(userData.getAllChanels());
+                                adaptetChanels.notifyDataSetChanged();
+                            }
+                            getChanels();
+
                     }
-                    getChanels();
-
                 }
 
-            }
+
 
         }
 
@@ -666,12 +666,6 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
             }
         }
-
-
-
-
-
-
 
         }
 

@@ -3,6 +3,7 @@ package com.developer.hrg.noralsalehin.Helps;
 import com.developer.hrg.noralsalehin.Models.Chanel;
 import com.developer.hrg.noralsalehin.Models.Comment;
 import com.developer.hrg.noralsalehin.Models.Message;
+import com.developer.hrg.noralsalehin.Models.Profile;
 import com.developer.hrg.noralsalehin.Models.UnRead;
 import com.developer.hrg.noralsalehin.Models.User;
 import com.google.gson.annotations.SerializedName;
@@ -32,6 +33,17 @@ public class SimpleResponse {
     ArrayList<Comment> comments;
     @SerializedName("last_count")
     int last_count ;
+
+    @SerializedName("photos")
+    ArrayList<Profile> profiles;
+
+    public ArrayList<Profile> getProfiles() {
+        return profiles;
+    }
+
+    public void setProfiles(ArrayList<Profile> profiles) {
+        this.profiles = profiles;
+    }
 
     public int getLast_count() {
         return last_count;

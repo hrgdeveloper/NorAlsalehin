@@ -513,7 +513,7 @@ public class UserData extends SQLiteOpenHelper {
                 String message = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_MESSAGE));
                 String thumb = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_THUMB));
                 int type = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_TYPE));
-                int lenth = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_LENTH));
+                Long lenth = cursor.getLong(cursor.getColumnIndexOrThrow(MESSAGE_LENTH));
                 String time = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_TIME));
                 String url = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_URL));
                 String filename = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_FILE_NAME));
