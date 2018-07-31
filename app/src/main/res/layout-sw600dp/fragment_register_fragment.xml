@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.developer.hrg.noralsalehin.Main.MainActivity">
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        app:theme="@style/ThemeOverlay.AppCompat.Light"
+        android:layout_height="wrap_content">
+        <android.support.v7.widget.Toolbar
+            android:layout_width="match_parent"
+            android:background="@android:color/white"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            app:theme="@style/ThemeOverlay.AppCompat.Dark"
+
+            >
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_marginTop="@dimen/_20sdp"
+                    android:text="@string/l_register_title"
+                    android:id="@+id/tv_lable_1"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/_16sdp"
+                    android:textColor="@color/titleColor"
+                    />
+            </RelativeLayout>
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+
+            >
+
+
+            <TextView
+                android:id="@+id/lable_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:paddingLeft="@dimen/_25sdp"
+                android:paddingRight="@dimen/_25sdp"
+                android:text="@string/l_register_text"
+                android:textColor="@android:color/black"
+                android:textStyle="normal" />
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/ti_phone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/lable_2"
+                android:layout_marginLeft="@dimen/_35sdp"
+                android:layout_marginRight="@dimen/_35sdp"
+                android:layout_marginTop="@dimen/_15sdp"
+                app:counterEnabled="true"
+                app:counterMaxLength="11"
+                app:counterTextAppearance="@android:color/holo_red_dark">
+
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/et_mobileNumber"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginLeft="@dimen/_35sdp"
+                    android:layout_marginRight="@dimen/_35sdp"
+                    android:drawableRight="@android:drawable/ic_menu_call"
+                    android:drawableTint="@android:color/black"
+                    android:gravity="left"
+                    android:hint="@string/l_register_hint_phone"
+                    android:inputType="phone"
+                    android:maxLines="1"
+                    app:counterEnabled="true"
+                    app:counterMaxLength="11" />
+            </android.support.design.widget.TextInputLayout>
+
+            <Button
+                android:id="@+id/btn_send_meeage"
+                android:layout_width="@dimen/_100sdp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ti_phone"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:background="@drawable/btn_one"
+                android:text="@string/l_register_sendSms"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+        </RelativeLayout>
+    </android.support.v4.widget.NestedScrollView>
+</android.support.design.widget.CoordinatorLayout>

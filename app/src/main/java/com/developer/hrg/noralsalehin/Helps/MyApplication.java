@@ -7,6 +7,8 @@ import android.app.Application;
 import android.content.Intent;
 import android.text.TextUtils;
 
+import com.downloader.PRDownloader;
+import com.downloader.PRDownloaderConfig;
 
 
 public class MyApplication extends Application {
@@ -24,6 +26,11 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         mInstance = this;
+
+        PRDownloaderConfig config = PRDownloaderConfig.newBuilder()
+                .setDatabaseEnabled(true)
+                .build();
+        PRDownloader.initialize(this, config);
     }
 
     public static synchronized MyApplication getInstance() {

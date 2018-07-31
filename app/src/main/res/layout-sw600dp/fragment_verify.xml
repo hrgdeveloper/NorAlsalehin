@@ -1,0 +1,101 @@
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.developer.hrg.noralsalehin.SmsHandeling.Verify_Fragment">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        app:theme="@style/ThemeOverlay.AppCompat.Light"
+        android:layout_height="wrap_content">
+        <android.support.v7.widget.Toolbar
+            android:layout_width="match_parent"
+            android:background="@android:color/white"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            app:theme="@style/ThemeOverlay.AppCompat.Dark"
+
+            >
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_20sdp"
+                    android:text="تایید شماره موبایل"
+                    android:id="@+id/tv_lable_1"
+                    android:textStyle="bold"
+                    android:layout_centerInParent="true"
+                    android:textSize="20sp"
+                    android:textColor="@color/titleColor"
+                    />
+            </RelativeLayout>
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="10dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <TextView
+                android:id="@+id/tv_lable_verify"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:padding="@dimen/_10sdp"
+                android:textColor="@android:color/black"
+                android:textStyle="normal" />
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/ti_verify"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tv_lable_verify"
+                android:layout_marginTop="@dimen/_8sdp">
+
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/et_verify"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="کد تایید"
+                    android:inputType="number" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <TextView
+                android:id="@+id/tv_wrong_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/ti_verify"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:text="@string/l_verifty_wrongNumber"
+                android:textColor="#549ce4" />
+
+            <Button
+                android:id="@+id/btn_verify_code"
+                android:layout_width="@dimen/_100sdp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_below="@id/ti_phone"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:background="@drawable/btn_one"
+                android:text="تایید شماره"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+        </RelativeLayout>
+    </android.support.v4.widget.NestedScrollView>
+</android.support.design.widget.CoordinatorLayout>

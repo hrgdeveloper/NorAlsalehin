@@ -30,12 +30,23 @@ public class Message implements Parcelable {
     String url ;
     @SerializedName("admin_name")
     String admin_name ;
-
     @SerializedName("updated_at")
     String updated_at ;
-
     @SerializedName("filename")
     String filename ;
+    @SerializedName("liked")
+    Integer liked ;
+
+
+    public Integer getDl_state() {
+        return dl_state;
+    }
+
+    public void setDl_state(Integer dl_state) {
+        this.dl_state = dl_state;
+    }
+
+    Integer dl_state = 0 ;
 
     public String getFilename() {
         return filename;
@@ -45,8 +56,7 @@ public class Message implements Parcelable {
         this.filename = filename;
     }
 
-    @SerializedName("liked")
-    Integer liked ;
+
 
     public Integer getLiked() {
         return liked;
@@ -57,7 +67,7 @@ public class Message implements Parcelable {
     }
 
     public Message(int message_id, int admin_id, int chanel_id, String message, String thumb, int type, Long lenth, String time , String filename, String url
-     , String updated_at , int liked) {
+     , String updated_at , int liked , Integer dl_state ) {
         this.message_id = message_id;
         this.admin_id = admin_id;
         this.chanel_id = chanel_id;
@@ -70,6 +80,7 @@ public class Message implements Parcelable {
         this.filename=filename;
         this.updated_at=updated_at;
         this.liked=liked;
+        this.dl_state=dl_state;
     }
 
 
@@ -191,6 +202,7 @@ public class Message implements Parcelable {
         updated_at=in.readString();
         liked=in.readInt();
         filename= in.readString();
+        dl_state=in.readInt();
     }
 
     @Override
@@ -213,6 +225,7 @@ public class Message implements Parcelable {
         dest.writeString(admin_name);
         dest.writeString(updated_at);
         dest.writeInt(liked);
+        dest.writeInt(dl_state);
     }
 
     @SuppressWarnings("unused")

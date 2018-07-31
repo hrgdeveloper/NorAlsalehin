@@ -27,10 +27,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.developer.hrg.noralsalehin.Helps.Config;
+import com.developer.hrg.noralsalehin.Helps.DateConvertor;
 import com.developer.hrg.noralsalehin.Models.Comment;
 import com.developer.hrg.noralsalehin.R;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -44,9 +46,6 @@ public class Comment_adapter extends RecyclerView.Adapter<Comment_adapter.Holder
     }
 
 
-
-
-
     @Override
     public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.custom_comment,parent,false);
@@ -58,8 +57,12 @@ public class Comment_adapter extends RecyclerView.Adapter<Comment_adapter.Holder
     @Override
     public void onBindViewHolder(Holder holder, int position) {
         Comment comment = comments.get(position);
+        Calendar calendar = DateConvertor.getCalendarFromString(comment.getCreated_at());
 
-        holder.tv_time.setText(comment.getCreated_at());
+        String shamsi_date = DateConvertor.shamsiDate(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,calendar.get(Calendar.DAY_OF_MONTH));
+        String curTime = String.format("%02d:%02d", calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE));
+
+        holder.tv_time.setText(shamsi_date + "  " + curTime);
         holder.tv_text.setText(comment.getText());
         holder.tv_username.setText(comment.getUsername());
         Glide.with(context).load(Config.PROFILE_PIC_THUMB_ADDRESS+comment.getPic_thumb()).apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL)

@@ -15,7 +15,6 @@
     android:layout_marginTop="@dimen/_4sdp"
     android:layout_marginBottom="@dimen/_2sdp"
     android:layout_marginEnd="@dimen/_10sdp"
-
     android:orientation="vertical"
     card_view:cardCornerRadius="@dimen/_5sdp"
    >
@@ -34,43 +33,37 @@
                 android:id="@+id/iv_picture_image"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/_200sdp"
+
                 android:layout_gravity="center"
                 android:layout_margin="@dimen/_5sdp"
                 android:adjustViewBounds="true"
                 android:scaleType="fitXY"
                 android:src="@android:drawable/ic_menu_camera" />
 
+            <View
+                android:layout_width="@dimen/_37sdp"
+                android:layout_height="@dimen/_37sdp"
+                android:layout_gravity="center"
+                android:background="@drawable/round_background"
+                android:id="@+id/view_picture_fake_white"
+                />
+
             <com.mikhaellopez.circularprogressbar.CircularProgressBar
                 android:id="@+id/cp_picturee"
                 android:layout_width="@dimen/_40sdp"
                 android:layout_height="@dimen/_40sdp"
                 android:layout_gravity="center"
-                app:cpb_background_progressbar_color="#FFCDD2"
-                app:cpb_background_progressbar_width="5dp"
+                app:cpb_background_progressbar_color="#3d3a3a"
+                app:cpb_background_progressbar_width="3dp"
                 app:cpb_progressbar_color="#F44336"
-                app:cpb_progressbar_width="10dp" />
+                app:cpb_progressbar_width="6dp"
 
-            <!--<at.grabner.circleprogress.CircleProgressView-->
-                <!--android:layout_width="@dimen/_70sdp"-->
-                <!--android:layout_height="@dimen/_70sdp"-->
-                <!--android:layout_gravity="center"-->
-                <!--CircleProgressView:cpv_textScale="1"-->
-                <!--CircleProgressView:cpv_unitPosition="right_top"-->
-                <!--CircleProgressView:cpv_autoTextSize="true"-->
-                <!--CircleProgressView:cpv_unit="%"-->
-                 <!--android:id="@+id/cp_image_download"-->
-                <!--CircleProgressView:cpv_unitScale="1"-->
-                <!--CircleProgressView:cpv_showUnit="true"-->
-                <!--CircleProgressView:cpv_rimColor="@color/rim_color"-->
-                <!--CircleProgressView:cpv_maxValue="100"-->
-                <!--CircleProgressView:cpv_fillColor="@android:color/white"-->
-                <!--CircleProgressView:cpv_barColor="@color/bar_color"-->
-                <!--CircleProgressView:cpv_seekMode="true"-->
-                <!--/>-->
+                />
 
             <ImageView
                 android:id="@+id/iv_picture_download"
                 android:layout_width="@dimen/_25sdp"
+                android:tint="@android:color/white"
                 android:layout_height="@dimen/_25sdp"
                 android:layout_gravity="center"
                 android:src="@drawable/download" />

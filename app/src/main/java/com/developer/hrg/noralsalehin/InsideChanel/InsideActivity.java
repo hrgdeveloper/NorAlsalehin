@@ -47,6 +47,14 @@ import com.developer.hrg.noralsalehin.Models.Chanel;
 import com.developer.hrg.noralsalehin.Models.Message;
 import com.developer.hrg.noralsalehin.Models.User;
 import com.developer.hrg.noralsalehin.R;
+import com.downloader.Error;
+import com.downloader.OnCancelListener;
+import com.downloader.OnDownloadListener;
+import com.downloader.OnPauseListener;
+import com.downloader.OnProgressListener;
+import com.downloader.OnStartOrResumeListener;
+import com.downloader.PRDownloader;
+import com.downloader.Progress;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 
 import org.json.JSONException;
@@ -82,6 +90,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     FloatingActionButton fab;
     int like_state;
     public static final int STORAGE_REQUEST = 102;
+    int download_id = 0 ;
 
 
     @Override
@@ -90,8 +99,6 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         setContentView(R.layout.activity_inside);
         defineViews();
         defineClass();
-
-
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Intent intent = getIntent();
@@ -487,9 +494,11 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     }
      /////////////////////////////////////////////////////pictureClicls\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
-    public void picture_imageClicked(final int position, View view, final CircularProgressBar circularProgressBar, final ImageView iv_download) {
+    public void picture_imageClicked(final int position, View view, final CircularProgressBar circularProgressBar, final ImageView iv_download)
+     {
 
-        if (isFileExists(Config.Folders.IMAGES, messages.get(position).getUrl())) {
+        if (isFileExists(Config.Folders.IMAGES, messages.get(position).getUrl()) &&
+                getFile(Config.Folders.IMAGES, messages.get(position).getUrl()).length()==messages.get(position).getLenth()) {
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.container_inside, Fragment_InsidePicture.newInstance(messages.get(position).getUrl(),
                     messages.get(position).getMessage()));
@@ -497,49 +506,134 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
             fragmentTransaction.commit();
 
 
-
-
         } else {
 
             if (ActivityCompat.checkSelfPermission(InsideActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED) {
                 askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,STORAGE_REQUEST);
             }else {
-                ApiInterface apiInterface = Apiclient.getClient().create(ApiInterface.class);
-                Call<ResponseBody> call = apiInterface.downloadFileWhiturl(Config.MESSAGE_PIC_ADDRES + messages.get(position).getUrl());
-                call.enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
+                if (messages.get(position).getDl_state()==0) {
+                    messages.get(position).setDl_state(1);
+                    adapter_message.notifyItemChanged(position);
+                    userdata.setDlState(1,messages.get(position).getMessage_id());
 
-                        if (response.isSuccessful()) {
 
-                            new DownloadFile(response.body(), messages.get(position).getUrl(), Config.Folders.IMAGES,circularProgressBar,iv_download
-                            ,position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+//               int download_id = PRDownloader.download(Config.MESSAGE_PIC_ADDRES + messages.get(position).getUrl(),
+//                       getPath(Config.Folders.IMAGES),messages.get(position).getUrl())
+//                    .build()
+//                            .setOnStartOrResumeListener(new OnStartOrResumeListener() {
+//                                @Override
+//                                public void onStartOrResume() {
+//
+//                                }
+//                            })
+//                            .setOnPauseListener(new OnPauseListener() {
+//                                @Override
+//                                public void onPause() {
+//                                    messages.get(position).setDl_state(1);
+//                                    userdata.setDlState(1,messages.get(position).getMessage_id());
+//                                }
+//                            })
+//                            .setOnCancelListener(new OnCancelListener() {
+//                                @Override
+//                                public void onCancel() {
+//
+//                                }
+//                            })
+//                            .setOnProgressListener(new OnProgressListener() {
+//                                @Override
+//                                public void onProgress(Progress progress) {
+//                                    long progressPercent = progress.currentBytes * 100 / progress.totalBytes;
+//                                    circularProgressBar.setProgress(progressPercent);
+//
+//
+//                                }
+//                            })
+//                            .start(new OnDownloadListener() {
+//                                @Override
+//                                public void onDownloadComplete() {
+//                                    adapter_message.notifyItemChanged(position);
+//                                }
+//
+//                                @Override
+//                                public void onError(Error error) {
+//
+//                                }
+//
+//
+//                            });
 
-                        } else {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//                    ApiInterface apiInterface = Apiclient.getClient().create(ApiInterface.class);
+//                    Call<ResponseBody> call = apiInterface.downloadFileWhiturl(Config.MESSAGE_PIC_ADDRES + messages.get(position).getUrl());
+//                    call.enqueue(new Callback<ResponseBody>() {
+//                        @Override
+//                        public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
+//
+//                            if (response.isSuccessful()) {
+//
+//                                new DownloadFile(response.body(), messages.get(position).getUrl(), Config.Folders.IMAGES,circularProgressBar,iv_download
+//                                        ,position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+//
+//                            } else {
 //                            try {
 //
 //                                MyAlert.showAlert(InsideActivity.this, "خطا در دریافت", response.errorBody().string());
 //                            } catch (IOException e) {
 //                                e.printStackTrace();
 //                            }
-                            Toast.makeText(InsideActivity.this, "خطا در دریافت", Toast.LENGTH_SHORT).show();
-                        }
+//                                Toast.makeText(InsideActivity.this, "خطا در دریافت", Toast.LENGTH_SHORT).show();
+//                            }
+//
+//                        }
+//
+//                        @Override
+//                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+//                            //         Toast.makeText(getApplicationContext(), "errore", Toast.LENGTH_SHORT).show();
+//                            Log.e("errorTodownload", t.getMessage());
+//                        }
+//                    });
+                }else {
 
-                    }
+                }
 
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-               //         Toast.makeText(getApplicationContext(), "errore", Toast.LENGTH_SHORT).show();
-                        Log.e("errorTodownload", t.getMessage());
-                    }
-                });
             }
 
         }
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        userdata.resetDlstate();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+    }
+
+    @Override
     public void picture_likeClicked(final int position, View view) {
+        likeFunction(position);
+
+    }
+    public void likeFunction(final int position) {
         if (!InternetCheck.isOnline(InsideActivity.this)) {
             Toast.makeText(this, "عدم دسترسی به اینترنت", Toast.LENGTH_SHORT).show();
         } else {
@@ -584,7 +678,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     /////////////////////////////////////////////////////simpleClicks\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
     public void simple_likeClicked(int position, View view) {
-
+     likeFunction(position);
     }
 
     @Override
@@ -594,48 +688,127 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
     /////////////////////////////////////////////////////videoClicls\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
-    public void video_imageClicked(final int position, View view, final CircularProgressBar circularProgressBar, final ImageView iv_download) {
+    public void video_imageClicked(final int position, View view, final CircularProgressBar circularProgressBar, final ImageView iv_download
 
-        if (isFileExists(Config.Folders.VIDEOS, messages.get(position).getUrl())) {
+    ) {
+
+        if (isFileExists(Config.Folders.VIDEOS, messages.get(position).getUrl()) &&
+                getFile(Config.Folders.VIDEOS, messages.get(position).getUrl()).length()==messages.get(position).getLenth()) {
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.container_inside, InsideVideoFragment.newInstance(messages.get(position).getUrl(),
                     messages.get(position).getMessage()));
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
-
         } else {
 
             if (ActivityCompat.checkSelfPermission(InsideActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_REQUEST);
             } else {
-                ApiInterface apiInterface = Apiclient.getClient().create(ApiInterface.class);
-                Call<ResponseBody> call = apiInterface.downloadFileWhiturl(Config.MESSAGE_VIDEO_ADDRESS + messages.get(position).getUrl());
-                call.enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
 
-                        if (response.isSuccessful()) {
+                if (messages.get(position).getDl_state()==0) {
 
-                            new DownloadFile(response.body(), messages.get(position).getUrl(), Config.Folders.VIDEOS, circularProgressBar,iv_download
-                            ,position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                 //  messages.get(position).setDl_state(1);
+                    Message message = messages.get(position);
+                    message.setDl_state(1);
+                    messages.set(position,message);
 
-                        } else {
-                            try {
+                    int download_id = PRDownloader.download(Config.MESSAGE_VIDEO_ADDRESS + messages.get(position).getUrl(),
+                            getPath(Config.Folders.VIDEOS),messages.get(position).getUrl())
+                            .build()
+                            .setOnStartOrResumeListener(new OnStartOrResumeListener() {
+                                @Override
+                                public void onStartOrResume() {
 
-                                MyAlert.showAlert(InsideActivity.this, "error", response.errorBody().string());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
+                                }
+                            })
+                            .setOnPauseListener(new OnPauseListener() {
+                                @Override
+                                public void onPause() {
 
-                    }
+                                }
+                            })
+                            .setOnCancelListener(new OnCancelListener() {
+                                @Override
+                                public void onCancel() {
 
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        Toast.makeText(getApplicationContext(), "errore", Toast.LENGTH_SHORT).show();
-                        Log.e("errorTodownload", t.getMessage());
-                    }
-                });
+                                }
+                            })
+                            .setOnProgressListener(new OnProgressListener() {
+                                @Override
+                                public void onProgress(Progress progress) {
+
+                                    Long progressPercent = progress.currentBytes * 100 / progress.totalBytes;
+                                    circularProgressBar.setProgress(progressPercent);
+
+
+                                }
+                            })
+                            .start(new OnDownloadListener() {
+                                @Override
+                                public void onDownloadComplete() {
+                                    adapter_message.notifyItemChanged(position);
+                                }
+
+                                @Override
+                                public void onError(Error error) {
+
+                                }
+
+
+                            });
+
+
+                }else {
+
+                }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//                ApiInterface apiInterface = Apiclient.getClient().create(ApiInterface.class);
+//                Call<ResponseBody> call = apiInterface.downloadFileWhiturl(Config.MESSAGE_VIDEO_ADDRESS + messages.get(position).getUrl());
+//                call.enqueue(new Callback<ResponseBody>() {
+//                    @Override
+//                    public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
+//
+//                        if (response.isSuccessful()) {
+//
+//                            new DownloadFile(response.body(), messages.get(position).getUrl(), Config.Folders.VIDEOS, circularProgressBar,iv_download
+//                            ,position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+//
+//                        } else {
+//                            try {
+//
+//                                MyAlert.showAlert(InsideActivity.this, "error", response.errorBody().string());
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+//                        Toast.makeText(getApplicationContext(), "errore", Toast.LENGTH_SHORT).show();
+//                        Log.e("errorTodownload", t.getMessage());
+//                    }
+//                });
             }
         }
 
@@ -643,14 +816,12 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void video_likeClicked(int position, View view) {
-
-
-
+        likeFunction(position);
     }
 
     @Override
     public void video_commentClicked(int position, View view) {
-
+        openFragment(CommentFragment.getInstance(messages.get(position).getMessage_id(), chanel.getChanel_id()));
     }
 
     public class DownloadFile extends AsyncTask<Void, String, String> {
@@ -661,6 +832,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         //CircleProgressView circleProgressView;
         CircularProgressBar circularProgressBar;
         int position ;
+
 
         public DownloadFile(ResponseBody responsebody, String fileName, String foldername, CircularProgressBar circularProgressBar , ImageView iv_download
         ,int position
@@ -676,7 +848,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            iv_download.setImageDrawable(ContextCompat.getDrawable(InsideActivity.this,R.drawable.pause));
+
         }
 
         @Override
@@ -684,7 +856,6 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
             try {
 
                 File destinationFile = new File(Environment.getExternalStorageDirectory() + "/NoorAlSalehin/" + foldername, filename);
-
                 InputStream is = null;
                 OutputStream os = null;
 
@@ -698,6 +869,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                     int count;
                     int progress = 0;
                     while ((count = is.read(data)) != -1) {
+
                         os.write(data, 0, count);
                         progress += count;
                         Log.d("imageDownload", "Progress: " + progress + "/" + responsebody.contentLength() + " >>>> " + (float) progress / responsebody.contentLength());
@@ -707,8 +879,6 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                     os.flush();
 
                     Log.d("imageDownload", "File saved successfully!");
-
-
                     return "success";
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -741,6 +911,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         } 
     }
 
+
     public boolean isFileExists(String folderName, String filename) {
         File file = new File(Environment.getExternalStorageDirectory() + "/NoorAlSalehin/" + folderName, filename);
         return file.exists();
@@ -748,6 +919,15 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     public File getFile(String folderName, String filename) {
         File file = new File(Environment.getExternalStorageDirectory() + "/NoorAlSalehin/" + folderName, filename);
         return file;
+    }
+
+    public String getPath(String folderName) {
+        File file = new File(Environment.getExternalStorageDirectory() + "/NoorAlSalehin/" + folderName);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        return  file.getAbsolutePath();
+
     }
 
     public void openFragment(Fragment fragment) {

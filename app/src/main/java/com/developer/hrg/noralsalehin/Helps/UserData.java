@@ -116,6 +116,7 @@ public class UserData extends SQLiteOpenHelper {
     public static final String MESSAGE_URL="url";
     public static final String MESSAGE_FILE_NAME="filename";
     public static final String MESSAGE_LIKED="liked";
+    public static final String MESSAGE_DOWLOAD_STATE="dl_state";
     public static final String MESSAGE_UPDATED_AT="updated_at";
 
     String CREATE_TABLE_MESSAGE = "CREATE TABLE " + TABLE_MESSAGE+"( "+MESSAGE_ID+ " INTEGER PRIMARY KEY AUTOINCREMENT , "+
@@ -130,6 +131,7 @@ public class UserData extends SQLiteOpenHelper {
             MESSAGE_URL+" TEXT ," +
             MESSAGE_FILE_NAME+ " TEXT , " +
             MESSAGE_LIKED + " smallint ," +
+            MESSAGE_DOWLOAD_STATE+ " smallint DEFAULT 0 , " +
             MESSAGE_UPDATED_AT + " TIMESTAMP NOT NULL)"
             ;
 
@@ -493,7 +495,8 @@ public class UserData extends SQLiteOpenHelper {
 
         Cursor cursor =    sqLiteDatabase.rawQuery("select sub."+MESSAGE_MESSAGE_ID+" , sub."+MESSAGE_ADMIN_ID+", sub."+MESSAGE_CHANEL_ID+" ,\n" +
                 "                sub."+MESSAGE_MESSAGE+" , sub."+MESSAGE_TYPE+",sub."+MESSAGE_THUMB+",sub."+MESSAGE_LENTH+"" +
-                ",sub."+MESSAGE_TIME+",sub."+MESSAGE_FILE_NAME+",sub."+MESSAGE_URL+",sub."+MESSAGE_UPDATED_AT+" , sub."+MESSAGE_LIKED+" from\n" +
+                ",sub."+MESSAGE_TIME+",sub."+MESSAGE_FILE_NAME+",sub."+MESSAGE_URL+",sub."+MESSAGE_UPDATED_AT+" ,sub."+MESSAGE_DOWLOAD_STATE+
+                " , sub."+MESSAGE_LIKED+" from\n" +
                 "                (select * from " +  TABLE_MESSAGE + " where " + MESSAGE_CHANEL_ID + " like "+ chanel_id+ "  ORDER by "  +  MESSAGE_MESSAGE_ID+ " DESC) sub\n" +
                 "         order by sub." + MESSAGE_MESSAGE_ID+" ASC",null,null);
 
@@ -505,8 +508,6 @@ public class UserData extends SQLiteOpenHelper {
         if (cursor.getCount()>0) {
             cursor.moveToFirst();
             do {
-
-
                 int message_id = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_MESSAGE_ID));
                 int admin_id = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_ADMIN_ID));
                 int chanel_id_temp = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_CHANEL_ID));
@@ -519,7 +520,10 @@ public class UserData extends SQLiteOpenHelper {
                 String filename = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_FILE_NAME));
                 int liked = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_LIKED));
                 String updated_at  = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_UPDATED_AT));
-                Message message_temp = new Message(message_id,admin_id,chanel_id_temp,message,thumb,type,lenth,time,filename, url ,updated_at,liked);
+                Integer dl_state = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_DOWLOAD_STATE));
+                Message message_temp = new Message(message_id,admin_id,chanel_id_temp,message,thumb,type,lenth,time,filename,
+                        url ,updated_at,liked,dl_state);
+
                 messages.add(message_temp);
             }while (cursor.moveToNext());
             return messages;
@@ -529,47 +533,6 @@ public class UserData extends SQLiteOpenHelper {
 
     }
 
-
-//    public ArrayList<Message> getAllMessagesTop(int chanel_id , int top_id)  {
-//        ArrayList<Message> messages = new ArrayList<>();
-//
-//        Cursor cursor =    sqLiteDatabase.rawQuery("select sub."+MESSAGE_MESSAGE_ID+" , sub."+MESSAGE_ADMIN_ID+", sub."+MESSAGE_CHANEL_ID+" ,\n" +
-//                "                sub."+MESSAGE_MESSAGE+" , sub."+MESSAGE_TYPE+",sub."+MESSAGE_THUMB+",sub."+MESSAGE_LENTH+"" +
-//                ",sub."+MESSAGE_TIME+",sub."+MESSAGE_URL+",sub."+MESSAGE_UPDATED_AT+" , sub."+MESSAGE_LIKED+" from\n" +
-//                "                (select * from " +  TABLE_MESSAGE + " where " + MESSAGE_CHANEL_ID + " like "+ chanel_id+ " and "+MESSAGE_MESSAGE_ID+" < " +top_id+ "  ORDER by "  +  MESSAGE_MESSAGE_ID+ " DESC limit 0, 20) sub\n" +
-//                "         order by sub." + MESSAGE_MESSAGE_ID+" ASC",null,null);
-//
-////        Cursor cursor = sqLiteDatabase.query(TABLE_MESSAGE,new String[]{MESSAGE_MESSAGE_ID,MESSAGE_ADMIN_ID,MESSAGE_CHANEL_ID,MESSAGE_MESSAGE
-////                ,MESSAGE_THUMB,MESSAGE_TYPE,MESSAGE_LENTH,MESSAGE_TIME,MESSAGE_URL,MESSAGE_LIKED, MESSAGE_UPDATED_AT},MESSAGE_CHANEL_ID+" LIKE ? ",
-////                new String[] {String.valueOf(chanel_id)},null,null,null,null
-////
-////                );
-//        if (cursor.getCount()>0) {
-//            cursor.moveToFirst();
-//            do {
-//
-//
-//                int message_id = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_MESSAGE_ID));
-//                int admin_id = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_ADMIN_ID));
-//                int chanel_id_temp = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_CHANEL_ID));
-//                String message = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_MESSAGE));
-//                String thumb = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_THUMB));
-//                int type = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_TYPE));
-//                int lenth = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_LENTH));
-//                String time = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_TIME));
-//                String url = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_URL));
-//                int liked = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_LIKED));
-//                String updated_at  = cursor.getString(cursor.getColumnIndexOrThrow(MESSAGE_UPDATED_AT));
-//                Message message_temp = new Message(message_id,admin_id,chanel_id_temp,message,thumb,type,lenth,time,url ,updated_at,liked);
-//                messages.add(message_temp);
-//            }while (cursor.moveToNext());
-//            return messages;
-//        }else {
-//            return  null;
-//        }
-//
-//    }
-
     public  int getLastMessage_id(int chanel_id) {
         Cursor cursor = sqLiteDatabase.query(TABLE_MESSAGE,new String[]{MESSAGE_MESSAGE_ID},MESSAGE_CHANEL_ID+" LIKE ? " ,new String[]{String.valueOf(chanel_id)},null
                 ,null,MESSAGE_MESSAGE_ID+" DESC","0,1"
@@ -578,12 +541,24 @@ public class UserData extends SQLiteOpenHelper {
         return  cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_MESSAGE_ID));
     }
 
+    public void setDlState(int dl_state,int message_id) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MESSAGE_DOWLOAD_STATE,dl_state);
+        sqLiteDatabase.update(TABLE_MESSAGE,contentValues,MESSAGE_MESSAGE_ID+" LIKE ? " , new String[]{String.valueOf(message_id)});
+    }
+
+    public void resetDlstate() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MESSAGE_DOWLOAD_STATE,0);
+        sqLiteDatabase.update(TABLE_MESSAGE,contentValues,null,null);
+    }
+
     public void setLikeState(int likeState,int message_id) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MESSAGE_LIKED,likeState);
         sqLiteDatabase.update(TABLE_MESSAGE,contentValues,MESSAGE_MESSAGE_ID+" LIKE ? " , new String[]{String.valueOf(message_id)});
     }
-    ///////////////////////////////////positionFunction\\\\\\\\\\\\\\\\\\\\\\\
+    ////////////////////////////////////////////////////////////////positionFunction\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
   //  check mikonim mibinim age dash ke update she age nadasht besaze
     public Long addPosition(int chanel_id , int position , boolean updateshe) {
         if (!updateshe) {

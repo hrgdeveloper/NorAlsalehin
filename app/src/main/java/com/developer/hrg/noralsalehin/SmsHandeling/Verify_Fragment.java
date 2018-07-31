@@ -23,7 +23,6 @@ import com.developer.hrg.noralsalehin.Helps.SimpleResponse;
 import com.developer.hrg.noralsalehin.Helps.UserData;
 import com.developer.hrg.noralsalehin.Helps.UserInfo;
 import com.developer.hrg.noralsalehin.Main.MainActivity;
-import com.developer.hrg.noralsalehin.Models.User;
 import com.developer.hrg.noralsalehin.R;
 
 import org.json.JSONException;
@@ -62,7 +61,7 @@ public class Verify_Fragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view =  inflater.inflate(R.layout.fragment_verify_, container, false);
+        View view =  inflater.inflate(R.layout.fragment_verify, container, false);
         et_verify=(EditText)view.findViewById(R.id.et_verify);
         tv_wrong=(TextView)view.findViewById(R.id.tv_wrong_number);
         tv_lable=(TextView)view.findViewById(R.id.tv_lable_verify);
