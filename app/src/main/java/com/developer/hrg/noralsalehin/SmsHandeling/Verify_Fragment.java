@@ -123,7 +123,7 @@ public class Verify_Fragment extends Fragment {
                                     progress.cancel();
                                 }else {
                                     progress.cancel();
-                                 userData.addUser(response.body().getUser());
+                                    userData.addUser(response.body().getUser());
                                     userInfo.set_IsLogged_in(true);
                                     startActivity(new Intent(getActivity(), MainActivity.class));
                                     Toast.makeText(getActivity(), "خوش آمدید", Toast.LENGTH_SHORT).show();

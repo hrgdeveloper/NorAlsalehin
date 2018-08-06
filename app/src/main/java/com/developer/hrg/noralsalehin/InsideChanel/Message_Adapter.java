@@ -6,10 +6,12 @@ import android.net.Uri;
 import android.os.Environment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 
@@ -50,20 +52,26 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     public interface ClickListener {
         public void picture_imageClicked(int position, View view, CircularProgressBar circularProgressBar, ImageView iv_download);
-
         public void picture_likeClicked(int position, View view);
-
         public void picture_commentClicked(int position, View view);
 
         public void simple_likeClicked(int position, View view);
-
         public void simple_commentClicked(int position, View view);
 
+
+
         public void video_imageClicked(int position, View view, CircularProgressBar circularProgressBar, ImageView iv_download );
-
         public void video_likeClicked(int position, View view);
-
         public void video_commentClicked(int position, View view);
+
+        public void audio_imageClicked(int position, View view, CircularProgressBar circularProgressBar, ImageView iv_download , SeekBar seekBar );
+        public void audio_likeClicked(int position, View view);
+        public void audio_commentClicked(int position, View view);
+
+
+        public void file_imageClicked(int position, View view, CircularProgressBar circularProgressBar, ImageView iv_download );
+        public void file_likeClicked(int position, View view);
+        public void file_commentClicked(int position, View view);
 
     }
 
@@ -86,7 +94,13 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             View view = LayoutInflater.from(context).inflate(R.layout.custom_video, parent, false);
 
             return new VideoHolder(view);
-        } else {
+        } else if (viewType==4) {
+            View view = LayoutInflater.from(context).inflate(R.layout.custom_audio, parent, false);
+            return new AudioHolder(view);
+        }else if (viewType==5) {
+            View view = LayoutInflater.from(context).inflate(R.layout.custom_file, parent, false);
+            return new FileHolder(view);
+        }else {
             throw new RuntimeException("The type has to be ONE or TWO");
         }
 
@@ -95,6 +109,11 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         Message message = messages.get(position);
+        message.setDl_state( message.getDl_state()==null? 0 : message.getDl_state());
+        message.setDl_percent( message.getDl_percent()==null? 0 : message.getDl_percent());
+        message.setDl_id( message.getDl_id()==null? 0 : message.getDl_id());
+        message.setAudio_percent(message.getAudio_percent()==null? 0 : message.getAudio_percent());
+
         String time = "00:00";
         Date date = null;
         try {
@@ -103,7 +122,7 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
+         //////////////////////////////////////////////////Simple\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
         if (holder instanceof SimpleHolder) {
             ((SimpleHolder) holder).tv_text.setText(message.getMessage());
             ((SimpleHolder) holder).tv_time.setText(time);
@@ -113,23 +132,26 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             } else {
                 ((SimpleHolder) holder).iv_like.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.like));
             }
-        } else if (holder instanceof ImageHolder) {
+        }
+        //////////////////////////////////////////////////Picture\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+        else if (holder instanceof ImageHolder) {
 
-            if (isFileExists(Config.Folders.IMAGES, message.getUrl()) && getFile(Config.Folders.IMAGES, message.getUrl()).length()==message.getLenth()) {
+            if (isFileExists(Config.Folders.IMAGES, message.getUrl())) {
                 ((ImageHolder) holder).circularProgressBar.setVisibility(View.GONE);
                 ((ImageHolder) holder).iv_download.setVisibility(View.GONE);
                 ((ImageHolder) holder).view_fake_white.setVisibility(View.GONE);
-                ((ImageHolder) holder).iv_picture.setImageURI(Uri.fromFile(getFile(Config.Folders.IMAGES, message.getUrl())));
-//                Glide.with(context).load(getFile(Config.Folders.IMAGES, message.getUrl())).apply(new RequestOptions()
-//                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-//
-//                ).into(new SimpleTarget<Drawable>() {
-//                    @Override
-//                    public void onResourceReady(Drawable resource, Transition<? super Drawable> transition) {
-//                        ((ImageHolder) holder).iv_picture.setImageDrawable(resource);
-//                    }
-//                });
-//                ((ImageHolder) holder).iv_picture.setImageURI(Uri.fromFile(getFile(Config.Folders.IMAGES, message.getUrl())));
+                                Glide.with(context).load(getFile(Config.Folders.IMAGES, message.getUrl())).apply(new RequestOptions()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+
+                ).into(new SimpleTarget<Drawable>() {
+                    @Override
+                    public void onResourceReady(Drawable resource, Transition<? super Drawable> transition) {
+                        ((ImageHolder) holder).iv_picture.setImageDrawable(resource);
+                    }
+                });
+
+             //  ((ImageHolder) holder).iv_picture.setImageURI(Uri.fromFile(getFile(Config.Folders.IMAGES, message.getUrl())));
+
             } else {
                 ((ImageHolder) holder).view_fake_white.setVisibility(View.VISIBLE);
                 ((ImageHolder) holder).iv_download.setVisibility(View.VISIBLE);
@@ -143,7 +165,7 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     ((ImageHolder) holder).circularProgressBar.setProgress(0);
                     ((ImageHolder) holder).iv_download.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.download));
                 }else {
-
+                    ((ImageHolder) holder).circularProgressBar.setProgress(message.getDl_percent());
                     ((ImageHolder) holder).iv_download.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.pause));
                 }
 
@@ -163,7 +185,9 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 ((ImageHolder) holder).iv_like.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.like));
             }
 
-        } else if (holder instanceof VideoHolder) {
+        }
+        //////////////////////////////////////////////////Video\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+        else if (holder instanceof VideoHolder) {
 
             ((VideoHolder) holder).tv_time.setText(time);
             if (message.getMessage() != null) {
@@ -184,7 +208,8 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             ).into(((VideoHolder) holder).iv_picture);
 
 
-            if (isFileExists(Config.Folders.VIDEOS, message.getUrl()) && getFile(Config.Folders.VIDEOS, message.getUrl()).length()==message.getLenth()) {
+            if (isFileExists(Config.Folders.VIDEOS, message.getUrl())
+                    ) {
                 ((VideoHolder) holder).circularProgressBar.setVisibility(View.INVISIBLE);
                 ((VideoHolder) holder).iv_download.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.play));
             } else {
@@ -195,16 +220,106 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
 
                 if (message.getDl_state()==0) {
+                    Log.e("adapter","pause mishe "+position);
                    ((VideoHolder) holder).circularProgressBar.setProgress(0);
                     ((VideoHolder) holder).iv_download.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.download));
                 }else {
+                    Log.e("adapter","resume mishe  " +position);
                     ((VideoHolder) holder).iv_download.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.pause));
+                    ((VideoHolder) holder).circularProgressBar.setProgress(message.getDl_percent());
+
                 }
             }
 
 
             String lenth = readableFileSize(message.getLenth());
             ((VideoHolder) holder).tv_video_time.setText(message.getTime() + " | " + lenth);
+        }
+        //////////////////////////////////////////////////Audio\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+        else if (holder instanceof AudioHolder) {
+            ((AudioHolder) holder).tv_time.setText(time);
+            if (message.getMessage() != null) {
+                ((AudioHolder) holder).tv_text.setVisibility(View.VISIBLE);
+                ((AudioHolder) holder).tv_text.setText(message.getMessage());
+            } else {
+                ((AudioHolder) holder).tv_text.setVisibility(View.INVISIBLE);
+            }
+
+            if (message.getLiked() == 0) {
+                ((AudioHolder) holder).iv_like.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.unlike));
+            } else {
+                ((AudioHolder) holder).iv_like.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.like));
+            }
+
+            if (isFileExists(Config.Folders.AUDIOS, message.getUrl()) ) {
+                ((AudioHolder) holder).circularProgressBar.setVisibility(View.INVISIBLE);
+                ((AudioHolder) holder).seekBar.setEnabled(true);
+                //yani dare play mishe
+                if (message.getDl_percent()==1) {
+                    ((AudioHolder) holder).iv_download.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.pause));
+                    ((AudioHolder) holder).seekBar.setProgress(message.getAudio_percent());
+                }else {
+                    ((AudioHolder) holder).iv_download.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.play));
+                    ((AudioHolder) holder).seekBar.setProgress(message.getAudio_percent());
+                }
+
+
+            } else {
+                ((AudioHolder) holder).seekBar.setEnabled(false);
+                ((AudioHolder) holder).iv_download.setVisibility(View.VISIBLE);
+                ((AudioHolder) holder).circularProgressBar.setVisibility(View.VISIBLE);
+
+
+                if (message.getDl_state()==0) {
+                    ((AudioHolder) holder).circularProgressBar.setProgress(0);
+                    ((AudioHolder) holder).iv_download.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.download));
+                }else {
+                    ((AudioHolder) holder).iv_download.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.pause));
+                    ((AudioHolder) holder).circularProgressBar.setProgress(message.getDl_percent());
+
+                }
+            }
+            String lenth = readableFileSize(message.getLenth());
+            ((AudioHolder) holder).tv_size.setText(lenth);
+            ((AudioHolder) holder).tv_audio_time.setText(message.getTime());
+            ((AudioHolder) holder).tv_filename.setText(message.getFilename());
+        }
+        //////////////////////////////////////////////////File\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+        else if (holder instanceof FileHolder){
+            ((FileHolder) holder).tv_time.setText(time);
+            if (message.getMessage() != null) {
+                ((FileHolder) holder).tv_text.setVisibility(View.VISIBLE);
+                ((FileHolder) holder).tv_text.setText(message.getMessage());
+            } else {
+                ((FileHolder) holder).tv_text.setVisibility(View.INVISIBLE);
+            }
+            if (message.getLiked() == 0) {
+                ((FileHolder) holder).iv_like.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.unlike));
+            } else {
+                ((FileHolder) holder).iv_like.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.like));
+            }
+            if (isFileExists(Config.Folders.DOCUMENTS, message.getUrl())) {
+                ((FileHolder) holder).circularProgressBar.setVisibility(View.INVISIBLE);
+                ((FileHolder) holder).iv_download.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.file));
+            } else {
+
+                ((FileHolder) holder).iv_download.setVisibility(View.VISIBLE);
+                ((FileHolder) holder).circularProgressBar.setVisibility(View.VISIBLE);
+
+
+                if (message.getDl_state()==0) {
+                    ((FileHolder) holder).circularProgressBar.setProgress(0);
+                    ((FileHolder) holder).iv_download.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.download));
+                }else {
+                    ((FileHolder) holder).iv_download.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.pause));
+                    ((FileHolder) holder).circularProgressBar.setProgress(message.getDl_percent());
+
+                }
+            }
+            String lenth = readableFileSize(message.getLenth());
+            ((FileHolder) holder).tv_size.setText(lenth);
+            ((FileHolder) holder).tv_filename.setText(message.getFilename());
+
         }
 
     }
@@ -344,8 +459,13 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return 2;
         } else if (type == 3) {
             return 3;
+        } else if (type == 4)
+            {
+            return  4;
+        }else if (type==5) {
+            return  5;
         } else {
-            return 0;
+            return  0 ;
         }
 
     }
@@ -439,18 +559,13 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             iv_comment = (ImageView) itemView.findViewById(R.id.iv_video_comment);
             tv_time = (TextView) itemView.findViewById(R.id.tv_video_time);
             tv_video_time = (TextView) itemView.findViewById(R.id.tv_video_video_time);
-//            iv_picture.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//
-//                }
-//            });
             view_fake_video.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     clickListener.video_imageClicked(getAdapterPosition(), view, circularProgressBar, iv_download);
                 }
             });
+
 
             iv_like = (ImageView) itemView.findViewById(R.id.iv_video_like);
             iv_like.setOnClickListener(new View.OnClickListener() {
@@ -464,6 +579,96 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 public void onClick(View view) {
 
                     clickListener.video_commentClicked(getAdapterPosition(), view);
+                }
+            });
+
+        }
+    }
+
+
+    class AudioHolder extends RecyclerView.ViewHolder {
+        ImageView  iv_download, iv_like, iv_comment;
+        TextView tv_text, tv_time, tv_audio_time,tv_size , tv_filename;
+        View view_fake_audio ;
+        CircularProgressBar circularProgressBar;
+        SeekBar seekBar ;
+
+        public AudioHolder(View itemView) {
+            super(itemView);
+            iv_download = (ImageView) itemView.findViewById(R.id.iv_audio_download_play);
+            circularProgressBar = (CircularProgressBar) itemView.findViewById(R.id.cp_audio);
+            tv_size=(TextView)itemView.findViewById(R.id.tv_audio_size);
+            tv_filename=(TextView)itemView.findViewById(R.id.tv_audio_filename);
+            view_fake_audio=(View)itemView.findViewById(R.id.view_audio_fake);
+            tv_text = (TextView) itemView.findViewById(R.id.tv_audio_text);
+            iv_like =(ImageView)itemView.findViewById(R.id.iv_audio_like);
+            iv_comment = (ImageView) itemView.findViewById(R.id.iv_audio_comment);
+            tv_time = (TextView) itemView.findViewById(R.id.tv_audio_time);
+            tv_audio_time = (TextView) itemView.findViewById(R.id.tv_audio_song_time);
+            seekBar=(SeekBar)itemView.findViewById(R.id.tv_audio_seekbar);
+
+            view_fake_audio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    clickListener.audio_imageClicked(getAdapterPosition(), view, circularProgressBar, iv_download ,seekBar );
+                }
+            });
+
+
+            iv_like.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    clickListener.audio_likeClicked(getAdapterPosition(), view);
+                }
+            });
+            iv_comment.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    clickListener.audio_commentClicked(getAdapterPosition(), view);
+                }
+            });
+
+        }
+    }
+
+
+    class FileHolder extends RecyclerView.ViewHolder {
+        ImageView  iv_download, iv_like, iv_comment;
+        TextView tv_text, tv_time,tv_size , tv_filename;
+        View view_fake_file ;
+        CircularProgressBar circularProgressBar;
+
+
+        public FileHolder(View itemView) {
+            super(itemView);
+            iv_download = (ImageView) itemView.findViewById(R.id.iv_file_download_open);
+            circularProgressBar = (CircularProgressBar) itemView.findViewById(R.id.cp_file);
+            tv_size=(TextView)itemView.findViewById(R.id.tv_file_size);
+            tv_filename=(TextView)itemView.findViewById(R.id.tv_file_filename);
+            view_fake_file=(View)itemView.findViewById(R.id.view_file_fake);
+            tv_text = (TextView) itemView.findViewById(R.id.tv_file_text);
+            iv_like =(ImageView)itemView.findViewById(R.id.iv_file_like);
+            iv_comment = (ImageView) itemView.findViewById(R.id.iv_file_comment);
+            tv_time = (TextView) itemView.findViewById(R.id.tv_file_time);
+            view_fake_file.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    clickListener.file_imageClicked(getAdapterPosition(), view, circularProgressBar, iv_download);
+                }
+            });
+
+            iv_like.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    clickListener.file_likeClicked(getAdapterPosition(), view);
+                }
+            });
+            iv_comment.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    clickListener.file_commentClicked(getAdapterPosition(), view);
                 }
             });
 

@@ -23,8 +23,6 @@ public class ImageCompression extends AsyncTask<String, Void, String> {
     private Context context;
     private static final float maxHeight = 1080.0f;
     private static final float maxWidth = 960.0f;
-
-
     public ImageCompression(Context context){
         this.context=context;
     }

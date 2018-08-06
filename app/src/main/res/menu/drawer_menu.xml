@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<item android:title="در مورد نورصالحین"
+    android:id="@+id/mu_about"
+    android:icon="@drawable/about"
+
+    />
+    <item android:title="ارتباط با توسعه دهنده "
+        android:id="@+id/mu_developer"
+        android:icon="@drawable/developer"
+
+        />
+    <item android:title="خروج از حساب کاربری "
+        android:id="@+id/mu_exit"
+        android:icon="@drawable/logout"
+        android:orderInCategory="1"
+        />
+
+</menu>

@@ -33,6 +33,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -51,6 +52,7 @@ import com.developer.hrg.noralsalehin.Helps.Config;
 import com.developer.hrg.noralsalehin.Helps.ImageCompression;
 import com.developer.hrg.noralsalehin.Helps.InternetCheck;
 
+import com.developer.hrg.noralsalehin.Helps.MyApplication;
 import com.developer.hrg.noralsalehin.Helps.MyProgress;
 import com.developer.hrg.noralsalehin.Helps.SimpleResponse;
 import com.developer.hrg.noralsalehin.Helps.UserData;
@@ -62,6 +64,7 @@ import com.developer.hrg.noralsalehin.Models.Notify;
 import com.developer.hrg.noralsalehin.Models.UnRead;
 import com.developer.hrg.noralsalehin.Models.User;
 import com.developer.hrg.noralsalehin.R;
+import com.developer.hrg.noralsalehin.SmsHandeling.SmsActivity;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONException;
@@ -110,8 +113,6 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         FirebaseMessaging.getInstance().subscribeToTopic(Config.TOPIC_GLOBAL);
-
-
         defineView();
         defineClasees();
         headerFunction();
@@ -156,6 +157,40 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
             }
         };
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                if (item.isChecked())
+                    item.setChecked(false);
+                else item.setChecked(true);
+                drawerLayout.closeDrawers();
+
+                switch (item.getItemId()) {
+
+                    case R.id.mu_about:
+                        Toast.makeText(MainActivity.this, "some thing", Toast.LENGTH_SHORT).show();
+                        return true;
+                    case R.id.mu_developer:
+                        Toast.makeText(MainActivity.this, "some thing else", Toast.LENGTH_SHORT).show();
+                        return true;
+                    case R.id.mu_exit:
+                        MyApplication.getInstance().getUserData().deleteuser();
+                        MyApplication.getInstance().getUserInfo().set_IsLogged_in(false);
+                        MyApplication.getInstance().getUserInfo().set_isMobileSent(false);
+                        MyApplication.getInstance().getUserInfo().deletMobileNumber();
+                        Intent intent = new Intent(MainActivity.this, SmsActivity.class);
+                        startActivity(intent);
+                        finish();
+                        return true;
+
+                    default:
+                        Toast.makeText(getApplicationContext(),"خطلا",Toast.LENGTH_SHORT).show();
+                        return true;
+                }
+
+            }
+
+        });
 
 
     }
@@ -460,7 +495,6 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
 
         final String username = userData.getUser().getUsername();
-
         LinearLayout linearlayout = (LinearLayout)view.findViewById(R.id.linear_header);
         Button btn_send=(Button)view.findViewById(R.id.btn_header_sendusername);
         TextView tv_username = (TextView)view.findViewById(R.id.tv_header_username);
@@ -661,6 +695,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                 }
             } else {
                 Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 startActivityForResult(intent, RESULT_LOAD_IMG_Gallery);
 
 

@@ -60,7 +60,7 @@ public class UserInfo {
         return sharedPreferences.getString(MOBILE_NUMBER,"1");
     }
    public void deletMobileNumber() {
-      editor.remove(MOBILE_NUMBER);
+       editor.remove(MOBILE_NUMBER);
        editor.apply();
    }
    public void set_isFirstTimeMain(boolean situtation) {

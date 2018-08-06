@@ -13,8 +13,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentTop="true"
-            android:layout_above="@+id/btn_inside_mute"
-            android:layout_alignEnd="@+id/floating_inside" />
+            android:layout_alignParentStart="true" />
 
         <ProgressBar
             android:id="@+id/myprogressbar"
@@ -47,13 +46,14 @@
             android:textColor="#7B1FA2" />
 
         <android.support.design.widget.FloatingActionButton
-            android:layout_width="@dimen/_35sdp"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/_48sdp"
+            android:layout_height="@dimen/_45sdp"
             android:id="@+id/floating_inside"
             android:src="@drawable/down"
-
             app:backgroundTint="@android:color/white"
+            app:elevation="3dp"
             app:borderWidth="0dp"
+            app:rippleColor="@android:color/darker_gray"
             android:layout_above="@+id/btn_inside_mute"
             android:layout_alignParentRight="true"
             android:layout_marginBottom="@dimen/_8sdp"

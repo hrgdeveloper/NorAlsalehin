@@ -16,4 +16,7 @@
     <color name="rim_color">#a5bf9b</color>
 
     <color name="bar_color">#f721a325</color>
+
+    <color name="cpb_background">#3d3a3a</color>
+    <color name="cpb_color">#F44336</color>
 </resources>

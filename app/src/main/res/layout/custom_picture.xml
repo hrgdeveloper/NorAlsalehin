@@ -33,7 +33,6 @@
                 android:id="@+id/iv_picture_image"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/_200sdp"
-
                 android:layout_gravity="center"
                 android:layout_margin="@dimen/_5sdp"
                 android:adjustViewBounds="true"
@@ -53,12 +52,12 @@
                 android:layout_width="@dimen/_40sdp"
                 android:layout_height="@dimen/_40sdp"
                 android:layout_gravity="center"
-                app:cpb_background_progressbar_color="#3d3a3a"
+                app:cpb_background_progressbar_color="@color/cpb_background"
                 app:cpb_background_progressbar_width="3dp"
-                app:cpb_progressbar_color="#F44336"
+                app:cpb_progressbar_color="@color/cpb_color"
                 app:cpb_progressbar_width="6dp"
-
                 />
+
 
             <ImageView
                 android:id="@+id/iv_picture_download"

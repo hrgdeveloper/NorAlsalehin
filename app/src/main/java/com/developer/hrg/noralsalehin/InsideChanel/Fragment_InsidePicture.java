@@ -1,6 +1,7 @@
 package com.developer.hrg.noralsalehin.InsideChanel;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -18,6 +19,11 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.developer.hrg.noralsalehin.Helps.Config;
 import com.developer.hrg.noralsalehin.Helps.TouchImageView;
 import com.developer.hrg.noralsalehin.R;
@@ -38,7 +44,7 @@ public class Fragment_InsidePicture extends Fragment {
     // TODO: Rename and change types of parameters
     private String  file;
     private String text;
-  FrameLayout frameLayout ;
+    FrameLayout frameLayout ;
     TouchImageView iv_pic   ;
     ImageView iv_back;
     TextView tv_text ;
@@ -88,6 +94,8 @@ public class Fragment_InsidePicture extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+
 
 
         iv_pic.setImageURI(Uri.fromFile(getFile(Config.Folders.IMAGES,file)));

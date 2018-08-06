@@ -34,7 +34,6 @@
         android:layout_margin="@dimen/_8sdp"
         android:text="09357273422"
         android:textColor="@android:color/white"
-
         android:id="@+id/tv_header_number" />
 
     <LinearLayout

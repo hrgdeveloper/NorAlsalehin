@@ -1,5 +1,6 @@
 package com.developer.hrg.noralsalehin.Models;
 
+import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -37,6 +38,36 @@ public class Message implements Parcelable {
     @SerializedName("liked")
     Integer liked ;
 
+    Integer dl_state = 0 ;
+
+    public Integer getAudio_percent() {
+        return audio_percent;
+    }
+
+    public void setAudio_percent(Integer audio_percent) {
+        this.audio_percent = audio_percent;
+    }
+
+    Integer dl_id = 0;
+
+    Integer dl_percent = 0;
+    Integer audio_percent = 0 ;
+
+    public Integer getDl_percent() {
+        return dl_percent;
+    }
+
+    public void setDl_percent(Integer dl_percent) {
+        this.dl_percent = dl_percent;
+    }
+
+    public Integer getDl_id() {
+        return dl_id;
+    }
+
+    public void setDl_id(Integer dl_id) {
+        this.dl_id = dl_id;
+    }
 
     public Integer getDl_state() {
         return dl_state;
@@ -46,8 +77,6 @@ public class Message implements Parcelable {
         this.dl_state = dl_state;
     }
 
-    Integer dl_state = 0 ;
-
     public String getFilename() {
         return filename;
     }
@@ -55,9 +84,6 @@ public class Message implements Parcelable {
     public void setFilename(String filename) {
         this.filename = filename;
     }
-
-
-
     public Integer getLiked() {
         return liked;
     }
@@ -67,7 +93,7 @@ public class Message implements Parcelable {
     }
 
     public Message(int message_id, int admin_id, int chanel_id, String message, String thumb, int type, Long lenth, String time , String filename, String url
-     , String updated_at , int liked , Integer dl_state ) {
+     , String updated_at , int liked , Integer dl_state , Integer dl_id , Integer dl_percent, Integer audio_percent ) {
         this.message_id = message_id;
         this.admin_id = admin_id;
         this.chanel_id = chanel_id;
@@ -81,25 +107,13 @@ public class Message implements Parcelable {
         this.updated_at=updated_at;
         this.liked=liked;
         this.dl_state=dl_state;
+        this.dl_id=dl_id;
+        this.dl_percent=dl_percent;
+        this.audio_percent=audio_percent;
     }
 
 
 
-    public Message(int message_id, int admin_id, int chanel_id, String message, String thumb, int type, Long lenth, String time, String url
-            , String updated_at , int liked) {
-        this.message_id = message_id;
-        this.admin_id = admin_id;
-        this.chanel_id = chanel_id;
-        this.message = message;
-        this.thumb = thumb;
-        this.type = type;
-        this.lenth = lenth;
-        this.time = time;
-        this.url = url;
-        this.filename=filename;
-        this.liked=liked;
-        this.updated_at=updated_at;
-    }
 
     public String getUpdated_at() {
         return updated_at;
@@ -198,11 +212,14 @@ public class Message implements Parcelable {
         lenth = in.readLong();
         time = in.readString();
         url = in.readString();
+        filename= in.readString();
         admin_name=in.readString();
         updated_at=in.readString();
         liked=in.readInt();
-        filename= in.readString();
         dl_state=in.readInt();
+        dl_id=in.readInt();
+        dl_percent=in.readInt();
+        audio_percent=in.readInt();
     }
 
     @Override
@@ -226,6 +243,11 @@ public class Message implements Parcelable {
         dest.writeString(updated_at);
         dest.writeInt(liked);
         dest.writeInt(dl_state);
+        dest.writeInt(dl_id);
+        dest.writeInt(dl_percent);
+        dest.writeInt(audio_percent);
+
+
     }
 
     @SuppressWarnings("unused")

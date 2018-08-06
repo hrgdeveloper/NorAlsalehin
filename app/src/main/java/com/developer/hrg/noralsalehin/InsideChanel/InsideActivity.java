@@ -6,7 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -16,6 +20,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -27,6 +32,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,14 +41,18 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.developer.hrg.noralsalehin.Helps.ApiInterface;
 import com.developer.hrg.noralsalehin.Helps.Apiclient;
+import com.developer.hrg.noralsalehin.Helps.AudioService;
 import com.developer.hrg.noralsalehin.Helps.Config;
+import com.developer.hrg.noralsalehin.Helps.DownloadService;
 import com.developer.hrg.noralsalehin.Helps.InternetCheck;
 import com.developer.hrg.noralsalehin.Helps.MyAlert;
 import com.developer.hrg.noralsalehin.Helps.MyApplication;
+import com.developer.hrg.noralsalehin.Helps.MyProgress;
 import com.developer.hrg.noralsalehin.Helps.SimpleResponse;
 import com.developer.hrg.noralsalehin.Helps.UserData;
 import com.developer.hrg.noralsalehin.InsideChanel.comment.CommentFragment;
 import com.developer.hrg.noralsalehin.InsideChanel.toolbar.Fragment_insideToolbar;
+import com.developer.hrg.noralsalehin.Main.MainActivity;
 import com.developer.hrg.noralsalehin.Models.Chanel;
 import com.developer.hrg.noralsalehin.Models.Message;
 import com.developer.hrg.noralsalehin.Models.User;
@@ -55,6 +65,7 @@ import com.downloader.OnProgressListener;
 import com.downloader.OnStartOrResumeListener;
 import com.downloader.PRDownloader;
 import com.downloader.Progress;
+import com.downloader.utils.Utils;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 
 import org.json.JSONException;
@@ -91,12 +102,17 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     int like_state;
     public static final int STORAGE_REQUEST = 102;
     int download_id = 0 ;
+     MediaPlayer mediaPlayer ;
+    boolean executeOnResumeTask   ;
+     LocalBroadcastManager localBroadcastManager ;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inside);
+        executeOnResumeTask=false;
+        mediaPlayer = new MediaPlayer();
         defineViews();
         defineClass();
         setSupportActionBar(toolbar);
@@ -219,13 +235,36 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         btn_mute.setOnClickListener(this);
         updateSoundState();
 
-        reciverChanelsTask = new BroadcastReceiver() {
+        reciverChanelsTask =  new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(Config.PUSH_NEW_MESSAGE)) {
                     Message message = intent.getParcelableExtra("message");
-
                     updateRows(message);
+                }else if (intent.getAction().equals(DownloadService.BROADCAST_PROGRESS)) {
+                    int percent = intent.getIntExtra(DownloadService.PROGRESS_PERCENT,0);
+                    int position = intent.getIntExtra(DownloadService.PROGRESS_POSITION,0);
+                    int chanel_id = intent.getIntExtra(DownloadService.CHANEL_ID,0);
+                    Log.e("chanel_id" , chanel_id+ "  : " +  chanel.getChanel_id());
+                   if (chanel.getChanel_id()==chanel_id) {
+                        Log.e("progress",percent+"");
+                        if (messages.get(position).getDl_state()==0) {
+                            messages.get(position).setDl_state(1);
+                        }
+                        messages.get(position).setDl_percent(percent);
+                        adapter_message.notifyItemChanged(position);
+                    }
+
+
+                }else if (intent.getAction().equals(DownloadService.BROADCAST_DL_FINISH)) {
+
+                    int position = intent.getIntExtra(DownloadService.FINISH_POSITION,0);
+                    adapter_message.notifyItemChanged(position);
+                }else if (intent.getAction().equals(DownloadService.BROADCAST_PAUSE)) {
+                     int position = intent.getIntExtra(DownloadService.PROGRESS_POSITION,0);
+                     messages.get(position).setDl_state(0);
+                     adapter_message.notifyItemChanged(position);
+
                 }
 
             }
@@ -246,10 +285,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                     //this is the top of the RecyclerView
 
 
-
                         int top_id = messages.get(0).getMessage_id();
-
-
 
                             if (InternetCheck.isOnline(InsideActivity.this)) {
 
@@ -285,8 +321,6 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                                             //    adapter_message.notifyDataSetChanged();
                                                 adapter_message.notifyItemRangeInserted(0,response.body().getMessages().size());
 
-
-
                                                 adapter_message.notifyItemChanged(messages.size());
                                                 last_meesage_id = userdata.getLastMessage_id(chanel.getChanel_id());
 
@@ -303,9 +337,6 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                                 });
                             }
 
-
-
-
                 }
 
                 int totalItemCount = layoutManager.getItemCount();
@@ -316,23 +347,9 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                     fab.hide();
                 }
 
-
-//                 if (dy > 0)
-//                 {
-//
-//                     fab.hide();
-//                 }else
-
-
                 if (dy < 0) {
-                    final Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            fab.show();
-                        }
-                    }, 450);
 
+          fab.show();
                 }
 
             }
@@ -371,7 +388,15 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     protected void onResume() {
         super.onResume();
+
         LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(Config.PUSH_NEW_MESSAGE));
+        LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(DownloadService.BROADCAST_PROGRESS));
+        LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(DownloadService.BROADCAST_DL_FINISH));
+        LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(DownloadService.BROADCAST_PAUSE));
+
+        LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(Config.PUSH_NEW_MESSAGE));
+        LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(Config.PUSH_NEW_MESSAGE));
+
         //vase raftan be ye akharin positon
                 if (messages.size() > 0 && last_position != 0) {
             ((LinearLayoutManager) recyclerView.getLayoutManager()).scrollToPositionWithOffset(last_position, 0);
@@ -430,6 +455,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
             recyclerView.setLayoutManager(new LinearLayoutManager(InsideActivity.this));
         }
 
+        recyclerView.setItemAnimator(null);
 
 
         toolbar = (Toolbar) findViewById(R.id.toolbar_inside);
@@ -492,13 +518,12 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
             fab.hide();
         }
     }
-     /////////////////////////////////////////////////////pictureClicls\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+     ////////////////////////////////////////////////////////pictureFunctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
     public void picture_imageClicked(final int position, View view, final CircularProgressBar circularProgressBar, final ImageView iv_download)
      {
 
-        if (isFileExists(Config.Folders.IMAGES, messages.get(position).getUrl()) &&
-                getFile(Config.Folders.IMAGES, messages.get(position).getUrl()).length()==messages.get(position).getLenth()) {
+        if (isFileExists(Config.Folders.IMAGES, messages.get(position).getUrl())) {
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.container_inside, Fragment_InsidePicture.newInstance(messages.get(position).getUrl(),
                     messages.get(position).getMessage()));
@@ -514,100 +539,13 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                 if (messages.get(position).getDl_state()==0) {
                     messages.get(position).setDl_state(1);
                     adapter_message.notifyItemChanged(position);
-                    userdata.setDlState(1,messages.get(position).getMessage_id());
+                    download_service(position,Config.MESSAGE_PIC_ADDRES,Config.Folders.IMAGES);
 
-
-//               int download_id = PRDownloader.download(Config.MESSAGE_PIC_ADDRES + messages.get(position).getUrl(),
-//                       getPath(Config.Folders.IMAGES),messages.get(position).getUrl())
-//                    .build()
-//                            .setOnStartOrResumeListener(new OnStartOrResumeListener() {
-//                                @Override
-//                                public void onStartOrResume() {
-//
-//                                }
-//                            })
-//                            .setOnPauseListener(new OnPauseListener() {
-//                                @Override
-//                                public void onPause() {
-//                                    messages.get(position).setDl_state(1);
-//                                    userdata.setDlState(1,messages.get(position).getMessage_id());
-//                                }
-//                            })
-//                            .setOnCancelListener(new OnCancelListener() {
-//                                @Override
-//                                public void onCancel() {
-//
-//                                }
-//                            })
-//                            .setOnProgressListener(new OnProgressListener() {
-//                                @Override
-//                                public void onProgress(Progress progress) {
-//                                    long progressPercent = progress.currentBytes * 100 / progress.totalBytes;
-//                                    circularProgressBar.setProgress(progressPercent);
-//
-//
-//                                }
-//                            })
-//                            .start(new OnDownloadListener() {
-//                                @Override
-//                                public void onDownloadComplete() {
-//                                    adapter_message.notifyItemChanged(position);
-//                                }
-//
-//                                @Override
-//                                public void onError(Error error) {
-//
-//                                }
-//
-//
-//                            });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//                    ApiInterface apiInterface = Apiclient.getClient().create(ApiInterface.class);
-//                    Call<ResponseBody> call = apiInterface.downloadFileWhiturl(Config.MESSAGE_PIC_ADDRES + messages.get(position).getUrl());
-//                    call.enqueue(new Callback<ResponseBody>() {
-//                        @Override
-//                        public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
-//
-//                            if (response.isSuccessful()) {
-//
-//                                new DownloadFile(response.body(), messages.get(position).getUrl(), Config.Folders.IMAGES,circularProgressBar,iv_download
-//                                        ,position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-//
-//                            } else {
-//                            try {
-//
-//                                MyAlert.showAlert(InsideActivity.this, "خطا در دریافت", response.errorBody().string());
-//                            } catch (IOException e) {
-//                                e.printStackTrace();
-//                            }
-//                                Toast.makeText(InsideActivity.this, "خطا در دریافت", Toast.LENGTH_SHORT).show();
-//                            }
-//
-//                        }
-//
-//                        @Override
-//                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-//                            //         Toast.makeText(getApplicationContext(), "errore", Toast.LENGTH_SHORT).show();
-//                            Log.e("errorTodownload", t.getMessage());
-//                        }
-//                    });
                 }else {
+                    int dl_id = userdata.getDl_id(messages.get(position).getMessage_id());
+                    PRDownloader.pause(dl_id);
+                    messages.get(position).setDl_state(0);
+                    adapter_message.notifyItemChanged(position);
 
                 }
 
@@ -617,65 +555,17 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        userdata.resetDlstate();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-    }
-
-    @Override
     public void picture_likeClicked(final int position, View view) {
         likeFunction(position);
 
     }
-    public void likeFunction(final int position) {
-        if (!InternetCheck.isOnline(InsideActivity.this)) {
-            Toast.makeText(this, "عدم دسترسی به اینترنت", Toast.LENGTH_SHORT).show();
-        } else {
-            like_state = messages.get(position).getLiked() > 0 ? 0 : 1;
 
-            ApiInterface api = Apiclient.getClient().create(ApiInterface.class);
-            Call<SimpleResponse> call_setlike = api.setLike(user.getApikey(), messages.get(position).getMessage_id(), like_state);
-            call_setlike.enqueue(new Callback<SimpleResponse>() {
-                @Override
-                public void onResponse(Call<SimpleResponse> call, Response<SimpleResponse> response) {
-                    if (!response.isSuccessful()) {
-
-                    } else {
-                        boolean error = response.body().isError();
-                        if (error) {
-
-                        } else {
-
-                            Message message = messages.get(position);
-                            message.setLiked(like_state);
-                            messages.set(position, message);
-                            adapter_message.notifyDataSetChanged();
-                            userdata.setLikeState(like_state, message.getMessage_id());
-                        }
-
-                    }
-
-                }
-
-                @Override
-                public void onFailure(Call<SimpleResponse> call, Throwable t) {
-
-                }
-            });
-        }
-    }
 
     @Override
     public void picture_commentClicked(int position, View view) {
         openFragment(CommentFragment.getInstance(messages.get(position).getMessage_id(), chanel.getChanel_id()));
     }
-    /////////////////////////////////////////////////////simpleClicks\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    /////////////////////////////////////////////////////simpleFunction\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
     public void simple_likeClicked(int position, View view) {
      likeFunction(position);
@@ -686,14 +576,13 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         openFragment(CommentFragment.getInstance(messages.get(position).getMessage_id(), chanel.getChanel_id()));
     }
 
-    /////////////////////////////////////////////////////videoClicls\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    /////////////////////////////////////////////////////videoFuctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
     public void video_imageClicked(final int position, View view, final CircularProgressBar circularProgressBar, final ImageView iv_download
 
     ) {
 
-        if (isFileExists(Config.Folders.VIDEOS, messages.get(position).getUrl()) &&
-                getFile(Config.Folders.VIDEOS, messages.get(position).getUrl()).length()==messages.get(position).getLenth()) {
+        if (isFileExists(Config.Folders.VIDEOS, messages.get(position).getUrl())) {
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.container_inside, InsideVideoFragment.newInstance(messages.get(position).getUrl(),
                     messages.get(position).getMessage()));
@@ -706,113 +595,25 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
             } else {
 
                 if (messages.get(position).getDl_state()==0) {
-
-                 //  messages.get(position).setDl_state(1);
-                    Message message = messages.get(position);
-                    message.setDl_state(1);
-                    messages.set(position,message);
-
-                    int download_id = PRDownloader.download(Config.MESSAGE_VIDEO_ADDRESS + messages.get(position).getUrl(),
-                            getPath(Config.Folders.VIDEOS),messages.get(position).getUrl())
-                            .build()
-                            .setOnStartOrResumeListener(new OnStartOrResumeListener() {
-                                @Override
-                                public void onStartOrResume() {
-
-                                }
-                            })
-                            .setOnPauseListener(new OnPauseListener() {
-                                @Override
-                                public void onPause() {
-
-                                }
-                            })
-                            .setOnCancelListener(new OnCancelListener() {
-                                @Override
-                                public void onCancel() {
-
-                                }
-                            })
-                            .setOnProgressListener(new OnProgressListener() {
-                                @Override
-                                public void onProgress(Progress progress) {
-
-                                    Long progressPercent = progress.currentBytes * 100 / progress.totalBytes;
-                                    circularProgressBar.setProgress(progressPercent);
-
-
-                                }
-                            })
-                            .start(new OnDownloadListener() {
-                                @Override
-                                public void onDownloadComplete() {
-                                    adapter_message.notifyItemChanged(position);
-                                }
-
-                                @Override
-                                public void onError(Error error) {
-
-                                }
-
-
-                            });
-
+                    messages.get(position).setDl_state(1);
+                    adapter_message.notifyItemChanged(position);
+                    download_service(position,Config.MESSAGE_VIDEO_ADDRESS,Config.Folders.VIDEOS);
 
                 }else {
 
+                    int dl_id = userdata.getDl_id(messages.get(position).getMessage_id());
+                     Log.e("download_id",dl_id+" ");
+                    PRDownloader.pause(dl_id);
+                    messages.get(position).setDl_state(0);
+                    adapter_message.notifyItemChanged(position);
+
                 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//                ApiInterface apiInterface = Apiclient.getClient().create(ApiInterface.class);
-//                Call<ResponseBody> call = apiInterface.downloadFileWhiturl(Config.MESSAGE_VIDEO_ADDRESS + messages.get(position).getUrl());
-//                call.enqueue(new Callback<ResponseBody>() {
-//                    @Override
-//                    public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
-//
-//                        if (response.isSuccessful()) {
-//
-//                            new DownloadFile(response.body(), messages.get(position).getUrl(), Config.Folders.VIDEOS, circularProgressBar,iv_download
-//                            ,position).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-//
-//                        } else {
-//                            try {
-//
-//                                MyAlert.showAlert(InsideActivity.this, "error", response.errorBody().string());
-//                            } catch (IOException e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-//                        Toast.makeText(getApplicationContext(), "errore", Toast.LENGTH_SHORT).show();
-//                        Log.e("errorTodownload", t.getMessage());
-//                    }
-//                });
             }
         }
 
     }
+
 
     @Override
     public void video_likeClicked(int position, View view) {
@@ -824,97 +625,153 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         openFragment(CommentFragment.getInstance(messages.get(position).getMessage_id(), chanel.getChanel_id()));
     }
 
-    public class DownloadFile extends AsyncTask<Void, String, String> {
-        ResponseBody responsebody;
-        String filename;
-        String foldername;
-        ImageView iv_download;
-        //CircleProgressView circleProgressView;
-        CircularProgressBar circularProgressBar;
-        int position ;
 
+    //////////////////////////////////////////////////////////////AduioFunctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
-        public DownloadFile(ResponseBody responsebody, String fileName, String foldername, CircularProgressBar circularProgressBar , ImageView iv_download
-        ,int position
-        ) {
-            this.responsebody = responsebody;
-            this.filename = fileName;
-            this.foldername = foldername;
-            this.circularProgressBar = circularProgressBar;
-            this.iv_download=iv_download;
-            this.position=position;
-        }
+    @Override
+    public void audio_imageClicked(final int position, View view, CircularProgressBar circularProgressBar, ImageView iv_download , SeekBar seekBar) {
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-        }
-
-        @Override
-        protected String doInBackground(Void... voids) {
+        if (isFileExists(Config.Folders.AUDIOS, messages.get(position).getUrl())) {
+            MediaPlayer mp = new MediaPlayer();
             try {
+                mp.setDataSource(getFile(Config.Folders.AUDIOS, messages.get(position).getUrl()).getAbsolutePath());
+                int duration = mp.getDuration();
+                mp.stop();
+                mp.release();
 
-                File destinationFile = new File(Environment.getExternalStorageDirectory() + "/NoorAlSalehin/" + foldername, filename);
-                InputStream is = null;
-                OutputStream os = null;
-
-                try {
-                    Log.d("imageDownload", "File Size=" + responsebody.contentLength());
-
-                    is = responsebody.byteStream();
-                    os = new FileOutputStream(destinationFile);
-
-                    byte data[] = new byte[4096];
-                    int count;
-                    int progress = 0;
-                    while ((count = is.read(data)) != -1) {
-
-                        os.write(data, 0, count);
-                        progress += count;
-                        Log.d("imageDownload", "Progress: " + progress + "/" + responsebody.contentLength() + " >>>> " + (float) progress / responsebody.contentLength());
-                        publishProgress("" + (int) ((progress * 100) / responsebody.contentLength()));
-                    }
-
-                    os.flush();
-
-                    Log.d("imageDownload", "File saved successfully!");
-                    return "success";
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.d("imageDownload", "Failed to save the file!");
-                    return "failed";
-                } finally {
-                    if (is != null) is.close();
-                    if (os != null) os.close();
-                }
+                Toast.makeText(getApplicationContext(), duration+" ", Toast.LENGTH_SHORT).show();
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.d("imageDownload", "Failed to save the file!");
-                return "failed";
+            }
+            Toast.makeText(this, "mishe ?", Toast.LENGTH_SHORT).show();
+//            if (messages.get(position).getDl_percent()==0) {
+//                messages.get(position).setDl_percent(1);
+//                adapter_message.notifyItemChanged(position);
+//                Intent intent = new Intent(InsideActivity.this, AudioService.class);
+//                intent.putExtra(AudioService.FILEPATH,getFile(Config.Folders.AUDIOS, messages.get(position).getUrl()).getAbsolutePath());
+//                intent.putExtra(AudioService.CHANEL_ID,chanel.getChanel_id());
+//                intent.putExtra(AudioService.POSITION,position);
+//                startService(intent);
+
+//            }else {
+//
+//            }
+
+//                       if (mediaPlayer.isPlaying()) {
+//                           mediaPlayer.release();
+//                           mediaPlayer.stop();
+//                       }
+//            try {
+//                messages.get(position).setDl_percent(1);
+//                adapter_message.notifyItemChanged(position);
+//                mediaPlayer.setDataSource(getFile(Config.Folders.AUDIOS,messages.get(position).getUrl()).getAbsolutePath());
+//                mediaPlayer.prepare();
+//                mediaPlayer.start();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+
+        } else {
+
+            if (ActivityCompat.checkSelfPermission(InsideActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_REQUEST);
+            } else {
+
+                if (messages.get(position).getDl_state()==0) {
+                    messages.get(position).setDl_state(1);
+                    adapter_message.notifyItemChanged(position);
+                    download_service(position,Config.MESSAGE_AUDIO_ADDRESS,Config.Folders.AUDIOS);
+
+
+                }else {
+                    int dl_id = userdata.getDl_id(messages.get(position).getMessage_id());
+                    PRDownloader.pause(dl_id);
+                    messages.get(position).setDl_state(0);
+                    adapter_message.notifyItemChanged(position);
+
+                }
+
+
+
             }
         }
 
-        @Override
-        protected void onProgressUpdate(String... values) {
-           // circleProgressView.setValue(Integer.parseInt(values[0]));
-            circularProgressBar.setProgress(Integer.parseInt(values[0]));
+    }
+    @Override
+    public void audio_likeClicked(int position, View view) {
+           likeFunction(position);
+    }
+    @Override
+    public void audio_commentClicked(int position, View view) {
+        openFragment(CommentFragment.getInstance(messages.get(position).getMessage_id(), chanel.getChanel_id()));
+    }
+    //////////////////////////////////////////////////////////////FileFunction\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    @Override
+    public void file_imageClicked(final int position, View view, CircularProgressBar circularProgressBar, ImageView iv_download) {
+
+        if (isFileExists(Config.Folders.DOCUMENTS, messages.get(position).getUrl())) {
+
+            try {
+                openFile(InsideActivity.this,getFile(Config.Folders.DOCUMENTS, messages.get(position).getUrl()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        } else {
+
+            if (ActivityCompat.checkSelfPermission(InsideActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_REQUEST);
+            } else {
+
+
+                if (messages.get(position).getDl_state()==0) {
+                    messages.get(position).setDl_state(1);
+                    adapter_message.notifyItemChanged(position);
+                    download_service(position,Config.MESSAGE_File_ADDRESS,Config.Folders.DOCUMENTS);
+                }else {
+                    int dl_id = userdata.getDl_id(messages.get(position).getMessage_id());
+
+                    PRDownloader.pause(dl_id);
+                    messages.get(position).setDl_state(0);
+                    adapter_message.notifyItemChanged(position);
+                }
+            }
         }
 
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            if (s == "success") {
+    }
 
-               adapter_message.notifyItemChanged(position);
-            }
-        } 
+    @Override
+    public void file_likeClicked(int position, View view) {
+         likeFunction(position);
+    }
+
+    @Override
+    public void file_commentClicked(int position, View view) {
+        openFragment(CommentFragment.getInstance(messages.get(position).getMessage_id(), chanel.getChanel_id()));
     }
 
 
+    ///////////////////////////////////////////////////neeDedFunction\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     public boolean isFileExists(String folderName, String filename) {
         File file = new File(Environment.getExternalStorageDirectory() + "/NoorAlSalehin/" + folderName, filename);
         return file.exists();
+    }
+
+    public void download_service(int position,String urlAddress , String folderAddress) {
+        Intent intent = new Intent(InsideActivity.this, DownloadService.class);
+        intent.putExtra(DownloadService.MESSAGES,messages.get(position).getMessage_id());
+
+        intent.putExtra(DownloadService.ADDRESS,urlAddress+ messages.get(position).getUrl());
+        intent.putExtra(DownloadService.POSITION,position);
+        intent.putExtra(DownloadService.DIRPATH, getPath(folderAddress));
+        intent.putExtra(DownloadService.FILENAME,messages.get(position).getUrl());
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(DownloadService.MESSAGE,messages.get(position));
+        intent.putExtra(DownloadService.BUNDLE,bundle);
+
+        intent.putExtra(DownloadService.CHANEL_ID,chanel.getChanel_id());
+
+        startService(intent);
     }
     public File getFile(String folderName, String filename) {
         File file = new File(Environment.getExternalStorageDirectory() + "/NoorAlSalehin/" + folderName, filename);
@@ -937,7 +794,6 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         fragmentTransaction.commit();
 
     }
-
     private void askForPermission(String permission, Integer requestCode) {
         if (requestCode == STORAGE_REQUEST) {
 
@@ -956,7 +812,6 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
 
     }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -998,6 +853,128 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
             doucmnets.mkdir();
         }
     }
+    public void likeFunction(final int position) {
+        if (!InternetCheck.isOnline(InsideActivity.this)) {
+            Toast.makeText(this, "عدم دسترسی به اینترنت", Toast.LENGTH_SHORT).show();
+        } else {
+            like_state = messages.get(position).getLiked() > 0 ? 0 : 1;
+
+            ApiInterface api = Apiclient.getClient().create(ApiInterface.class);
+            Call<SimpleResponse> call_setlike = api.setLike(user.getApikey(), messages.get(position).getMessage_id(), like_state);
+            call_setlike.enqueue(new Callback<SimpleResponse>() {
+                @Override
+                public void onResponse(Call<SimpleResponse> call, Response<SimpleResponse> response) {
+                    if (!response.isSuccessful()) {
+
+                    } else {
+                        boolean error = response.body().isError();
+                        if (error) {
+
+                        } else {
+
+                            Message message = messages.get(position);
+                            message.setLiked(like_state);
+                            messages.set(position, message);
+                            adapter_message.notifyDataSetChanged();
+                            userdata.setLikeState(like_state, message.getMessage_id());
+                        }
+
+                    }
+
+                }
+
+                @Override
+                public void onFailure(Call<SimpleResponse> call, Throwable t) {
+
+                }
+            });
+        }
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        userdata.resetDlstate();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+
+
+    }
+
+
+//vase baz kardane file download shode dar list
+        public  void openFile(Context context, File url) throws IOException {
+            // Create URI
+            File file=url;
+            Uri uri ;
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+
+            if (Build.VERSION.SDK_INT<Build.VERSION_CODES.N) {
+                uri = Uri.fromFile(file);
+            }else {
+                uri = FileProvider.getUriForFile(context, context.getPackageName() + ".share", file);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+
+
+
+            // Check what kind of file you are trying to open, by comparing the url with extensions.
+            // When the if condition is matched, plugin sets the correct intent (mime) type,
+            // so Android knew what application to use to open the file
+            if (url.toString().contains(".doc") || url.toString().contains(".docx")) {
+                // Word document
+                intent.setDataAndType(uri, "application/msword");
+            } else if(url.toString().contains(".pdf")) {
+                // PDF file
+                intent.setDataAndType(uri, "application/pdf");
+            } else if(url.toString().contains(".ppt") || url.toString().contains(".pptx")) {
+                // Powerpoint file
+                intent.setDataAndType(uri, "application/vnd.ms-powerpoint");
+            } else if(url.toString().contains(".xls") || url.toString().contains(".xlsx")) {
+                // Excel file
+                intent.setDataAndType(uri, "application/vnd.ms-excel");
+            } else if(url.toString().contains(".zip") || url.toString().contains(".rar")) {
+                // WAV audio file
+                intent.setDataAndType(uri, "application/x-wav");
+            } else if(url.toString().contains(".rtf")) {
+                // RTF file
+                intent.setDataAndType(uri, "application/rtf");
+            } else if(url.toString().contains(".wav") || url.toString().contains(".mp3")) {
+                // WAV audio file
+                intent.setDataAndType(uri, "audio/x-wav");
+            } else if(url.toString().contains(".gif")) {
+                // GIF file
+                intent.setDataAndType(uri, "image/gif");
+            } else if(url.toString().contains(".jpg") || url.toString().contains(".jpeg") || url.toString().contains(".png")) {
+                // JPG file
+                intent.setDataAndType(uri, "image/jpeg");
+            } else if(url.toString().contains(".txt")) {
+                // Text file
+                intent.setDataAndType(uri, "text/plain");
+            } else if(url.toString().contains(".3gp") || url.toString().contains(".mpg") || url.toString().contains(".mpeg") || url.toString().contains(".mpe") || url.toString().contains(".mp4") || url.toString().contains(".avi")
+                    || url.toString().contains(".mkv")
+                    ) {
+                // Video files
+                intent.setDataAndType(uri, "video/*");
+            } else if (url.toString().contains(".apk")) {
+                intent.setDataAndType(uri, "application/vnd.android.package-archive");
+            } else{
+                //if you want you can also define the intent type for any other file
+
+                //additionally use else clause below, to manage other unknown extensions
+                //in this case, Android will show all applications installed on the device
+                //so you can choose which application to use
+                intent.setDataAndType(uri, "*/*");
+            }
+
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            context.startActivity(intent);
+        }
+
 
 }
 

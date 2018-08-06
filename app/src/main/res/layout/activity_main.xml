@@ -61,6 +61,7 @@
         android:layout_gravity="left"
         android:id="@+id/navigationview"
         app:headerLayout="@layout/navigation_header"
+        app:menu="@menu/drawer_menu"
         >
 
     </android.support.design.widget.NavigationView>

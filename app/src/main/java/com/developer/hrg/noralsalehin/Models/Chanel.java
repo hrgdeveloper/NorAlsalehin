@@ -138,10 +138,9 @@ public class Chanel implements Parcelable {
                 typee=  "فایل صوتی" ;
                 break;
             case 5 :
-                typee=  "تصویر متحرک" ;
-                break;
-            case 6 :
                 typee=  "فایل" ;
+                break;
+
                 default:
                     typee ="بدون پیام";
 

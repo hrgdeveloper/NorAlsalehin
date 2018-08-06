@@ -29,6 +29,15 @@ public class Config {
     public static final String MESSAGE_VIDEO_ADDRESS= "http://192.168.1.147/noor/uploads/videos/video/";
     public static final String MESSAGE_VIDEO_ADDRESS_ONLINE= "http://keepwords.ir/noor/uploads/videos/video/";
 
+
+    public static final String MESSAGE_File_ADDRESS= "http://192.168.1.147/noor/uploads/files/";
+    public static final String MESSAGE_File_ADDRESS_ONLINE= "http://keepwords.ir/noor/uploads/files/";
+
+
+    public static final String MESSAGE_AUDIO_ADDRESS= "http://192.168.1.147/noor/uploads/audio/";
+    public static final String MESSAGE_AUDIO_ADDRESS_ONLINE= "http://keepwords.ir/noor/uploads/audio/";
+
+
     public static final String VIDEO_PIC_ADDRES= "http://192.168.1.147/noor/uploads/videos/thumb/";
     public static final String VIDEO_PIC_ADDRES_ONLINE = "http://keepwords.ir/noor/uploads/videos/thumb/";
 
