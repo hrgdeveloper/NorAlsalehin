@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 
 import com.developer.hrg.noralsalehin.Helps.Config;
+import com.developer.hrg.noralsalehin.Helps.DateConvertor;
 import com.developer.hrg.noralsalehin.Helps.MyApplication;
 import com.developer.hrg.noralsalehin.Helps.UserData;
 import com.developer.hrg.noralsalehin.Main.MainActivity;
@@ -25,6 +26,11 @@ import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 
 /**
@@ -146,6 +152,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     }
 
 
+                }else if (Integer.valueOf(flag)==Config.PUSH_NEW_NOTIFY) {
+                    String imageURL = data.getString("image");
+                    String title = data.getString("title");
+                    String message = data.getString("message");
+                    Calendar calendar = getCurrentTimestamp();
+                    String shamsi_date = DateConvertor.shamsiDate(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,calendar.get(Calendar.DAY_OF_MONTH));
+                    String curTime = String.format("%02d:%02d", calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE));
+                    String timestamp = shamsi_date + " : " +  curTime;
+                    Intent resultIntent = new Intent(getApplicationContext(), MainActivity.class);
+                    showNotificationMessageWithBigImage(this,title,message,timestamp,resultIntent,Config.NOTIFY_ADDRESS+imageURL);
                 }
 
 
@@ -202,6 +218,20 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Log.e("Gaveeeeeee", "Exception: " + e.getMessage());
             Log.e("Gaveeeeeee", "Exceptionnnnnnnnnnnnnnnnnn: " );
         }
+    }
+    public Calendar getCurrentTimestamp() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-M-d hh:mm");
+        String format = simpleDateFormat.format(new Date());
+
+        Calendar calendar = Calendar.getInstance() ;
+
+        try {
+            Date date = simpleDateFormat.parse(format);
+            calendar.setTime(date);
+        }
+        catch(ParseException pe) {
+        }
+        return calendar;
     }
 
     /**

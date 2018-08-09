@@ -20,6 +20,7 @@ public class MyApplication extends Application {
     private static MyApplication mInstance;
       UserInfo userInfo ;
     UserData userData ;
+    SettingPref settingPref;
 
 
     @Override
@@ -36,6 +37,13 @@ public class MyApplication extends Application {
     public static synchronized MyApplication getInstance() {
         return mInstance;
     }
+    public SettingPref getSettingPref() {
+        if (settingPref==null) {
+            settingPref=new SettingPref(this);
+        }
+        return settingPref;
+    }
+
 
     public UserInfo getUserInfo () {
         if (userInfo==null) {

@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -44,6 +46,7 @@ public class Verify_Fragment extends Fragment {
  UserInfo userInfo;
     UserData userData;
     ProgressDialog progress;
+    private static final String TAG = Register_fragment.class.getName();
     public Verify_Fragment() {
         // Required empty public constructor
     }
@@ -95,8 +98,7 @@ public class Verify_Fragment extends Fragment {
                 if (TextUtils.isEmpty(otp)) {
                     Toast.makeText(getActivity(), "لطفا کد مورد نظر را وارد نمایید", Toast.LENGTH_SHORT).show();
                    et_verify.requestFocus();
-                }else if (!InternetCheck.isOnline(getActivity())) {
-                    Toast.makeText(getActivity(), R.string.No_Internet, Toast.LENGTH_SHORT).show();
+
                 }else {
                     progress.show();
                     ApiInterface apiInterface = Apiclient.getClient().create(ApiInterface.class);
@@ -136,7 +138,14 @@ public class Verify_Fragment extends Fragment {
                         @Override
                         public void onFailure(Call<SimpleResponse> call, Throwable t) {
                             progress.cancel();
-                            Toast.makeText(getActivity(), "خطا در برقراری ارتباط", Toast.LENGTH_SHORT).show();
+                            if (t instanceof SocketTimeoutException){
+                                Toast.makeText(getActivity(), R.string.timeout , Toast.LENGTH_SHORT).show();
+                            }else if (t instanceof IOException) {
+                                Toast.makeText(getActivity(), R.string.no_internet_connection , Toast.LENGTH_SHORT).show();
+                            }else {
+                                Toast.makeText(getActivity(), R.string.connection_problem , Toast.LENGTH_SHORT).show();
+                                Log.e(TAG,t.getMessage());
+                            }
                         }
                     });
                 }

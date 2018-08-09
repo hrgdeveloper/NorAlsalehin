@@ -84,6 +84,7 @@ public class DownloadService extends Service {
         final int    chanel_id = intent.getIntExtra(CHANEL_ID,0);
         Bundle data = intent.getBundleExtra(BUNDLE);
         final Message message = data.getParcelable(MESSAGE);
+        Log.e("firstValue",message.getDl_state()+" ");
         int download_id = PRDownloader.download(address,
                 dirpath,filename)
                 .build()
@@ -117,13 +118,14 @@ public class DownloadService extends Service {
 
                         //in qesmat vase inke ke darsad vaqti yedo
                         // ne raft bala ersal she
-                        if (progressPercent.intValue()> message.getDl_state() ) {
+
+                        if (progressPercent.intValue() > message.getDl_state() +1 ) {
                             final  Intent    intent = new Intent(BROADCAST_PROGRESS);
                             intent.putExtra(PROGRESS_PERCENT,progressPercent.intValue());
                             intent.putExtra(PROGRESS_POSITION,position);
                             intent.putExtra(CHANEL_ID,chanel_id);
                             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-                            message.setDl_id(progressPercent.intValue());
+                            message.setDl_state(message.getDl_state()+1);
                    }
 
                     }

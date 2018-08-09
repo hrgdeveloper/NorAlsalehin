@@ -46,6 +46,14 @@ public class Config {
     public static final String PROFILE_PIC_THUMB_ADDRESS  = "http://192.168.1.147/noor/uploads/user_profile/thumb/";
 
 
+
+
+    public static final String NOTIFY_ADDRESS = "http://192.168.1.147/noor/uploads/notify/";
+    public static final String NOTIFY_ADDRESS_ONLINE  = "http://keepwords.ir/noor/uploads/notify/";
+
+
+
+
     public static final String TOPIC_GLOBAL = "global";
     public static final String PUSH_NOTIFICATION = "pushNotification";
 
@@ -56,6 +64,7 @@ public class Config {
 
     public static final int PUSH_NEW_CHANEL_FLAG = 1;
     public static final int PUSH_NEW_MESSAGE_FLAG = 2;
+    public static final int PUSH_NEW_NOTIFY = 3;
 
     public static final String TOPIC_CHANEL = "chanel_";
     public static final int NOTIFICATION_ID = 100;

@@ -103,7 +103,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     public static final int STORAGE_REQUEST = 102;
     int download_id = 0 ;
      MediaPlayer mediaPlayer ;
-    boolean executeOnResumeTask   ;
+     boolean executeOnResumeTask   ;
      LocalBroadcastManager localBroadcastManager ;
 
 
@@ -234,7 +234,6 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         toolbar.setOnClickListener(this);
         btn_mute.setOnClickListener(this);
         updateSoundState();
-
         reciverChanelsTask =  new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -246,11 +245,13 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                     int position = intent.getIntExtra(DownloadService.PROGRESS_POSITION,0);
                     int chanel_id = intent.getIntExtra(DownloadService.CHANEL_ID,0);
                     Log.e("chanel_id" , chanel_id+ "  : " +  chanel.getChanel_id());
+
                    if (chanel.getChanel_id()==chanel_id) {
                         Log.e("progress",percent+"");
                         if (messages.get(position).getDl_state()==0) {
                             messages.get(position).setDl_state(1);
                         }
+                       Log.e("broadcastt","resume mishe  " +position + "darsad "+ percent);
                         messages.get(position).setDl_percent(percent);
                         adapter_message.notifyItemChanged(position);
                     }
@@ -260,10 +261,11 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
                     int position = intent.getIntExtra(DownloadService.FINISH_POSITION,0);
                     adapter_message.notifyItemChanged(position);
-                }else if (intent.getAction().equals(DownloadService.BROADCAST_PAUSE)) {
+                  }else if (intent.getAction().equals(DownloadService.BROADCAST_PAUSE)) {
                      int position = intent.getIntExtra(DownloadService.PROGRESS_POSITION,0);
                      messages.get(position).setDl_state(0);
                      adapter_message.notifyItemChanged(position);
+
 
                 }
 
@@ -393,7 +395,6 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(DownloadService.BROADCAST_PROGRESS));
         LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(DownloadService.BROADCAST_DL_FINISH));
         LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(DownloadService.BROADCAST_PAUSE));
-
         LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(Config.PUSH_NEW_MESSAGE));
         LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(Config.PUSH_NEW_MESSAGE));
 
@@ -435,6 +436,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         if (messages.size() == 0) {
             tv_label.setVisibility(View.VISIBLE);
             tv_label.setText("هیچ پیامی ثبت نشده است");
+            fab.hide();
         }
     }
 
@@ -599,6 +601,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                     adapter_message.notifyItemChanged(position);
                     download_service(position,Config.MESSAGE_VIDEO_ADDRESS,Config.Folders.VIDEOS);
 
+
                 }else {
 
                     int dl_id = userdata.getDl_id(messages.get(position).getMessage_id());
@@ -629,47 +632,13 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     //////////////////////////////////////////////////////////////AduioFunctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
     @Override
-    public void audio_imageClicked(final int position, View view, CircularProgressBar circularProgressBar, ImageView iv_download , SeekBar seekBar) {
+    public void audio_imageClicked(final int position, View view, CircularProgressBar circularProgressBar, ImageView iv_download ) {
 
         if (isFileExists(Config.Folders.AUDIOS, messages.get(position).getUrl())) {
-            MediaPlayer mp = new MediaPlayer();
-            try {
-                mp.setDataSource(getFile(Config.Folders.AUDIOS, messages.get(position).getUrl()).getAbsolutePath());
-                int duration = mp.getDuration();
-                mp.stop();
-                mp.release();
 
-                Toast.makeText(getApplicationContext(), duration+" ", Toast.LENGTH_SHORT).show();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            Toast.makeText(this, "mishe ?", Toast.LENGTH_SHORT).show();
-//            if (messages.get(position).getDl_percent()==0) {
-//                messages.get(position).setDl_percent(1);
-//                adapter_message.notifyItemChanged(position);
-//                Intent intent = new Intent(InsideActivity.this, AudioService.class);
-//                intent.putExtra(AudioService.FILEPATH,getFile(Config.Folders.AUDIOS, messages.get(position).getUrl()).getAbsolutePath());
-//                intent.putExtra(AudioService.CHANEL_ID,chanel.getChanel_id());
-//                intent.putExtra(AudioService.POSITION,position);
-//                startService(intent);
 
-//            }else {
-//
-//            }
 
-//                       if (mediaPlayer.isPlaying()) {
-//                           mediaPlayer.release();
-//                           mediaPlayer.stop();
-//                       }
-//            try {
-//                messages.get(position).setDl_percent(1);
-//                adapter_message.notifyItemChanged(position);
-//                mediaPlayer.setDataSource(getFile(Config.Folders.AUDIOS,messages.get(position).getUrl()).getAbsolutePath());
-//                mediaPlayer.prepare();
-//                mediaPlayer.start();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
+
 
         } else {
 
@@ -679,9 +648,12 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
                 if (messages.get(position).getDl_state()==0) {
                     messages.get(position).setDl_state(1);
-                    adapter_message.notifyItemChanged(position);
-                    download_service(position,Config.MESSAGE_AUDIO_ADDRESS,Config.Folders.AUDIOS);
-
+                    if (messages.get(position).getDl_id()==0) {
+                        adapter_message.notifyItemChanged(position);
+                        download_service(position,Config.MESSAGE_AUDIO_ADDRESS,Config.Folders.AUDIOS);
+                    }else {
+                      PRDownloader.resume(messages.get(position).getDl_id());
+                    }
 
                 }else {
                     int dl_id = userdata.getDl_id(messages.get(position).getMessage_id());
@@ -730,7 +702,6 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                     download_service(position,Config.MESSAGE_File_ADDRESS,Config.Folders.DOCUMENTS);
                 }else {
                     int dl_id = userdata.getDl_id(messages.get(position).getMessage_id());
-
                     PRDownloader.pause(dl_id);
                     messages.get(position).setDl_state(0);
                     adapter_message.notifyItemChanged(position);
@@ -830,6 +801,9 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
         }
     }
+    public Message_Adapter  getMessageAdapter() {
+        return  adapter_message;
+    }
 
     public void creatFolders() {
         File mainfoldrs = new File(Environment.getExternalStorageDirectory(), "NoorAlSalehin");
@@ -918,8 +892,6 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                 uri = FileProvider.getUriForFile(context, context.getPackageName() + ".share", file);
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
-
-
 
             // Check what kind of file you are trying to open, by comparing the url with extensions.
             // When the if condition is matched, plugin sets the correct intent (mime) type,

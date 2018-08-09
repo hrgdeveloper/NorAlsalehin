@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -43,6 +45,7 @@ public class Register_fragment extends Fragment  {
     UserInfo userInfo ;
     ProgressDialog progress ;
     String wrongNumber=null;
+    private static final String TAG = Verify_Fragment.class.getName();
     public Register_fragment() {
 
     }
@@ -89,9 +92,7 @@ public class Register_fragment extends Fragment  {
             public void onClick(View view) {
                final String number = editText.getText().toString();
 
-                if (!InternetCheck.isOnline(getActivity())) {
-                    Toast.makeText(getActivity(), R.string.No_Internet, Toast.LENGTH_SHORT).show();
-                }else if (!number.matches("^(09)\\d{9}$"))
+            if (!number.matches("^(09)\\d{9}$"))
                            {
                                Toast.makeText(getActivity(), "شماره وارد شده صحیح نمیباشد", Toast.LENGTH_SHORT).show();
                 }else{
@@ -134,7 +135,14 @@ public class Register_fragment extends Fragment  {
 
                         @Override
                         public void onFailure(Call<SimpleResponse> call, Throwable t) {
-                            MyAlert.showAlert(getActivity(),"خطا","خطای " +"\n" + t.getMessage() );
+                            if (t instanceof SocketTimeoutException){
+                                Toast.makeText(getActivity(), R.string.timeout , Toast.LENGTH_SHORT).show();
+                            }else if (t instanceof IOException) {
+                                Toast.makeText(getActivity(), R.string.no_internet_connection , Toast.LENGTH_SHORT).show();
+                            }else {
+                                Toast.makeText(getActivity(), R.string.connection_problem , Toast.LENGTH_SHORT).show();
+                                Log.e(TAG,t.getMessage());
+                            }
                             progress.cancel();
                         }
                     });

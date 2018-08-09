@@ -163,6 +163,24 @@
                 android:layout_marginTop="@dimen/_10sdp"
                 android:text="خاموش کردن"
                 android:textColor="@android:color/holo_blue_dark" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="اندازه متن"
+                android:layout_below="@+id/tv_notify_state"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+
+                />
+            <android.support.v7.widget.AppCompatSpinner
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tv_notify_state"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:id="@+id/spinner"
+                ></android.support.v7.widget.AppCompatSpinner>
         </RelativeLayout>
 
     </android.support.v4.widget.NestedScrollView>

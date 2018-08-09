@@ -2,6 +2,7 @@
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="@dimen/_4sdp"
@@ -16,9 +17,11 @@
         android:layout_height="match_parent">
 
         <FrameLayout
-            android:layout_width="@dimen/_50sdp"
+            android:layout_width="65dp"
             android:id="@+id/frame_file"
-            android:layout_height="@dimen/_50sdp">
+            android:layout_height="65dp"
+            tools:layout_editor_absoluteY="30dp"
+            tools:layout_editor_absoluteX="10dp">
 
             <com.mikhaellopez.circularprogressbar.CircularProgressBar
                 android:id="@+id/cp_file"
@@ -55,14 +58,15 @@
             android:text="file.pdf"
             android:id="@+id/tv_file_filename"
             android:textColor="@android:color/black"
-            app:layout_constraintLeft_toRightOf="@id/frame_file"
+            app:layout_constraintLeft_toRightOf="@+id/frame_file"
             app:layout_constraintRight_toLeftOf="@+id/tv_file_size"
             android:layout_marginRight="@dimen/_2sdp"
             android:layout_marginLeft="@dimen/_5sdp"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="@dimen/_5sdp"
 
-            />
+            android:layout_marginStart="@dimen/_5sdp"
+            android:layout_marginEnd="@dimen/_2sdp" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -72,7 +76,7 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="@dimen/_5sdp"
-            />
+            android:layout_marginEnd="@dimen/_5sdp" />
 
 
         <TextView
@@ -81,34 +85,37 @@
             android:id="@+id/tv_file_text"
             android:layout_marginTop="@dimen/_5sdp"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintLeft_toRightOf="@id/frame_file"
+            app:layout_constraintLeft_toRightOf="@+id/frame_file"
             app:layout_constraintTop_toBottomOf="@+id/tv_file_filename"
             android:layout_marginRight="@dimen/_5sdp"
-            />
+            android:layout_marginEnd="@dimen/_5sdp" />
 
         <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/_20sdp"
+            android:layout_height="26dp"
             android:src="@drawable/like"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toLeftOf="@+id/iv_file_comment"
             android:id="@+id/iv_file_like"
-            app:layout_constraintTop_toBottomOf="@id/tv_file_text"
+            app:layout_constraintTop_toBottomOf="@+id/tv_file_text"
             android:layout_marginEnd="@dimen/_5sdp"
             />
         <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/_20sdp"
+            android:layout_height="26dp"
             android:src="@drawable/comment"
             android:id="@+id/iv_file_comment"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toLeftOf="@+id/tv_file_time"
-            app:layout_constraintTop_toBottomOf="@id/tv_file_text"
+            app:layout_constraintTop_toBottomOf="@+id/tv_file_text"
             android:layout_marginEnd="@dimen/_5sdp"
             />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/tv_file_text"
+            app:layout_constraintTop_toBottomOf="@+id/tv_file_text"
+            app:layout_constraintBottom_toBottomOf="parent"
             android:id="@+id/tv_file_time"
             android:textColor="@android:color/holo_green_dark"
             android:text="14:25"
@@ -116,6 +123,19 @@
             android:layout_marginTop="@dimen/_5sdp"
 
             />
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="MKV FILE"
+          android:textColor="@android:color/black"
+          android:textStyle="bold"
+          app:layout_constraintRight_toLeftOf="@+id/iv_file_like"
+          app:layout_constraintTop_toBottomOf="@+id/tv_file_text"
+          app:layout_constraintBottom_toBottomOf="parent"
+          android:layout_marginRight="@dimen/_5sdp"
+          android:id="@+id/tv_file_type"
+
+          />
 
 
 
