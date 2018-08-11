@@ -13,8 +13,10 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.developer.hrg.noralsalehin.InsideChanel.InsideActivity;
+import com.developer.hrg.noralsalehin.Models.DownloadBack;
 import com.developer.hrg.noralsalehin.Models.Message;
 import com.developer.hrg.noralsalehin.R;
+import com.developer.hrg.noralsalehin.fcm.NotificationUtils;
 import com.downloader.Error;
 import com.downloader.OnCancelListener;
 import com.downloader.OnDownloadListener;
@@ -34,8 +36,8 @@ import java.util.TimerTask;
  */
 
 public class DownloadService extends Service {
-    public static final String MESSAGES="messages";
     public static final String MESSAGE="message";
+    public static final String MESSAGE_ID="message_id";
     public static final String BUNDLE="bundle";
 
     public static final String ADDRESS="address";
@@ -76,7 +78,7 @@ public class DownloadService extends Service {
     public int onStartCommand(final Intent intent, int flags, int startId) {
 
 
-        int  message_id = intent.getIntExtra(MESSAGES,0);
+        final int  message_id = intent.getIntExtra(MESSAGE_ID,0);
         String address = intent.getStringExtra(ADDRESS);
         String filename = intent.getStringExtra(FILENAME);
         String dirpath = intent.getStringExtra(DIRPATH);
@@ -111,11 +113,7 @@ public class DownloadService extends Service {
                 .setOnProgressListener(new OnProgressListener() {
                     @Override
                     public void onProgress(Progress progress)  {
-
                         Long progressPercent = progress.currentBytes * 100 / progress.totalBytes;
-
-
-
                         //in qesmat vase inke ke darsad vaqti yedo
                         // ne raft bala ersal she
 
@@ -135,7 +133,16 @@ public class DownloadService extends Service {
                     public void onDownloadComplete() {
                         Intent intent = new Intent(BROADCAST_DL_FINISH);
                         intent.putExtra(FINISH_POSITION,position);
+                        intent.putExtra(MESSAGE_ID,message_id);
+                        intent.putExtra(CHANEL_ID,chanel_id);
+                        // inja save mikonim chon age ye vaqt to in activity naboodim vaziate downloade in moshakhash she
+                        userData.setCompleteState(1,message_id);
                         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                        if (NotificationUtils.isAppIsInBackground(context)) {
+                            // baraye peygirie vaziate download vaqti ke barnamee to backgrounde
+                            DownloadBack downloadBack = new DownloadBack(chanel_id,position);
+                            userData.insertDownloadBACK(downloadBack);
+                        }
                     }
 
                     @Override

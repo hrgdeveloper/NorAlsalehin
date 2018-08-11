@@ -64,6 +64,7 @@ public class NotificationUtils {
 
         final int icon = R.drawable.noralmobin_icon;
         int chanel_id = intent.getIntExtra("chanel_id" , 1);
+        int isnotify= intent.getIntExtra(Config.PUSH_NOTIFICATION,0);
 
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         final PendingIntent resultPendingIntent =
@@ -94,7 +95,7 @@ public class NotificationUtils {
             }
         } else {
             showSmallNotification(mBuilder, icon, title, message, timeStamp, resultPendingIntent, alarmSound);
-            if (MyApplication.getInstance().getUserData().getChanelSoundState(chanel_id)==1) {
+            if (MyApplication.getInstance().getUserData().getChanelSoundState(chanel_id)==1 || isnotify==1) {
                 playNotificationSound();
             }
 

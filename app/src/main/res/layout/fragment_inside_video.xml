@@ -47,7 +47,6 @@
         android:padding="@dimen/_5sdp"
         android:textColor="@android:color/white"
         android:textColorHint="@android:color/white"
-        android:hint="متن پیام"
         android:minLines="3" />
 </LinearLayout>
 

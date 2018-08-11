@@ -7,8 +7,11 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.webkit.DownloadListener;
 
 import com.developer.hrg.noralsalehin.Models.Chanel;
+import com.developer.hrg.noralsalehin.Models.Download;
+import com.developer.hrg.noralsalehin.Models.DownloadBack;
 import com.developer.hrg.noralsalehin.Models.Message;
 import com.developer.hrg.noralsalehin.Models.Notify;
 import com.developer.hrg.noralsalehin.Models.UnRead;
@@ -120,6 +123,7 @@ public class UserData extends SQLiteOpenHelper {
     public static final String MESSAGE_DOWLOAD_ID="dl_id";
     public static final String MESSAGE_DOWNLOAD_PERCENT="dl_percent";
     public static final String MESSAGE_AUDIO_PERCENT="audio_percent";
+    public static final String MESSAGE_COMPELETE="compelete";
     public static final String MESSAGE_UPDATED_AT="updated_at";
 
     String CREATE_TABLE_MESSAGE = "CREATE TABLE " + TABLE_MESSAGE+"( "+MESSAGE_ID+ " INTEGER PRIMARY KEY AUTOINCREMENT , "+
@@ -138,10 +142,42 @@ public class UserData extends SQLiteOpenHelper {
             MESSAGE_DOWLOAD_ID+ " INTEGER DEFAULT  0 ," +
             MESSAGE_DOWNLOAD_PERCENT+ " INTEGER DEFAULT 0 ,"+
             MESSAGE_AUDIO_PERCENT+ " INTEGER DEFAULT 0 , " +
+            MESSAGE_COMPELETE+ " INTEGER DEFAULT 0 ," +
             MESSAGE_UPDATED_AT + " TIMESTAMP NOT NULL)"
             ;
+//////////////////////////////////////////////////////DownloadsTable\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    //in jadvade vase peygrie downloadhaie ke baz vaghti internet qato o vast shod dobare edame download bedan
+public static final String TABLE_DOWNLOADS="downloads_table" ;
+    public static final String DOWNLOADS_ID="download_id" ;
+    public static final String DOWNLOADS_MESSAGE_ID="message_id" ;
+    public static final String DOWNLOADS_ADDRESS="address" ;
+    public static final String DOWNLOADS_POSITION="position" ;
+    public static final String DOWNLOADS_DIRPATH="dirpath";
+    public static final String DOWNLOADS_FILENAME="filename";
+    public static final String DOWNLOADS_MESSAGE="message";
+    public static final String DOWNLOADS_CHANEL_ID="chanel_id";
+
+    String CREATE_TABLE_DOWNLOADS = "CREATE TABLE " + TABLE_DOWNLOADS+"( "+DOWNLOADS_ID+ " INTEGER PRIMARY KEY AUTOINCREMENT , "+
+            DOWNLOADS_MESSAGE_ID+ " INTEGER NOT NULL , " +
+            DOWNLOADS_ADDRESS+ " TEXT NOT NULL , " +
+            DOWNLOADS_POSITION+ " INTEGER NOT NULL , " +
+            DOWNLOADS_DIRPATH+ " TEXT NOT NULL , " +
+            DOWNLOADS_FILENAME+ " TEXT NOT NULL , "+
+            DOWNLOADS_MESSAGE+" TEXT NOT NULL , " +
+            DOWNLOADS_CHANEL_ID+ " INTEGER NOT NULL ) ";
+
+ ////////////////////////////////////////////////////backgroundDownload\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    // in jadval vase sabte position itemhaie ke vaghti app to background hastan estefade mishe va baes mishe bedonim vaqti dobar app
+    // lunch shod kodom yeki az itemahye adapter bayad change beshan
+    public static final String TABLE_BACKGROUND_DOWNLOADS="back_downloads_table" ;
+    public static final String DOWNLOADS_BACK_ID="download_back_id" ;
+    public static final String DOWNLOADS_BACK_CHANEL_ID="chanel_id" ;
+    public static final String DOWNLOADS_BACK_POSITION="position";
 
 
+    String CREATE_TABLE_DOWNLOADS_BACK = "CREATE TABLE " + TABLE_BACKGROUND_DOWNLOADS+"( "+DOWNLOADS_BACK_ID+ " INTEGER PRIMARY KEY AUTOINCREMENT , "+
+            DOWNLOADS_BACK_CHANEL_ID+ " INTEGER NOT NULL , " +
+            DOWNLOADS_BACK_POSITION+ " INTEGER NOT NULL )";
 
 
 //////////////////////////////////////////////PositionTable\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -149,7 +185,6 @@ public class UserData extends SQLiteOpenHelper {
     public static final String POSITION_ID="_id";
     public static final String POSITION_CHANEL_ID="position_chanel_id";
     public static final String POSITION_NUMBER="position_number";
-
 
     String CREATE_TABLE_POSITION= "CREATE TABLE " + TABLE_POSITION+ " ("+POSITION_ID+" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
             +POSITION_CHANEL_ID+" INTEGER NOT NULL , "
@@ -171,6 +206,9 @@ public class UserData extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_TABLE_NOTIFY);
         sqLiteDatabase.execSQL(CREATE_TABLE_MESSAGE);
         sqLiteDatabase.execSQL(CREATE_TABLE_POSITION);
+        sqLiteDatabase.execSQL(CREATE_TABLE_DOWNLOADS);
+        sqLiteDatabase.execSQL(CREATE_TABLE_DOWNLOADS_BACK);
+
         sqLiteDatabase.execSQL("CREATE INDEX message_id_index ON " +TABLE_MESSAGE +  " ("+MESSAGE_MESSAGE_ID+");");
     }
 
@@ -186,6 +224,91 @@ public class UserData extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
 
     }
+    /////////////////////////////////////////////////////////////DownloadsFunction\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+     public Long insertDownload(Download download) {
+         ContentValues contentValues = new ContentValues();
+         contentValues.put(DOWNLOADS_MESSAGE_ID,download.getMessage_id());
+         contentValues.put(DOWNLOADS_ADDRESS,download.getAddress());
+         contentValues.put(DOWNLOADS_POSITION,download.getPosition());
+         contentValues.put(DOWNLOADS_DIRPATH,download.getDirpath());
+         contentValues.put(DOWNLOADS_FILENAME,download.getFilename());
+         contentValues.put(DOWNLOADS_MESSAGE,download.getMessage());
+         contentValues.put(DOWNLOADS_CHANEL_ID,download.getChanel_id());
+     return    sqLiteDatabase.insert(TABLE_DOWNLOADS,null,contentValues);
+
+     }
+    public boolean hasDownloadsData() {
+        long cnt  = DatabaseUtils.queryNumEntries(sqLiteDatabase, TABLE_DOWNLOADS);
+        return cnt > 0;
+    }
+    public ArrayList<Download> getDownloads() {
+        ArrayList<Download> downloads = new ArrayList<>();
+        Cursor cursor = sqLiteDatabase.query(TABLE_DOWNLOADS,new String [] {DOWNLOADS_MESSAGE_ID,DOWNLOADS_ADDRESS,DOWNLOADS_POSITION
+        ,DOWNLOADS_DIRPATH,DOWNLOADS_FILENAME,DOWNLOADS_MESSAGE,DOWNLOADS_CHANEL_ID
+        },null,null,null,null,null);
+        if (cursor.getCount()>0) {
+            cursor.moveToFirst();
+            do {
+                int message_id = cursor.getInt(cursor.getColumnIndexOrThrow(DOWNLOADS_MESSAGE_ID));
+                String address = cursor.getString(cursor.getColumnIndexOrThrow(DOWNLOADS_ADDRESS));
+                int position = cursor.getInt(cursor.getColumnIndexOrThrow(DOWNLOADS_POSITION));
+                String  dirpath = cursor.getString(cursor.getColumnIndexOrThrow(DOWNLOADS_DIRPATH));
+                String filename = cursor.getString(cursor.getColumnIndexOrThrow(DOWNLOADS_FILENAME));
+                String message = cursor.getString(cursor.getColumnIndexOrThrow(DOWNLOADS_MESSAGE));
+                int  chanel_id = cursor.getInt(cursor.getColumnIndexOrThrow(DOWNLOADS_CHANEL_ID));
+                Download download = new Download(message_id,address,position,dirpath,filename,message,chanel_id);
+                downloads.add(download);
+            }while (cursor.moveToNext());
+            return downloads;
+        }else {
+            return  null ;
+        }
+
+    }
+    public Integer deleteSingleDownload(int message_id) {
+        return sqLiteDatabase.delete(TABLE_DOWNLOADS,message_id+ " LIKE ? ",new String[]{String.valueOf(message_id)});
+    }
+
+    public Integer deleteDownloas(){
+        return sqLiteDatabase.delete(TABLE_DOWNLOADS,null,null);
+    }
+///////////////////////////////////////////////////////////////DownloadBackFunctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
+        public Long insertDownloadBACK(DownloadBack downloadBack) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DOWNLOADS_BACK_CHANEL_ID,downloadBack.getChanel_id());
+        contentValues.put(DOWNLOADS_BACK_POSITION,downloadBack.getPosition());
+        return    sqLiteDatabase.insert(TABLE_BACKGROUND_DOWNLOADS,null,contentValues);
+    }
+    public boolean hasDownloadsBACKData() {
+        long cnt  = DatabaseUtils.queryNumEntries(sqLiteDatabase, TABLE_BACKGROUND_DOWNLOADS);
+        return cnt > 0;
+    }
+    public ArrayList<DownloadBack> getDownloadsBacks() {
+        ArrayList<DownloadBack> downloadsBacks = new ArrayList<>();
+        Cursor cursor = sqLiteDatabase.query(TABLE_BACKGROUND_DOWNLOADS,new String [] {DOWNLOADS_BACK_CHANEL_ID,DOWNLOADS_BACK_POSITION},null,null,null,null,null);
+        if (cursor.getCount()>0) {
+            cursor.moveToFirst();
+            do {
+                int position = cursor.getInt(cursor.getColumnIndexOrThrow(DOWNLOADS_BACK_POSITION));
+                int  chanel_id = cursor.getInt(cursor.getColumnIndexOrThrow(DOWNLOADS_BACK_CHANEL_ID));
+                DownloadBack downloadback = new DownloadBack(chanel_id,position);
+                downloadsBacks.add(downloadback);
+            }while (cursor.moveToNext());
+            return downloadsBacks;
+        }else {
+            return  null ;
+        }
+
+    }
+
+    public Integer deleteDownloasBack(){
+        return sqLiteDatabase.delete(TABLE_BACKGROUND_DOWNLOADS,null,null);
+    }
+
+
     ////////////////////////////////////////////////////////////////USerFunctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     public void addUser(User user) {
         ContentValues contentValues = new ContentValues();
@@ -468,7 +591,7 @@ public class UserData extends SQLiteOpenHelper {
         Cursor cursor =    sqLiteDatabase.rawQuery("select sub."+MESSAGE_MESSAGE_ID+" , sub."+MESSAGE_ADMIN_ID+", sub."+MESSAGE_CHANEL_ID+" ,\n" +
                 "                sub."+MESSAGE_MESSAGE+" , sub."+MESSAGE_TYPE+",sub."+MESSAGE_THUMB+",sub."+MESSAGE_LENTH+"" +
                 ",sub."+MESSAGE_TIME+",sub."+MESSAGE_FILE_NAME+",sub."+MESSAGE_URL+",sub."+MESSAGE_UPDATED_AT+" ,sub."+MESSAGE_DOWLOAD_STATE+
-             " ,sub."+MESSAGE_DOWNLOAD_PERCENT  +  ", sub."+MESSAGE_DOWLOAD_ID+ " , sub."+MESSAGE_AUDIO_PERCENT + " , sub."+MESSAGE_LIKED+" from\n" +
+             " ,sub."+MESSAGE_DOWNLOAD_PERCENT  +  ", sub."+MESSAGE_DOWLOAD_ID+ " , sub."+MESSAGE_AUDIO_PERCENT +" ,sub."+MESSAGE_COMPELETE+ " , sub."+MESSAGE_LIKED+" from\n" +
                 "                (select * from " +  TABLE_MESSAGE + " where " + MESSAGE_CHANEL_ID + " like "+ chanel_id+ "  ORDER by "  +  MESSAGE_MESSAGE_ID+ " DESC) sub\n" +
                 "         order by sub." + MESSAGE_MESSAGE_ID+" ASC",null,null);
 
@@ -496,9 +619,9 @@ public class UserData extends SQLiteOpenHelper {
                 Integer dl_id = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_DOWLOAD_ID));
                 Integer dl_percent = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_DOWNLOAD_PERCENT));
                 Integer audio_percent = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_AUDIO_PERCENT));
+                Integer complete = cursor.getInt(cursor.getColumnIndexOrThrow(MESSAGE_COMPELETE));
                 Message message_temp = new Message(message_id,admin_id,chanel_id_temp,message,thumb,type,lenth,time,filename,
-                        url ,updated_at,liked,dl_state,dl_id,dl_percent,audio_percent);
-
+                        url ,updated_at,liked,dl_state,dl_id,dl_percent,audio_percent,complete);
                 messages.add(message_temp);
             }while (cursor.moveToNext());
             return messages;
@@ -546,6 +669,13 @@ public class UserData extends SQLiteOpenHelper {
         contentValues.put(MESSAGE_DOWLOAD_STATE,0);
         sqLiteDatabase.update(TABLE_MESSAGE,contentValues,null,null);
     }
+    public void setCompleteState(int state , int message_id) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MESSAGE_COMPELETE,state);
+        sqLiteDatabase.update(TABLE_MESSAGE,contentValues,MESSAGE_MESSAGE_ID+" LIKE ? " , new String[]{String.valueOf(message_id)});
+
+    }
+
     public void setLikeState(int likeState,int message_id) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MESSAGE_LIKED,likeState);

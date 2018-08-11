@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -17,12 +18,17 @@ import android.widget.TextView;
 
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.developer.hrg.noralsalehin.Helps.Config;
 import com.developer.hrg.noralsalehin.Helps.MyApplication;
+import com.developer.hrg.noralsalehin.Helps.UserData;
 import com.developer.hrg.noralsalehin.Models.Message;
 import com.developer.hrg.noralsalehin.R;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
@@ -46,12 +52,14 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     ArrayList<Message> messages;
     ClickListener clickListener;
     int textSize ;
-
-    public Message_Adapter(Context context, ArrayList<Message> messages) {
+   UserData userData;
+    public Message_Adapter(Context context, ArrayList<Message> messages , UserData userData) {
         this.context = context;
         this.messages = messages;
         setHasStableIds(true);
         textSize= MyApplication.getInstance().getSettingPref().getTextSize();
+        this.userData=userData;
+
     }
 
     public interface ClickListener {
@@ -118,12 +126,7 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
-        Message message = messages.get(position);
-        message.setDl_state( message.getDl_state()==null? 0 : message.getDl_state());
-        message.setDl_percent( message.getDl_percent()==null? 0 : message.getDl_percent());
-        message.setDl_id( message.getDl_id()==null? 0 : message.getDl_id());
-        message.setAudio_percent(message.getAudio_percent()==null? 0 : message.getAudio_percent());
-
+        final Message message = messages.get(position);
         String time = "00:00";
         Date date = null;
         try {
@@ -147,19 +150,36 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         //////////////////////////////////////////////////Picture\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
         else if (holder instanceof ImageHolder) {
 
-            if (isFileExists(Config.Folders.IMAGES, message.getUrl())) {
+       //     if (isFileExists(Config.Folders.IMAGES, message.getUrl())) {
+                if (message.getComplete()==1) {
+                    Glide.with(context).load(getFile(Config.Folders.IMAGES, message.getUrl())).apply(new RequestOptions()
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    ).listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            message.setComplete(0);
+                            message.setDl_state(0);
+                            userData.setCompleteState(0,message.getMessage_id());
+                            notifyItemChanged(position);
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            return false;
+                        }
+                    }) .into(new SimpleTarget<Drawable>() {
+                        @Override
+                        public void onResourceReady(Drawable resource, Transition<? super Drawable> transition) {
+                            ((ImageHolder) holder).iv_picture.setImageDrawable(resource);
+                        }
+                    });
+
+
                 ((ImageHolder) holder).circularProgressBar.setVisibility(View.GONE);
                 ((ImageHolder) holder).iv_download.setVisibility(View.GONE);
                 ((ImageHolder) holder).view_fake_white.setVisibility(View.GONE);
-                                Glide.with(context).load(getFile(Config.Folders.IMAGES, message.getUrl())).apply(new RequestOptions()
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
 
-                ).into(new SimpleTarget<Drawable>() {
-                    @Override
-                    public void onResourceReady(Drawable resource, Transition<? super Drawable> transition) {
-                        ((ImageHolder) holder).iv_picture.setImageDrawable(resource);
-                    }
-                });
 
              //  ((ImageHolder) holder).iv_picture.setImageURI(Uri.fromFile(getFile(Config.Folders.IMAGES, message.getUrl())));
 
@@ -221,8 +241,12 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             ).into(((VideoHolder) holder).iv_picture);
 
 
-            if (isFileExists(Config.Folders.VIDEOS, message.getUrl())
-                    ) {
+
+            if (message.getComplete()==1)
+
+            //    if (isFileExists(Config.Folders.VIDEOS, message.getUrl()))
+
+            {
                 ((VideoHolder) holder).circularProgressBar.setVisibility(View.INVISIBLE);
                 ((VideoHolder) holder).iv_download.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.play));
             } else {
@@ -230,7 +254,6 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
                 ((VideoHolder) holder).iv_download.setVisibility(View.VISIBLE);
                 ((VideoHolder) holder).circularProgressBar.setVisibility(View.VISIBLE);
-
 
                 if (message.getDl_state()==0) {
                     Log.e("adapter","pause mishe "+position);
@@ -265,7 +288,8 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 ((AudioHolder) holder).iv_like.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.like));
             }
 
-            if (isFileExists(Config.Folders.AUDIOS, message.getUrl()) ) {
+     //      if (isFileExists(Config.Folders.AUDIOS, message.getUrl()) ) {
+            if (message.getComplete()==1) {
                 ((AudioHolder) holder).circularProgressBar.setVisibility(View.INVISIBLE);
 
                 //yani dare play mishe
@@ -314,7 +338,8 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             } else {
                 ((FileHolder) holder).iv_like.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.like));
             }
-            if (isFileExists(Config.Folders.DOCUMENTS, message.getUrl())) {
+            if (message.getComplete()==1) {
+       //     if (isFileExists(Config.Folders.DOCUMENTS, message.getUrl())) {
                 ((FileHolder) holder).circularProgressBar.setVisibility(View.INVISIBLE);
                 ((FileHolder) holder).iv_download.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.file));
             } else {
@@ -453,6 +478,7 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
         File file = new File(Environment.getExternalStorageDirectory() + "/NoorAlSalehin/" + folderName, filename);
         return file.exists();
+
     }
 
     public File getFile(String folderName, String filename) {

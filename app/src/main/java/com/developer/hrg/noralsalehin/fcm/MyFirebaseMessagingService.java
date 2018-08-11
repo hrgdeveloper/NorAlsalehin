@@ -112,6 +112,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     Gson gson = new Gson();
                     Message message = gson.fromJson(payload.toString(),Message.class);
                     message.setLiked(0);
+                    message.setDl_percent(0);
+                    message.setDl_id(0);
+                    message.setDl_state(0);
+
                     if (!NotificationUtils.isAppIsInBackground(getApplicationContext())) {
                         Intent intent = new Intent(Config.PUSH_NEW_MESSAGE);
                         intent.putExtra("message",message);
@@ -161,6 +165,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     String curTime = String.format("%02d:%02d", calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE));
                     String timestamp = shamsi_date + " : " +  curTime;
                     Intent resultIntent = new Intent(getApplicationContext(), MainActivity.class);
+                    resultIntent.putExtra(Config.PUSH_NOTIFICATION,1);
                     showNotificationMessageWithBigImage(this,title,message,timestamp,resultIntent,Config.NOTIFY_ADDRESS+imageURL);
                 }
 

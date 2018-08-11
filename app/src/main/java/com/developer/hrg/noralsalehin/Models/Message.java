@@ -37,8 +37,19 @@ public class Message implements Parcelable {
     String filename ;
     @SerializedName("liked")
     Integer liked ;
+    Integer dl_state  ;
+    Integer dl_id ;
+    Integer dl_percent ;
+    Integer audio_percent  ;
+    Integer complete ;
 
-    Integer dl_state = 0 ;
+    public Integer getComplete() {
+        return complete;
+    }
+
+    public void setComplete(Integer complete) {
+        this.complete = complete;
+    }
 
     public Integer getAudio_percent() {
         return audio_percent;
@@ -48,10 +59,7 @@ public class Message implements Parcelable {
         this.audio_percent = audio_percent;
     }
 
-    Integer dl_id = 0;
 
-    Integer dl_percent = 0;
-    Integer audio_percent = 0 ;
 
     public Integer getDl_percent() {
         return dl_percent;
@@ -93,7 +101,7 @@ public class Message implements Parcelable {
     }
 
     public Message(int message_id, int admin_id, int chanel_id, String message, String thumb, int type, Long lenth, String time , String filename, String url
-     , String updated_at , int liked , Integer dl_state , Integer dl_id , Integer dl_percent, Integer audio_percent ) {
+     , String updated_at , int liked , Integer dl_state , Integer dl_id , Integer dl_percent, Integer audio_percent,Integer complete ) {
         this.message_id = message_id;
         this.admin_id = admin_id;
         this.chanel_id = chanel_id;
@@ -110,6 +118,7 @@ public class Message implements Parcelable {
         this.dl_id=dl_id;
         this.dl_percent=dl_percent;
         this.audio_percent=audio_percent;
+        this.complete=complete;
     }
 
 
@@ -220,6 +229,7 @@ public class Message implements Parcelable {
         dl_id=in.readInt();
         dl_percent=in.readInt();
         audio_percent=in.readInt();
+        complete=in.readInt();
     }
 
     @Override
@@ -246,7 +256,7 @@ public class Message implements Parcelable {
         dest.writeInt(dl_id);
         dest.writeInt(dl_percent);
         dest.writeInt(audio_percent);
-
+        dest.writeInt(complete);
 
     }
 

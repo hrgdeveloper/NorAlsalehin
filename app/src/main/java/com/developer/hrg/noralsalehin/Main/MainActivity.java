@@ -24,11 +24,14 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -45,6 +48,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.cache.DiskLruCacheWrapper;
 import com.bumptech.glide.request.RequestOptions;
 import com.developer.hrg.noralsalehin.Helps.ApiInterface;
 import com.developer.hrg.noralsalehin.Helps.Apiclient;
@@ -59,6 +63,7 @@ import com.developer.hrg.noralsalehin.Helps.UserData;
 import com.developer.hrg.noralsalehin.Helps.UserInfo;
 import com.developer.hrg.noralsalehin.InsideChanel.InsideActivity;
 import com.developer.hrg.noralsalehin.Models.Chanel;
+import com.developer.hrg.noralsalehin.Models.Download;
 import com.developer.hrg.noralsalehin.Models.Message;
 import com.developer.hrg.noralsalehin.Models.Notify;
 import com.developer.hrg.noralsalehin.Models.UnRead;
@@ -83,10 +88,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements GetChanelsAdapter.MyClickListener {
-    public final int GALLERY_REQUEST = 100 ;
-    public final int  RESULT_LOAD_IMG_Gallery = 101 ;
-    CircleImageView iv_profile ;
-    File profile_file = null ;
+    public final int GALLERY_REQUEST = 100;
+    public final int RESULT_LOAD_IMG_Gallery = 101;
+    CircleImageView iv_profile;
+    File profile_file = null;
     RecyclerView recyclerView;
     User user;
     UserData userData;
@@ -96,30 +101,58 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     UserInfo userInfo;
     TextView tv_toolbar;
     Toolbar toolbar;
-    boolean firstTimeLunchForBroadCast = true  ;
-    boolean firstTimeLunchForOnResume = true  ;
+    boolean firstTimeLunchForBroadCast = true;
+    boolean firstTimeLunchForOnResume = true;
     private BroadcastReceiver reciverChanelsTask;
-    NetworkChangeReceiver networkChangeReceiver ;
-    TextView tv_noChanel ;
-    DrawerLayout drawerLayout ;
-    NavigationView navigationView ;
+    NetworkChangeReceiver networkChangeReceiver;
+    NetworkChangeReceiverForDownloads networkChangeReciverFordownlaod;
+    TextView tv_noChanel;
+    DrawerLayout drawerLayout;
+    NavigationView navigationView;
     ActionBarDrawerToggle drawerToggle;
-    ImageCompression imageCompression ;
-    public static final int STORAGE_REQUEST =102;
+    ImageCompression imageCompression;
+    public static final int STORAGE_REQUEST = 102;
 
     private String TAG = MainActivity.class.getSimpleName();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
         FirebaseMessaging.getInstance().subscribeToTopic(Config.TOPIC_GLOBAL);
         defineView();
         defineClasees();
+        // vase download ha ye reciver joda dar nazar migirim ke vaghti activity baste shod in reciver qat nashe o faqat
+        //vaqti app close mishe reciver ham bahash qat mishe
+
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkChangeReciverFordownlaod, filter);
+
         headerFunction();
+        // vase pak kardane download haye temp
+        if (userData.hasDownloadsData()) {
+//            ArrayList<Download> downloads = new ArrayList<>();
+//            downloads.addAll(userData.getDownloads());
+//            AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+//            StringBuffer stringBuffer = new StringBuffer();
+//            stringBuffer.append(downloads.get(0).getAddress() + " : " + downloads.get(0).getChanel_id() + " : " + downloads.get(0).getDirpath() + " : " +
+//                    downloads.get(0).getFilename() + " : " + downloads.get(0).getMessage() + " : " + downloads.get(0).getPosition() + " : " + downloads.get(0)
+//                    .getMessage_id());
+//            alert.setTitle("inja");
+//            alert.setMessage(stringBuffer.toString());
+//            alert.show();
+            userData.deleteDownloas();
+        }
 
-        drawerToggle=new ActionBarDrawerToggle(MainActivity.this,drawerLayout,toolbar,R.string.app_name,R.string.app_name);
+        if (userData.hasDownloadsBACKData()) {
+            userData.deleteDownloasBack();
+        }
+
+
+        drawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, toolbar, R.string.app_name, R.string.app_name);
         drawerToggle.syncState();
-
         adaptetChanels = new GetChanelsAdapter(MainActivity.this, chanels, unreads);
         adaptetChanels.setMyClickListener(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
@@ -132,27 +165,22 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         }
 
 
-
-
-
-
         if (InternetCheck.isOnline(MainActivity.this)) {
             getChanels();
 
         }
 
 
-        reciverChanelsTask=new BroadcastReceiver() {
+        reciverChanelsTask = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(Config.PUSH_NEW_CHANEL)) {
-                      handleNewChanel(intent);
+                    handleNewChanel(intent);
 
-                }else if (intent.getAction().equals(Config.PUSH_NEW_MESSAGE))
-                {
+                } else if (intent.getAction().equals(Config.PUSH_NEW_MESSAGE)) {
                     Message message = intent.getParcelableExtra("message");
 
-                     updateRows(message);
+                    updateRows(message);
                 }
 
             }
@@ -184,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                         return true;
 
                     default:
-                        Toast.makeText(getApplicationContext(),"خطلا",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "خطلا", Toast.LENGTH_SHORT).show();
                         return true;
                 }
 
@@ -197,10 +225,10 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
     @Override
     public void onBackPressed() {
-        profile_file=null;
+        profile_file = null;
         if (drawerLayout.isDrawerOpen(Gravity.START)) {
             drawerLayout.closeDrawer(Gravity.START);
-        }else {
+        } else {
             super.onBackPressed();
         }
 
@@ -210,21 +238,21 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     protected void onResume() {
         super.onResume();
 
-        if (Build.VERSION.SDK_INT>=23) {
-            askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,STORAGE_REQUEST);
-        }else {
+        if (Build.VERSION.SDK_INT >= 23) {
+            askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_REQUEST);
+        } else {
 
             creatFolders();
         }
 
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(networkChangeReceiver, filter);
-        LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(reciverChanelsTask,new IntentFilter(Config.PUSH_NEW_CHANEL));
-        LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(reciverChanelsTask,new IntentFilter(Config.PUSH_NEW_MESSAGE));
+        LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(Config.PUSH_NEW_CHANEL));
+        LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(Config.PUSH_NEW_MESSAGE));
 
         if (firstTimeLunchForOnResume) {
-            firstTimeLunchForOnResume=false;
-        }else {
+            firstTimeLunchForOnResume = false;
+        } else {
             if (userData.hasUnreadData() && userData.hasChanelsData()) {
                 unreads.clear();
                 chanels.clear();
@@ -238,20 +266,22 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         }
 
 
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(networkChangeReceiver);
+        LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(reciverChanelsTask);
+        super.onPause();
 
     }
 
-
-
-
-
-
     public void creatFolders() {
-        File mainfoldrs = new File(Environment.getExternalStorageDirectory(),"NoorAlSalehin");
-        File images = new File(mainfoldrs,"Images");
-        File autdios = new File(mainfoldrs,"Auidos");
-        File videos = new File(mainfoldrs,"Videos");
-        File doucmnets = new File(mainfoldrs,"Documnets");
+        File mainfoldrs = new File(Environment.getExternalStorageDirectory(), "NoorAlSalehin");
+        File images = new File(mainfoldrs, "Images");
+        File autdios = new File(mainfoldrs, "Auidos");
+        File videos = new File(mainfoldrs, "Videos");
+        File doucmnets = new File(mainfoldrs, "Documnets");
         if (!mainfoldrs.exists()) {
             mainfoldrs.mkdir();
         }
@@ -269,38 +299,29 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         }
     }
 
-    @Override
-    protected void onPause() {
-        unregisterReceiver(networkChangeReceiver);
-        LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(reciverChanelsTask);
-
-        super.onPause();
-
-    }
-
     public void updateRows(Message message) {
         for (Chanel chanel : chanels) {
-            if (chanel.getChanel_id()==message.getChanel_id()) {
+            if (chanel.getChanel_id() == message.getChanel_id()) {
                 // aval chaneli ke payam omade vasaho migirim
                 int index = chanels.indexOf(chanel);
 
-             //moshakhaste chanel ro ba tavajoh be message update mikonim
+                //moshakhaste chanel ro ba tavajoh be message update mikonim
                 chanel.setUsername(message.getAdmin_name());
                 chanel.setLast_message(message.getMessage());
                 chanel.setType(message.getType());
                 chanel.setUpdated_at(message.getUpdated_at());
-                chanel.setCount(chanel.getCount()+1);
-                chanels.set(index,chanel);
+                chanel.setCount(chanel.getCount() + 1);
+                chanels.set(index, chanel);
                 userData.updateChanel(chanel);
 
-                 //tedade payam haye khonde nashode on chanel ro migirim
+                //tedade payam haye khonde nashode on chanel ro migirim
                 int unreadCount = userData.getUnreadCount(message.getChanel_id());
                 //yeki behesh ezafe mikonim  o to database va to list update mikoim
                 unreadCount++;
                 UnRead unRead = unreads.get(index);
                 unRead.setCount(unreadCount);
-                unreads.set(index,unRead);
-                userData.updateUnread(unreadCount,message.getChanel_id());
+                unreads.set(index, unRead);
+                userData.updateUnread(unreadCount, message.getChanel_id());
                 break;
             }
         }
@@ -309,17 +330,19 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
     public void defineView() {
         tv_toolbar = (TextView) findViewById(R.id.tv_toolbar);
-        tv_noChanel=(TextView)findViewById(R.id.tv_main_noChanel);
+        tv_noChanel = (TextView) findViewById(R.id.tv_main_noChanel);
         recyclerView = (RecyclerView) findViewById(R.id.rv_main);
-        drawerLayout=(DrawerLayout)findViewById(R.id.drawerlayout);
-        navigationView=(NavigationView)findViewById(R.id.navigationview);
-        toolbar=(Toolbar)findViewById(R.id.toolbar_main);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawerlayout);
+        navigationView = (NavigationView) findViewById(R.id.navigationview);
+        toolbar = (Toolbar) findViewById(R.id.toolbar_main);
     }
+
     public void defineClasees() {
         networkChangeReceiver = new NetworkChangeReceiver();
+        networkChangeReciverFordownlaod = new NetworkChangeReceiverForDownloads();
         userData = new UserData(MainActivity.this);
         userInfo = new UserInfo(MainActivity.this);
-        imageCompression=new ImageCompression(MainActivity.this);
+        imageCompression = new ImageCompression(MainActivity.this);
         user = userData.getUser();
     }
 
@@ -346,10 +369,10 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                 } else {
                     if (response.body().isError()) {
                         tv_toolbar.setText(R.string.toolbar_text);
-                      tv_noChanel.setVisibility(View.VISIBLE);
+                        tv_noChanel.setVisibility(View.VISIBLE);
                     } else {
                         tv_noChanel.setVisibility(View.GONE);
-                        tv_toolbar.setText( R.string.toolbar_text);
+                        tv_toolbar.setText(R.string.toolbar_text);
                         userData.deleteChanels();
                         chanels.clear();
                         chanels.addAll(response.body().getChanels());
@@ -363,36 +386,35 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 //
 //                            }
 //                            userData.addUnReads(unreads);
-                  //      } else {
-                            if (unreads.size() < chanels.size()) {
-                                for (int i = unreads.size() ; i < chanels.size(); i++) {
-                                    UnRead unRead = new UnRead(chanels.get(i).getChanel_id(), chanels.get(i).getCount(),0);
-                                    userData.addUnread(unRead);
-                                    Notify notify = new Notify(chanels.get(i).getChanel_id(),1,1);
-                                    userData.addNotify(notify);
-                               //     unreads.add(unRead);
+                        //      } else {
+                        if (unreads.size() < chanels.size()) {
+                            for (int i = unreads.size(); i < chanels.size(); i++) {
+                                UnRead unRead = new UnRead(chanels.get(i).getChanel_id(), chanels.get(i).getCount(), 0);
+                                userData.addUnread(unRead);
+                                Notify notify = new Notify(chanels.get(i).getChanel_id(), 1, 1);
+                                userData.addNotify(notify);
+                                //     unreads.add(unRead);
 
-                                }
-                                unreads.clear();
-                                unreads.addAll(userData.getAllunReads());
+                            }
+                            unreads.clear();
+                            unreads.addAll(userData.getAllunReads());
+                        }
+
+                        // in qestmat vase ine ke agar moghei ke offline boodim payame jadidi ezafe shode check kone bebine chnata payam jadid ezaf shode
+
+                        for (int i = 0; i < unreads.size(); i++) {
+                            int sum = unreads.get(i).getCount() + unreads.get(i).getReadCount();
+                            if (sum < chanels.get(i).getCount()) {
+                                int ekhtelaf = chanels.get(i).getCount() - sum;
+                                userData.updateUnread(unreads.get(i).getCount() + ekhtelaf, chanels.get(i).getChanel_id());
+                                UnRead tempUnread = new UnRead(unreads.get(i).getChanel_id(), unreads.get(i).getCount() + ekhtelaf, unreads.get(i).getReadCount());
+                                unreads.set(i, tempUnread);
                             }
 
-                       // in qestmat vase ine ke agar moghei ke offline boodim payame jadidi ezafe shode check kone bebine chnata payam jadid ezaf shode
-
-                       for (int i=0 ; i<unreads.size() ; i++) {
-                            int sum = unreads.get(i).getCount()+unreads.get(i).getReadCount();
-                           if (sum < chanels.get(i).getCount()) {
-                               int ekhtelaf = chanels.get(i).getCount() - sum;
-                                 userData.updateUnread(unreads.get(i).getCount()+ekhtelaf,chanels.get(i).getChanel_id());
-                                  UnRead tempUnread = new UnRead(unreads.get(i).getChanel_id(),unreads.get(i).getCount()+ekhtelaf,unreads.get(i).getReadCount());
-                               unreads.set(i,tempUnread);
-                           }
-
-                       }
+                        }
 
 
-
-          //              }
+                        //              }
                         subscribeToAllChanels(chanels);
                         adaptetChanels.notifyDataSetChanged();
                     }
@@ -403,7 +425,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
             @Override
             public void onFailure(Call<SimpleResponse> call, Throwable t) {
                 tv_toolbar.setText(R.string.toolbar_text);
-              Log.e(TAG,t.getMessage()+" ");
+                Log.e(TAG, t.getMessage() + " ");
                 if (!userData.hasUnreadData() && !userData.hasChanelsData()) {
                     tv_noChanel.setVisibility(View.VISIBLE);
                 }
@@ -415,12 +437,11 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     }
 
 
+    public void subscribeToAllChanels(ArrayList<Chanel> chanels) {
+        for (Chanel chanel : chanels) {
+            FirebaseMessaging.getInstance().subscribeToTopic(Config.TOPIC_CHANEL + chanel.getChanel_id());
 
-    public void subscribeToAllChanels(ArrayList<Chanel> chanels){
-    for (Chanel chanel : chanels) {
-        FirebaseMessaging.getInstance().subscribeToTopic(Config.TOPIC_CHANEL+chanel.getChanel_id());
-
-    }
+        }
     }
 
     // az recivver akharin chanele ezafe shodaro migirim o be list ezafe mionim
@@ -429,8 +450,8 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         Chanel chanel = (Chanel) intent.getParcelableExtra("chanel");
         chanels.add(chanel);
         // meghdare khande shodaro barabe ba 0 mizarim chon hanooz messagi khande nashode
-        UnRead unread = new UnRead(chanel.getChanel_id(),chanel.getCount(),0);
-        Notify notify = new Notify(chanel.getChanel_id(),1,1);
+        UnRead unread = new UnRead(chanel.getChanel_id(), chanel.getCount(), 0);
+        Notify notify = new Notify(chanel.getChanel_id(), 1, 1);
         unreads.add(unread);
         userData.addChanel(chanel);
         userData.addUnread(unread);
@@ -442,126 +463,131 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     public void chanel_clicked(int position, View view) {
         Chanel chanel = chanels.get(position);
         Intent intent = new Intent(MainActivity.this, InsideActivity.class);
-        intent.putExtra("chanel",chanel);
+        intent.putExtra("chanel", chanel);
         startActivity(intent);
         userData.updateRead(unreads.get(position).getCount(), unreads.get(position).getReadCount(), unreads.get(position).getChanel_id());
 
     }
 
 
-
     // vase zamani ke dobare connect mishe . check mikonim age activiry bare avaleshe run shode in code ejra nashe
 
     public class NetworkChangeReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (firstTimeLunchForBroadCast) {
-                firstTimeLunchForBroadCast=false;
+                firstTimeLunchForBroadCast = false;
+            } else {
+                if (InternetCheck.isOnline(MainActivity.this)) {
 
-            }else
-                {
-                    if (InternetCheck.isOnline(MainActivity.this)){
-
-                            if (userData.hasUnreadData() && userData.hasChanelsData()) {
-                                unreads.clear();
-                                chanels.clear();
-                                unreads.addAll(userData.getAllunReads());
-                                chanels.addAll(userData.getAllChanels());
-                                adaptetChanels.notifyDataSetChanged();
-                            }
-                            getChanels();
-
+                    if (userData.hasUnreadData() && userData.hasChanelsData()) {
+                        unreads.clear();
+                        chanels.clear();
+                        unreads.addAll(userData.getAllunReads());
+                        chanels.addAll(userData.getAllChanels());
+                        adaptetChanels.notifyDataSetChanged();
                     }
+                    getChanels();
                 }
-
-
-
+            }
         }
-
-
     }
-    public void  headerFunction() {
+
+    public class NetworkChangeReceiverForDownloads extends BroadcastReceiver {
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+
+            if (InternetCheck.isOnline(MainActivity.this)) {
+                Toast.makeText(context, "connecte", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(context, "khamoshe", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+
+    public void headerFunction() {
         View view = navigationView.getHeaderView(0);
-         CircleImageView iv_profile = (CircleImageView)view.findViewById(R.id.iv_header_profilePic);
+        CircleImageView iv_profile = (CircleImageView) view.findViewById(R.id.iv_header_profilePic);
 
 
-        if (user.getPic_thumb()!=null) {
+        if (user.getPic_thumb() != null) {
 
-            Glide.with(MainActivity.this).load(Config.PROFILE_PIC_THUMB_ADDRESS+user.getPic_thumb()).apply(new RequestOptions().placeholder(R.drawable.profile).error(R.drawable.profile)
+            Glide.with(MainActivity.this).load(Config.PROFILE_PIC_THUMB_ADDRESS + user.getPic_thumb()).apply(new RequestOptions().placeholder(R.drawable.profile).error(R.drawable.profile)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
             ).into(iv_profile);
         }
 
 
         final String username = userData.getUser().getUsername();
-        LinearLayout linearlayout = (LinearLayout)view.findViewById(R.id.linear_header);
-        Button btn_send=(Button)view.findViewById(R.id.btn_header_sendusername);
-        TextView tv_username = (TextView)view.findViewById(R.id.tv_header_username);
-        TextView tv_number = (TextView)view.findViewById(R.id.tv_header_number);
-        final       EditText et_username = (EditText)view.findViewById(R.id.et_header_username);
+        LinearLayout linearlayout = (LinearLayout) view.findViewById(R.id.linear_header);
+        Button btn_send = (Button) view.findViewById(R.id.btn_header_sendusername);
+        TextView tv_username = (TextView) view.findViewById(R.id.tv_header_username);
+        TextView tv_number = (TextView) view.findViewById(R.id.tv_header_number);
+        final EditText et_username = (EditText) view.findViewById(R.id.et_header_username);
         tv_number.setText(user.getMobile());
 
         if (username.equalsIgnoreCase("e")) {
             linearlayout.setVisibility(View.VISIBLE);
             btn_send.setVisibility(View.VISIBLE);
             et_username.setVisibility(View.VISIBLE);
+            et_username.setFilters(new InputFilter[]{getUsernameFilter()});
             tv_username.setVisibility(View.GONE);
-           btn_send.setOnClickListener(new View.OnClickListener() {
-               @Override
-               public void onClick(View view) {
-                  if (!InternetCheck.isOnline(MainActivity.this)) {
-                      Toast.makeText(getApplication(), "عدم دسترسی به اینترنت", Toast.LENGTH_SHORT).show();
-                  }else {
-                      final String typed_username = et_username.getText().toString();
-                      if (TextUtils.isEmpty(typed_username)) {
-                          Toast.makeText(getApplication(), "نام کاربری نمیتواند خالی بماند", Toast.LENGTH_SHORT).show();
+            btn_send.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (!InternetCheck.isOnline(MainActivity.this)) {
+                        Toast.makeText(getApplication(), "عدم دسترسی به اینترنت", Toast.LENGTH_SHORT).show();
+                    } else {
+                        final String typed_username = et_username.getText().toString();
+                        if (TextUtils.isEmpty(typed_username)) {
+                            Toast.makeText(getApplication(), "نام کاربری نمیتواند خالی بماند", Toast.LENGTH_SHORT).show();
 
-                      }else if (typed_username.equalsIgnoreCase("e")) {
-                          Toast.makeText(getApplication(), "این نام کاربری قابل انتخاب نیست", Toast.LENGTH_SHORT).show();
-                      }else {
-                          ApiInterface api = Apiclient.getClient().create(ApiInterface.class);
-                          Call<SimpleResponse> call = api.updateUsername(user.getApikey(),typed_username);
-                          call.enqueue(new Callback<SimpleResponse>() {
-                              @Override
-                              public void onResponse(Call<SimpleResponse> call, Response<SimpleResponse> response) {
-                                  if (!response.isSuccessful()) {
-                                      try {
-                                          JSONObject jsonObject = new JSONObject(response.errorBody().string());
-                                          String message = jsonObject.getString("message");
-                                          Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                        } else if (typed_username.equalsIgnoreCase("e")) {
+                            Toast.makeText(getApplication(), "این نام کاربری قابل انتخاب نیست", Toast.LENGTH_SHORT).show();
+                        } else {
+                            ApiInterface api = Apiclient.getClient().create(ApiInterface.class);
+                            Call<SimpleResponse> call = api.updateUsername(user.getApikey(), typed_username);
+                            call.enqueue(new Callback<SimpleResponse>() {
+                                @Override
+                                public void onResponse(Call<SimpleResponse> call, Response<SimpleResponse> response) {
+                                    if (!response.isSuccessful()) {
+                                        try {
+                                            JSONObject jsonObject = new JSONObject(response.errorBody().string());
+                                            String message = jsonObject.getString("message");
+                                            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
 
-                                      } catch (JSONException e) {
-                                          e.printStackTrace();
-                                      } catch (IOException e) {
-                                          e.printStackTrace();
-                                      }
-                                  } else {
-                                      if (response.body().isError()) {
-                                          Toast.makeText(MainActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
-                                      } else {
-                                          userData.updateUsername(typed_username);
-                                          user=userData.getUser();
-                                          headerFunction();
-                                      }
-                                  }
-                              }
-
-
-                              @Override
-                              public void onFailure(Call<SimpleResponse> call, Throwable t) {
-
-                                  Toast.makeText(getApplicationContext(), "خطای برقراری ارتباط", Toast.LENGTH_SHORT).show();
-                              }
-                          });
-                      }
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    } else {
+                                        if (response.body().isError()) {
+                                            Toast.makeText(MainActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            userData.updateUsername(typed_username);
+                                            user = userData.getUser();
+                                            headerFunction();
+                                        }
+                                    }
+                                }
 
 
-                  }
-               }
-           });
+                                @Override
+                                public void onFailure(Call<SimpleResponse> call, Throwable t) {
 
-        }else {
+                                    Toast.makeText(getApplicationContext(), "خطای برقراری ارتباط", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+
+
+                    }
+                }
+            });
+
+        } else {
             et_username.setVisibility(View.GONE);
             linearlayout.setVisibility(View.INVISIBLE);
             btn_send.setVisibility(View.GONE);
@@ -576,11 +602,11 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
                 if (!InternetCheck.isOnline(MainActivity.this)) {
                     Toast.makeText(MainActivity.this, R.string.No_Internet, Toast.LENGTH_SHORT).show();
-                }else {
-                    if (Build.VERSION.SDK_INT>= 23) {
-                        askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,GALLERY_REQUEST);
+                } else {
+                    if (Build.VERSION.SDK_INT >= 23) {
+                        askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, GALLERY_REQUEST);
 
-                    }else {
+                    } else {
                         Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                         startActivityForResult(intent, RESULT_LOAD_IMG_Gallery);
 
@@ -590,6 +616,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         });
 
     }
+
     public String getRealPathFromURI(Context context, Uri contentUri) {
         Cursor cursor = null;
         try {
@@ -610,18 +637,18 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RESULT_LOAD_IMG_Gallery && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
             Uri selectedImage = data.getData();
-            String    realPath=getRealPathFromURI(MainActivity.this,selectedImage);
+            String realPath = getRealPathFromURI(MainActivity.this, selectedImage);
             String filePath = imageCompression.compressImage(realPath);
             profile_file = new File(filePath);
 
-            MyProgress.showProgress(MainActivity.this,"در حال ارسال ...");
-            String last_pic = user.getPic_thumb()==null? "n" : user.getPic_thumb();
-            RequestBody req_lastPicName = RequestBody.create(MediaType.parse("text/plain"),last_pic);
-            RequestBody req_pic = RequestBody.create(MediaType.parse("image/jpeg") , profile_file);
-            MultipartBody.Part part_pic = MultipartBody.Part.createFormData("pic",profile_file.getName(),req_pic);
+            MyProgress.showProgress(MainActivity.this, "در حال ارسال ...");
+            String last_pic = user.getPic_thumb() == null ? "n" : user.getPic_thumb();
+            RequestBody req_lastPicName = RequestBody.create(MediaType.parse("text/plain"), last_pic);
+            RequestBody req_pic = RequestBody.create(MediaType.parse("image/jpeg"), profile_file);
+            MultipartBody.Part part_pic = MultipartBody.Part.createFormData("pic", profile_file.getName(), req_pic);
 
             ApiInterface api = Apiclient.getClient().create(ApiInterface.class);
-            Call<SimpleResponse> profile_call = api.updateProfile(user.getApikey(),part_pic,req_lastPicName);
+            Call<SimpleResponse> profile_call = api.updateProfile(user.getApikey(), part_pic, req_lastPicName);
             profile_call.enqueue(new Callback<SimpleResponse>() {
                 @Override
                 public void onResponse(Call<SimpleResponse> call, Response<SimpleResponse> response) {
@@ -637,7 +664,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                             e.printStackTrace();
                         }
 
-                    }else {
+                    } else {
                         boolean error = response.body().isError();
                         String message = response.body().getMessage();
                         if (!error) {
@@ -646,9 +673,9 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                             user.setPic(message);
                             user.setPic_thumb(message);
                             userData.updatePicAndThumb(message);
-                        headerFunction();
+                            headerFunction();
 
-                        }else {
+                        } else {
                             MyProgress.cancelProgress();
                             Toast.makeText(MainActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
                         }
@@ -666,13 +693,10 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         }
 
 
-
     }
 
-
-
     private void askForPermission(String permission, Integer requestCode) {
-        if (requestCode==STORAGE_REQUEST){
+        if (requestCode == STORAGE_REQUEST) {
 
             if (ContextCompat.checkSelfPermission(MainActivity.this, permission) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission)) {
@@ -685,7 +709,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
                 creatFolders();
             }
-        } else if (requestCode==GALLERY_REQUEST) {
+        } else if (requestCode == GALLERY_REQUEST) {
             if (ContextCompat.checkSelfPermission(MainActivity.this, permission) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission)) {
                     ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
@@ -702,7 +726,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
             }
         }
 
-        }
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -711,27 +735,44 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
 
             case STORAGE_REQUEST:
-                if(ActivityCompat.checkSelfPermission(MainActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED ) {
+                if (ActivityCompat.checkSelfPermission(MainActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED) {
                     creatFolders();
 
-                }else {
-                    Log.e("Premission","Storrage is not Granted");
+                } else {
+                    Log.e("Premission", "Storrage is not Granted");
                 }
-             break;
+                break;
 
             case GALLERY_REQUEST:
-                if(ActivityCompat.checkSelfPermission(MainActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED ) {
+                if (ActivityCompat.checkSelfPermission(MainActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED) {
 
                     Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                     startActivityForResult(intent, RESULT_LOAD_IMG_Gallery);
 
 
-                }else {
+                } else {
 
-                    Toast.makeText(MainActivity.this,"عدم دسترسی به گالری",Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "عدم دسترسی به گالری", Toast.LENGTH_LONG).show();
                 }
 
         }
+    }
+
+    // vase check kardane inke user space nazane to username
+    public InputFilter getUsernameFilter() {
+        InputFilter filter = new InputFilter() {
+            public CharSequence filter(CharSequence source, int start, int end,
+                                       Spanned dest, int dstart, int dend) {
+                for (int i = start; i < end; i++) {
+                    if (Character.isWhitespace(source.charAt(i))) {
+                        return "";
+                    }
+                }
+                return null;
+            }
+
+        };
+        return filter;
     }
 
 }
