@@ -135,7 +135,11 @@ public class DownloadService extends Service {
                         intent.putExtra(FINISH_POSITION,position);
                         intent.putExtra(MESSAGE_ID,message_id);
                         intent.putExtra(CHANEL_ID,chanel_id);
+                        //vase downloadhaie ke vaghti offline mishim va dobare online mishim edame dashte bashe
+                        userData.deleteSingleDownload(message_id);
+
                         // inja save mikonim chon age ye vaqt to in activity naboodim vaziate downloade in moshakhash she
+
                         userData.setCompleteState(1,message_id);
                         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                         if (NotificationUtils.isAppIsInBackground(context)) {

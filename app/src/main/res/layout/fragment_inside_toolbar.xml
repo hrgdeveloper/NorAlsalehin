@@ -132,6 +132,7 @@ tools:context="com.developer.hrg.noralsalehin.InsideChanel.toolbar.Fragment_insi
                     android:layout_alignParentRight="true"
                     android:layout_marginTop="@dimen/_10sdp"
                     android:text="توضیحات کانال"
+                    android:autoLink="all"
                     android:textColor="@android:color/black" />
             </RelativeLayout>
 

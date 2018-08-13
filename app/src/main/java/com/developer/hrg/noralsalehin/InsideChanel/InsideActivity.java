@@ -3,7 +3,10 @@ package com.developer.hrg.noralsalehin.InsideChanel;
 import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -23,6 +26,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -189,15 +193,36 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                         boolean error = response.body().isError();
                         if (!error) {
                             progressBar.setVisibility(View.INVISIBLE);
+                            // vase inke check konim bebin agar qablan to database item boode faqat itemi ke taze ezaf shodaro
+                            //maghadairesho sefr konim
+                            boolean hadItems = true ;
+
+                            if (messages.size()>0) {
+                                 hadItems = true ;
+                            }else {
+                                hadItems = false ;
+                            }
                             messages.addAll(messages.size(), response.body().getMessages());
                             // vase qarar dadane meghdare avalie barabare ba sefr
-                            for (int i = 0; i < messages.size(); i++) {
-                                messages.get(i).setDl_percent(0);
-                                messages.get(i).setDl_state(0);
-                                messages.get(i).setDl_id(0);
-                                messages.get(i).setAudio_percent(0);
-                                messages.get(i).setComplete(0);
+
+                            if (hadItems) {
+                                for (int i = messages.size() - +response.body().getMessages().size() ; i < messages.size() ; i++) {
+                                    messages.get(i).setDl_percent(0);
+                                    messages.get(i).setDl_state(0);
+                                    messages.get(i).setDl_id(0);
+                                    messages.get(i).setAudio_percent(0);
+                                    messages.get(i).setComplete(0);
+                                }
+                            }else {
+                                for (int i = 0; i < messages.size(); i++) {
+                                    messages.get(i).setDl_percent(0);
+                                    messages.get(i).setDl_state(0);
+                                    messages.get(i).setDl_id(0);
+                                    messages.get(i).setAudio_percent(0);
+                                    messages.get(i).setComplete(0);
+                                }
                             }
+
 
                             userdata.insertIntoMessage(response.body().getMessages());
                             adapter_message.notifyItemRangeInserted(messages.size(), response.body().getMessages().size());
@@ -260,7 +285,6 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                         messages.get(position).setDl_percent(percent);
                         adapter_message.notifyItemChanged(position);
                     }
-
 
                 } else if (intent.getAction().equals(DownloadService.BROADCAST_DL_FINISH)) {
 
@@ -553,7 +577,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
     ////////////////////////////////////////////////////////pictureFunctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
-    public void picture_imageClicked(final int position, View view, final CircularProgressBar circularProgressBar, final ImageView iv_download) {
+    public void picture_imageClicked(final int position, final CircularProgressBar circularProgressBar, final ImageView iv_download) {
 
         if (isFileExists(Config.Folders.IMAGES, messages.get(position).getUrl())) {
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -574,10 +598,8 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                     download_service(position, Config.MESSAGE_PIC_ADDRES, Config.Folders.IMAGES);
 
                 } else {
-                    int dl_id = userdata.getDl_id(messages.get(position).getMessage_id());
-                    PRDownloader.pause(dl_id);
-                    messages.get(position).setDl_state(0);
-                    adapter_message.notifyItemChanged(position);
+
+                    pauseDownload(position);
 
                 }
 
@@ -587,31 +609,41 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     @Override
-    public void picture_likeClicked(final int position, View view) {
+    public void picture_likeClicked(final int position) {
         likeFunction(position);
 
     }
 
 
     @Override
-    public void picture_commentClicked(int position, View view) {
+    public void picture_commentClicked(int position) {
         openFragment(CommentFragment.getInstance(messages.get(position).getMessage_id(), chanel.getChanel_id()));
+    }
+
+    @Override
+    public void picture_text_clicked(int position) {
+            showTextAlert(position);
     }
 
     /////////////////////////////////////////////////////simpleFunction\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
-    public void simple_likeClicked(int position, View view) {
+    public void simple_likeClicked(int position) {
         likeFunction(position);
     }
 
     @Override
-    public void simple_commentClicked(int position, View view) {
+    public void simple_commentClicked(int position) {
         openFragment(CommentFragment.getInstance(messages.get(position).getMessage_id(), chanel.getChanel_id()));
+    }
+
+    @Override
+    public void simple_text_clicked(int position) {
+        showTextAlert(position);
     }
 
     /////////////////////////////////////////////////////videoFuctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
-    public void video_imageClicked(final int position, View view, final CircularProgressBar circularProgressBar, final ImageView iv_download
+    public void video_imageClicked(final int position, final CircularProgressBar circularProgressBar, final ImageView iv_download
 
     ) {
 
@@ -636,12 +668,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                     adapter_message.notifyItemChanged(position);
                     download_service(position, Config.MESSAGE_VIDEO_ADDRESS, Config.Folders.VIDEOS);
                 } else {
-                    int dl_id = userdata.getDl_id(messages.get(position).getMessage_id());
-                    Log.e("download_id", dl_id + " ");
-                    PRDownloader.pause(dl_id);
-                    userdata.deleteSingleDownload(messages.get(position).getMessage_id());
-                    messages.get(position).setDl_state(0);
-                    adapter_message.notifyItemChanged(position);
+                    pauseDownload(position);
                 }
 
             }
@@ -650,32 +677,31 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
 
     @Override
-    public void video_likeClicked(int position, View view) {
+    public void video_likeClicked(int position) {
         likeFunction(position);
     }
 
     @Override
-    public void video_commentClicked(int position, View view) {
+    public void video_commentClicked(int position) {
         openFragment(CommentFragment.getInstance(messages.get(position).getMessage_id(), chanel.getChanel_id()));
+    }
+
+    @Override
+    public void video_text_clicked(int position) {
+        showTextAlert(position);
     }
 
     //////////////////////////////////////////////////////////////AduioFunctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
     @Override
-    public void audio_imageClicked(final int position, View view, CircularProgressBar circularProgressBar, ImageView iv_download) {
+    public void audio_imageClicked(final int position, CircularProgressBar circularProgressBar, ImageView iv_download) {
+
          if (messages.get(position).getComplete()==1) {
              if (isFileExists(Config.Folders.AUDIOS, messages.get(position).getUrl())) {
 
-                 Toast.makeText(this, "playing...", Toast.LENGTH_SHORT).show();
+                 playAudioFile(InsideActivity.this,getFile(Config.Folders.AUDIOS,messages.get(position).getUrl()));
              }else {
-//                 messages.get(position).setComplete(0);
-//                 messages.get(position).setDl_state(0);
-//                 userdata.setCompleteState(0,messages.get(position).getMessage_id());
-//                 adapter_message.notifyItemChanged(position);
-//                 messages.get(position).setDl_state(1);
-//                 messages.get(position).setDl_percent(0);
-//                 adapter_message.notifyItemChanged(position);
-//                 download_service(position, Config.MESSAGE_AUDIO_ADDRESS, Config.Folders.AUDIOS);
+
                  reDownload_ifFile_Deleted(position,Config.MESSAGE_AUDIO_ADDRESS,Config.Folders.AUDIOS);
              }
          }
@@ -687,18 +713,11 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
                 if (messages.get(position).getDl_state() == 0) {
                     messages.get(position).setDl_state(1);
-                    if (messages.get(position).getDl_id() == 0) {
-                        adapter_message.notifyItemChanged(position);
-                        download_service(position, Config.MESSAGE_AUDIO_ADDRESS, Config.Folders.AUDIOS);
-                    } else {
-                        PRDownloader.resume(messages.get(position).getDl_id());
-                    }
+                    adapter_message.notifyItemChanged(position);
+                    download_service(position, Config.MESSAGE_AUDIO_ADDRESS, Config.Folders.AUDIOS);
 
                 } else {
-                    int dl_id = userdata.getDl_id(messages.get(position).getMessage_id());
-                    PRDownloader.pause(dl_id);
-                    messages.get(position).setDl_state(0);
-                    adapter_message.notifyItemChanged(position);
+                    pauseDownload(position);
 
                 }
 
@@ -709,18 +728,23 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     @Override
-    public void audio_likeClicked(int position, View view) {
+    public void audio_likeClicked(int position) {
         likeFunction(position);
     }
 
     @Override
-    public void audio_commentClicked(int position, View view) {
+    public void audio_commentClicked(int position) {
         openFragment(CommentFragment.getInstance(messages.get(position).getMessage_id(), chanel.getChanel_id()));
+    }
+
+    @Override
+    public void audio_text_clicked(int position) {
+        showTextAlert(position);
     }
 
     //////////////////////////////////////////////////////////////FileFunction\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
-    public void file_imageClicked(final int position, View view, CircularProgressBar circularProgressBar, ImageView iv_download) {
+    public void file_imageClicked(final int position, CircularProgressBar circularProgressBar, ImageView iv_download) {
       if (messages.get(position).getComplete()==1) {
           if (isFileExists(Config.Folders.DOCUMENTS, messages.get(position).getUrl())) {
 
@@ -747,10 +771,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                     adapter_message.notifyItemChanged(position);
                     download_service(position, Config.MESSAGE_File_ADDRESS, Config.Folders.DOCUMENTS);
                 } else {
-                    int dl_id = userdata.getDl_id(messages.get(position).getMessage_id());
-                    PRDownloader.pause(dl_id);
-                    messages.get(position).setDl_state(0);
-                    adapter_message.notifyItemChanged(position);
+                    pauseDownload(position);
                 }
             }
         }
@@ -758,13 +779,18 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     @Override
-    public void file_likeClicked(int position, View view) {
+    public void file_likeClicked(int position) {
         likeFunction(position);
     }
 
     @Override
-    public void file_commentClicked(int position, View view) {
+    public void file_commentClicked(int position) {
         openFragment(CommentFragment.getInstance(messages.get(position).getMessage_id(), chanel.getChanel_id()));
+    }
+
+    @Override
+    public void file_text_clicked(int position) {
+        showTextAlert(position);
     }
 
 
@@ -793,8 +819,16 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                 position,getPath(folderAddress),messages.get(position).getUrl(),message,chanel.getChanel_id()
                 );
         userdata.insertDownload(download);
-
         startService(intent);
+    }
+
+    public void pauseDownload(int position) {
+        int dl_id = userdata.getDl_id(messages.get(position).getMessage_id());
+        PRDownloader.pause(dl_id);
+        Log.e("download_id", dl_id + " ");
+        userdata.deleteSingleDownload(messages.get(position).getMessage_id());
+        messages.get(position).setDl_state(0);
+        adapter_message.notifyItemChanged(position);
     }
 
     //re download for when want to oepn file and it dose not exists
@@ -1021,6 +1055,59 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
     }
 
+    public void showTextAlert(int position) {
+        final String text = messages.get(position).getMessage();
+        AlertDialog.Builder alert = new AlertDialog.Builder(InsideActivity.this);
+        alert.setTitle("انتخاب عملیات");
+        alert.setItems(new CharSequence[]{"کپی کردن متن","به اشتراک گذاری متن"}, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                switch (i) {
+                    case 0 :
+                        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("پیام", text);
+                        clipboard.setPrimaryClip(clip);
+                        Toast.makeText(InsideActivity.this, "متن مورد نظر کپی گردید", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 1 :
+
+                        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                        sharingIntent.setType("text/plain");
+                        sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "به اشتراک گذاری متن");
+                        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, text);
+                        startActivity(Intent.createChooser(sharingIntent, "برنامه مورد نظر جهت به اشتراک گذاری"));
+
+                        break;
+
+                }
+            }
+        });
+        alert.show();
+
+
+    }
+
+    public void playAudioFile(Context context, File url) {
+        File file = url;
+        Uri uri;
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            uri = Uri.fromFile(file);
+        } else {
+            uri = FileProvider.getUriForFile(context, context.getPackageName() + ".share", file);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        }
+        intent.setDataAndType(uri, "audio/x-wav");
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        try {
+            context.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(context, "برنامه ای برای باز کردن فایل صوتی  یافت نشد", Toast.LENGTH_LONG).show();
+        }
+
+    }
 
 }
 

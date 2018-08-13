@@ -89,6 +89,7 @@
                 android:layout_gravity="right"
                 android:layout_marginEnd="@dimen/_3sdp"
                 android:layout_marginTop="@dimen/_3sdp"
+                android:autoLink="web"
                 android:text="بهترن "
                 android:textColor="@color/cardview_dark_background" />
 

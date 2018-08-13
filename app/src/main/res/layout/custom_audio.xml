@@ -80,6 +80,7 @@
                    android:layout_width="0dp"
                    android:layout_height="wrap_content"
                    android:id="@+id/tv_audio_text"
+                   android:autoLink="web"
                    android:layout_marginTop="@dimen/_5sdp"
                    app:layout_constraintRight_toRightOf="parent"
                    app:layout_constraintLeft_toRightOf="@id/frame_audio"

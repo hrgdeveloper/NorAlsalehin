@@ -63,27 +63,33 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public interface ClickListener {
-        public void picture_imageClicked(int position, View view, CircularProgressBar circularProgressBar, ImageView iv_download);
-        public void picture_likeClicked(int position, View view);
-        public void picture_commentClicked(int position, View view);
-
-        public void simple_likeClicked(int position, View view);
-        public void simple_commentClicked(int position, View view);
+        public void picture_imageClicked(int position, CircularProgressBar circularProgressBar, ImageView iv_download);
+        public void picture_likeClicked(int position);
+        public void picture_commentClicked(int position);
+        public void picture_text_clicked(int position);
 
 
 
-        public void video_imageClicked(int position, View view, CircularProgressBar circularProgressBar, ImageView iv_download );
-        public void video_likeClicked(int position, View view);
-        public void video_commentClicked(int position, View view);
-
-        public void audio_imageClicked(int position, View view, CircularProgressBar circularProgressBar, ImageView iv_download  );
-        public void audio_likeClicked(int position, View view);
-        public void audio_commentClicked(int position, View view);
+        public void simple_likeClicked(int position);
+        public void simple_commentClicked(int position);
+        public void simple_text_clicked(int position);
 
 
-        public void file_imageClicked(int position, View view, CircularProgressBar circularProgressBar, ImageView iv_download );
-        public void file_likeClicked(int position, View view);
-        public void file_commentClicked(int position, View view);
+        public void video_imageClicked(int position, CircularProgressBar circularProgressBar, ImageView iv_download );
+        public void video_likeClicked(int position);
+        public void video_commentClicked(int position);
+        public void video_text_clicked(int position);
+
+        public void audio_imageClicked(int position, CircularProgressBar circularProgressBar, ImageView iv_download  );
+        public void audio_likeClicked(int position);
+        public void audio_commentClicked(int position);
+        public void audio_text_clicked(int position);
+
+
+        public void file_imageClicked(int position, CircularProgressBar circularProgressBar, ImageView iv_download );
+        public void file_likeClicked(int position);
+        public void file_commentClicked(int position);
+        public void file_text_clicked(int position);
 
     }
 
@@ -528,16 +534,23 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             iv_like = (ImageView) itemView.findViewById(R.id.iv_simple_like);
             iv_comment = (ImageView) itemView.findViewById(R.id.iv_simple_comment);
             tv_time = (TextView) itemView.findViewById(R.id.tv_simple_time);
+            tv_text.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    clickListener.simple_text_clicked(getAdapterPosition());
+                }
+            });
+
             iv_like.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    clickListener.simple_likeClicked(getAdapterPosition(), view);
+                    clickListener.simple_likeClicked(getAdapterPosition());
                 }
             });
             iv_comment.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    clickListener.simple_commentClicked(getAdapterPosition(), view);
+                    clickListener.simple_commentClicked(getAdapterPosition());
                 }
             });
         }
@@ -559,24 +572,30 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             tv_text = (TextView) itemView.findViewById(R.id.tv_picture_text);
             iv_comment = (ImageView) itemView.findViewById(R.id.iv_picture_comment);
             tv_time = (TextView) itemView.findViewById(R.id.tv_picture_time);
+            tv_text.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    clickListener.picture_text_clicked(getAdapterPosition());
+                }
+            });
             iv_picture.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    clickListener.picture_imageClicked(getAdapterPosition(), view, circularProgressBar, iv_download);
+                    clickListener.picture_imageClicked(getAdapterPosition(), circularProgressBar, iv_download);
                 }
             });
             iv_like = (ImageView) itemView.findViewById(R.id.iv_picture_like);
             iv_like.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    clickListener.picture_likeClicked(getAdapterPosition(), view);
+                    clickListener.picture_likeClicked(getAdapterPosition());
                 }
             });
             iv_comment.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
-                    clickListener.picture_commentClicked(getAdapterPosition(), view);
+                    clickListener.picture_commentClicked(getAdapterPosition());
                 }
             });
         }
@@ -601,10 +620,16 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             iv_comment = (ImageView) itemView.findViewById(R.id.iv_video_comment);
             tv_time = (TextView) itemView.findViewById(R.id.tv_video_time);
             tv_video_time = (TextView) itemView.findViewById(R.id.tv_video_video_time);
+            tv_text.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    clickListener.video_text_clicked(getAdapterPosition());
+                }
+            });
             view_fake_video.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    clickListener.video_imageClicked(getAdapterPosition(), view, circularProgressBar, iv_download);
+                    clickListener.video_imageClicked(getAdapterPosition(), circularProgressBar, iv_download);
                 }
             });
 
@@ -613,14 +638,14 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             iv_like.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    clickListener.video_likeClicked(getAdapterPosition(), view);
+                    clickListener.video_likeClicked(getAdapterPosition());
                 }
             });
             iv_comment.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
-                    clickListener.video_commentClicked(getAdapterPosition(), view);
+                    clickListener.video_commentClicked(getAdapterPosition());
                 }
             });
 
@@ -647,12 +672,17 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             iv_comment = (ImageView) itemView.findViewById(R.id.iv_audio_comment);
             tv_time = (TextView) itemView.findViewById(R.id.tv_audio_time);
             tv_audio_time = (TextView) itemView.findViewById(R.id.tv_audio_song_time);
-
+             tv_text.setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View view) {
+                  clickListener.audio_text_clicked(getAdapterPosition());
+              }
+          });
 
             view_fake_audio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    clickListener.audio_imageClicked(getAdapterPosition(), view, circularProgressBar, iv_download  );
+                    clickListener.audio_imageClicked(getAdapterPosition(), circularProgressBar, iv_download  );
                 }
             });
 
@@ -660,14 +690,14 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             iv_like.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    clickListener.audio_likeClicked(getAdapterPosition(), view);
+                    clickListener.audio_likeClicked(getAdapterPosition());
                 }
             });
             iv_comment.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
-                    clickListener.audio_commentClicked(getAdapterPosition(), view);
+                    clickListener.audio_commentClicked(getAdapterPosition());
                 }
             });
 
@@ -680,8 +710,6 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         TextView tv_text, tv_time,tv_size , tv_filename , tv_file_type;
         View view_fake_file ;
         CircularProgressBar circularProgressBar;
-
-
         public FileHolder(View itemView) {
             super(itemView);
             iv_download = (ImageView) itemView.findViewById(R.id.iv_file_download_open);
@@ -694,24 +722,30 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             iv_like =(ImageView)itemView.findViewById(R.id.iv_file_like);
             iv_comment = (ImageView) itemView.findViewById(R.id.iv_file_comment);
             tv_time = (TextView) itemView.findViewById(R.id.tv_file_time);
+            tv_text.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    clickListener.file_text_clicked(getAdapterPosition());
+                }
+            });
             view_fake_file.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    clickListener.file_imageClicked(getAdapterPosition(), view, circularProgressBar, iv_download);
+                    clickListener.file_imageClicked(getAdapterPosition(), circularProgressBar, iv_download);
                 }
             });
 
             iv_like.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    clickListener.file_likeClicked(getAdapterPosition(), view);
+                    clickListener.file_likeClicked(getAdapterPosition());
                 }
             });
             iv_comment.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
-                    clickListener.file_commentClicked(getAdapterPosition(), view);
+                    clickListener.file_commentClicked(getAdapterPosition());
                 }
             });
 

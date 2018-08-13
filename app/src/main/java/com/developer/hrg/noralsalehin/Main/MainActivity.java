@@ -53,6 +53,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.developer.hrg.noralsalehin.Helps.ApiInterface;
 import com.developer.hrg.noralsalehin.Helps.Apiclient;
 import com.developer.hrg.noralsalehin.Helps.Config;
+import com.developer.hrg.noralsalehin.Helps.DownloadService;
 import com.developer.hrg.noralsalehin.Helps.ImageCompression;
 import com.developer.hrg.noralsalehin.Helps.InternetCheck;
 
@@ -71,6 +72,7 @@ import com.developer.hrg.noralsalehin.Models.User;
 import com.developer.hrg.noralsalehin.R;
 import com.developer.hrg.noralsalehin.SmsHandeling.SmsActivity;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -118,12 +120,19 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        defineClasees();
+        if (userData.hasDownloadsData()) {
+            userData.deleteDownloas();
+        }
+
+        if (userData.hasDownloadsBACKData()) {
+            userData.deleteDownloasBack();
+        }
+
         setContentView(R.layout.activity_main);
-
-
         FirebaseMessaging.getInstance().subscribeToTopic(Config.TOPIC_GLOBAL);
         defineView();
-        defineClasees();
+
         // vase download ha ye reciver joda dar nazar migirim ke vaghti activity baste shod in reciver qat nashe o faqat
         //vaqti app close mishe reciver ham bahash qat mishe
 
@@ -132,23 +141,6 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
         headerFunction();
         // vase pak kardane download haye temp
-        if (userData.hasDownloadsData()) {
-//            ArrayList<Download> downloads = new ArrayList<>();
-//            downloads.addAll(userData.getDownloads());
-//            AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
-//            StringBuffer stringBuffer = new StringBuffer();
-//            stringBuffer.append(downloads.get(0).getAddress() + " : " + downloads.get(0).getChanel_id() + " : " + downloads.get(0).getDirpath() + " : " +
-//                    downloads.get(0).getFilename() + " : " + downloads.get(0).getMessage() + " : " + downloads.get(0).getPosition() + " : " + downloads.get(0)
-//                    .getMessage_id());
-//            alert.setTitle("inja");
-//            alert.setMessage(stringBuffer.toString());
-//            alert.show();
-            userData.deleteDownloas();
-        }
-
-        if (userData.hasDownloadsBACKData()) {
-            userData.deleteDownloasBack();
-        }
 
 
         drawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, toolbar, R.string.app_name, R.string.app_name);
@@ -498,9 +490,33 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         public void onReceive(final Context context, final Intent intent) {
 
             if (InternetCheck.isOnline(MainActivity.this)) {
-                Toast.makeText(context, "connecte", Toast.LENGTH_SHORT).show();
+               if (userData.hasDownloadsData()) {
+                      Gson json = new Gson();
+                   ArrayList<Download> downloads = new ArrayList<>();
+                   downloads.addAll(userData.getDownloads());
+                   for (Download download : downloads) {
+                       Intent intentt = new Intent(MainActivity.this, DownloadService.class);
+                       intentt.putExtra(DownloadService.MESSAGE_ID, download.getMessage_id());
+                       intentt.putExtra(DownloadService.ADDRESS, download.getAddress());
+                       intentt.putExtra(DownloadService.POSITION, download.getPosition());
+                       intentt.putExtra(DownloadService.DIRPATH, download.getDirpath());
+                       intentt.putExtra(DownloadService.FILENAME, download.getFilename());
+
+                       Message message = json.fromJson(download.getMessage(),Message.class);
+                       Bundle bundle = new Bundle();
+                       bundle.putParcelable(DownloadService.MESSAGE, message);
+                       intentt.putExtra(DownloadService.BUNDLE, bundle);
+                       intentt.putExtra(DownloadService.CHANEL_ID, download.getChanel_id());
+                       startService(intentt);
+
+                   }
+
+
+
+               }
+
             } else {
-                Toast.makeText(context, "khamoshe", Toast.LENGTH_SHORT).show();
+
             }
         }
     }
