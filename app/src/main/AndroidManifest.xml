@@ -6,6 +6,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
+
+
+
     <!--
      needed for older devices -
      used to check app background / foreground status
@@ -79,6 +82,7 @@
 </service>
         <activity
             android:screenOrientation="portrait"
+
             android:name=".InsideChanel.InsideActivity"></activity>
     </application>
 

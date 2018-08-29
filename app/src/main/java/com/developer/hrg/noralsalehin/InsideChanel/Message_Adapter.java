@@ -193,7 +193,7 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 ((ImageHolder) holder).view_fake_white.setVisibility(View.VISIBLE);
                 ((ImageHolder) holder).iv_download.setVisibility(View.VISIBLE);
                 ((ImageHolder) holder).circularProgressBar.setVisibility(View.VISIBLE);
-                Glide.with(context).load(Config.MESSAGE_THUMB_ADDRESS + message.getThumb()).apply(new RequestOptions()
+                Glide.with(context).load(Config.MESSAGE_THUMB_ADDRESS_ONLINE_FINAL + message.getThumb()).apply(new RequestOptions()
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .placeholder(ContextCompat.getDrawable(context, R.drawable.white))
                 ).into(((ImageHolder) holder).iv_picture);
@@ -241,7 +241,7 @@ public class Message_Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 ((VideoHolder) holder).iv_like.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.like));
             }
 
-            Glide.with(context).load(Config.VIDEO_PIC_ADDRES + message.getThumb()).apply(new RequestOptions()
+            Glide.with(context).load(Config.VIDEO_PIC_ADDRES_ONLINE_FINAL + message.getThumb()).apply(new RequestOptions()
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
 
             ).into(((VideoHolder) holder).iv_picture);

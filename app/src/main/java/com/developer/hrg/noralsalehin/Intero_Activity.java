@@ -21,10 +21,13 @@ import com.developer.hrg.noralsalehin.SmsHandeling.SmsActivity;
 
 import java.util.ArrayList;
 
+import me.relex.circleindicator.CircleIndicator;
+
 public class Intero_Activity extends AppCompatActivity {
    ArrayList<Intro> introes = new ArrayList<>();
     ViewPager viewPager ;
     MyAdapter myAdapter;
+    CircleIndicator circleIndicator;
     Button btn_next , btn_skip ;
    UserInfo userInfo ;
 
@@ -38,7 +41,9 @@ public class Intero_Activity extends AppCompatActivity {
         defineList();
         viewPager=(ViewPager)findViewById(R.id.viewpager_intro);
         myAdapter=new MyAdapter(Intero_Activity.this,introes);
+        circleIndicator=(CircleIndicator)findViewById(R.id.indicator);
         viewPager.setAdapter(myAdapter);
+        circleIndicator.setViewPager(viewPager);
         btn_next=(Button)findViewById(R.id.btn_intro_next);
         btn_skip=(Button)findViewById(R.id.btn_intro_skip);
         btn_next.setOnClickListener(new View.OnClickListener() {

@@ -40,7 +40,7 @@ public class Adapter_Profile extends PagerAdapter {
         View view = LayoutInflater.from(context).inflate(R.layout.custom_profile_viewpager,container,false);
         FrameLayout frameLayout = (FrameLayout)view.findViewById(R.id.frame_profile);
         ImageView iv_pic =(ImageView)view.findViewById(R.id.iv_profile);
-        Glide.with(context).load(Config.CHANEL_PIC_BASE_OFFLINE+profiles.get(position).getPhoto()).into(iv_pic);
+        Glide.with(context).load(Config.CHANEL_PIC_BASE_ONLINE_FINAL+profiles.get(position).getPhoto()).into(iv_pic);
         frameLayout.setBackgroundColor(ContextCompat.getColor(context,android.R.color.black));
         container.addView(view);
         return view;

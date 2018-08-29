@@ -1,0 +1,124 @@
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:clickable="true"
+    android:background="@drawable/gradiant_netflix"
+    tools:context="com.developer.hrg.noralsalehin.about.AboutProgramerFragment">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="52dp"
+        android:id="@+id/toolbar_aProgramer"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteY="0dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintRight_toRightOf="parent"
+            android:text="ارتباط با توسعه دهنده"
+            android:textColor="@android:color/white"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginRight="@dimen/_6sdp"
+            android:textStyle="bold"
+            />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/back"
+            android:id="@+id/iv_back_aProgramer"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_marginLeft="@dimen/_5sdp"
+
+            />
+        <View
+          android:layout_width="0dp"
+            android:layout_height="1dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintLeft_toRightOf="parent"
+            android:background="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+           />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.v7.widget.AppCompatImageView
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:src="@drawable/call"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_aProgramer"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:id="@+id/iv_call_aProgramer"
+        android:tint="@android:color/white"
+        />
+   <TextView
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="تماس مستقیم"
+       android:textColor="@android:color/white"
+       android:textStyle="bold"
+       android:textSize="@dimen/_22sdp"
+       app:layout_constraintTop_toBottomOf="@+id/iv_call_aProgramer"
+       app:layout_constraintLeft_toLeftOf="parent"
+       app:layout_constraintRight_toRightOf="parent"
+       android:layout_marginTop="@dimen/_5sdp"
+       />
+    <ImageView
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:src="@drawable/telegram"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/iv_telegram_aProgramer"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="@dimen/_15sdp"
+        app:layout_constraintVertical_bias="0.516" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="از طریق تلگرام"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:textSize="@dimen/_22sdp"
+        app:layout_constraintTop_toBottomOf="@+id/iv_telegram_aProgramer"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="@dimen/_5sdp"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="and.app.order@gmail.com"
+        android:textColorLink="@android:color/white"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_16sdp"
+        android:autoLink="email"
+        android:id="@+id/tv_emaail_aProgramer"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="@dimen/_18sdp"
+        />
+<ImageView
+    android:layout_width="@dimen/_45sdp"
+    android:layout_height="@dimen/_45sdp"
+    android:src="@drawable/email"
+    android:id="@+id/iv_email_aPrgamer"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintBottom_toTopOf="@+id/tv_emaail_aProgramer"
+    />
+
+</android.support.constraint.ConstraintLayout>

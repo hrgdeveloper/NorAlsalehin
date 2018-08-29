@@ -122,7 +122,8 @@ public class Register_fragment extends Fragment  {
                                 }else {
 
                                     FragmentTransaction transation = getFragmentManager().beginTransaction();
-                                    transation.setCustomAnimations(R.anim.right_in,R.anim.left_out);
+                                    transation.setCustomAnimations(R.anim.right_in,R.anim.left_out
+                                            );
                                     transation.replace(R.id.smsContainer,new Verify_Fragment());
                                     userInfo.setMobileNumber(number);
                                     userInfo.set_isMobileSent(true);

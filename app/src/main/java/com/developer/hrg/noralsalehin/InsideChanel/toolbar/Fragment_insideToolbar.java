@@ -96,12 +96,12 @@ public class Fragment_insideToolbar extends Fragment implements View.OnClickList
         ((InsideActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ((InsideActivity)getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
         fb_back.setOnClickListener(this);
-        Glide.with(getActivity()).load(Config.CHANEL_PIC_BASE_OFFLINE+chanel.getThumb())
+        Glide.with(getActivity()).load(Config.CHANEL_PIC_BASE_ONLINE_FINAL+chanel.getThumb())
                 .apply(new RequestOptions().placeholder(R.drawable.broadcast).error(R.drawable.broadcast)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
         ).into(iv_pic);
 
-        Glide.with(getActivity()).load(Config.CHANEL_THUMB_BASE_OFFLINE+chanel.getThumb())
+        Glide.with(getActivity()).load(Config.CHANEL_THUMB_BASE_ONLINE_FINAL+chanel.getThumb())
                 .apply(new RequestOptions().placeholder(R.drawable.broadcast).error(R.drawable.broadcast)
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                 ).into(iv_thumb);

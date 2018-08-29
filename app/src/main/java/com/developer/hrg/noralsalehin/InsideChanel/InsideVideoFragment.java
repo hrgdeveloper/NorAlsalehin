@@ -1,12 +1,14 @@
 package com.developer.hrg.noralsalehin.InsideChanel;
 
 
+import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -32,6 +34,8 @@ public class InsideVideoFragment extends Fragment {
     private static final String FILE = "file";
     private static final String TEXT = "text";
 
+    private static final String VIDEOPOSITION = "position";
+
     private String  file;
     private String text;
     FrameLayout frameLayout ;
@@ -42,6 +46,7 @@ public class InsideVideoFragment extends Fragment {
     boolean hide = false ;
     RelativeLayout relativeLayout_top ;
     MediaController mediaController ;
+    Integer last_post = 0 ;
 
 
     public static InsideVideoFragment newInstance(String file, String text) {
@@ -68,12 +73,20 @@ public class InsideVideoFragment extends Fragment {
         // Required empty public constructor
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(VIDEOPOSITION,videoView.getCurrentPosition());
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_inside_video, container, false);
+
+
         videoView=(VideoView) view.findViewById(R.id.videoView);
         tv_text=(TextView)view.findViewById(R.id.tv_inside_video_bottom);
         iv_back=(ImageView)view.findViewById(R.id.iv_back_insideVideo);
@@ -90,15 +103,25 @@ public class InsideVideoFragment extends Fragment {
         }else {
             tv_text.setVisibility(View.GONE);
         }
+        if (savedInstanceState==null) {
+
+        }else {
+            last_post=savedInstanceState.getInt(VIDEOPOSITION,0);
+        }
+
+
 
         mediaController.setAnchorView(videoView);
         videoView.setVideoURI(Uri.fromFile(getFile(Config.Folders.VIDEOS,file)));
         videoView.setMediaController(mediaController);
+        videoView.seekTo(last_post);
         videoView.start();
+
 //        mediaController.show();
         iv_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 ((InsideActivity)getActivity()).onBackPressed();
             }
         });
@@ -125,7 +148,37 @@ public class InsideVideoFragment extends Fragment {
             }
         });
 
-}
+ }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity()!=null) {
+            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+        }
+
+
+        if(getView() == null){
+            return;
+        }
+
+        getView().setFocusableInTouchMode(true);
+        getView().requestFocus();
+        getView().setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+
+                if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK){
+                    getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                    ((InsideActivity)getActivity()).onBackPressed();
+
+                    return true;
+                }
+                return false;
+            }
+        });
+
+    }
 
     public File getFile (String folderName, String filename) {
         File file = new File(Environment.getExternalStorageDirectory()+"/NoorAlSalehin/"+folderName,filename);

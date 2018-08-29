@@ -19,6 +19,8 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -59,6 +61,7 @@ import com.developer.hrg.noralsalehin.Helps.InternetCheck;
 
 import com.developer.hrg.noralsalehin.Helps.MyApplication;
 import com.developer.hrg.noralsalehin.Helps.MyProgress;
+import com.developer.hrg.noralsalehin.Helps.Repetetive;
 import com.developer.hrg.noralsalehin.Helps.SimpleResponse;
 import com.developer.hrg.noralsalehin.Helps.UserData;
 import com.developer.hrg.noralsalehin.Helps.UserInfo;
@@ -71,6 +74,7 @@ import com.developer.hrg.noralsalehin.Models.UnRead;
 import com.developer.hrg.noralsalehin.Models.User;
 import com.developer.hrg.noralsalehin.R;
 import com.developer.hrg.noralsalehin.SmsHandeling.SmsActivity;
+import com.developer.hrg.noralsalehin.about.AboutProgramerFragment;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 
@@ -191,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                         Toast.makeText(MainActivity.this, "some thing", Toast.LENGTH_SHORT).show();
                         return true;
                     case R.id.mu_developer:
-                        Toast.makeText(MainActivity.this, "some thing else", Toast.LENGTH_SHORT).show();
+                        openFragmeentAbout(new AboutProgramerFragment());
                         return true;
                     case R.id.mu_exit:
                         MyApplication.getInstance().getUserData().deleteuser();
@@ -214,6 +218,19 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
 
     }
+    private void openFragmeentAbout(Fragment fragment) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.anim.right_in,R.anim.left_out,
+                android.R.anim.slide_in_left,android.R.anim.slide_out_right);
+        transaction.add(R.id.container_main_compelete,fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+
+    }
+
+//    public void unlockDrawer() {
+//        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+//    }
 
     @Override
     public void onBackPressed() {
@@ -229,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     @Override
     protected void onResume() {
         super.onResume();
-
+        //unlockDrawer();
         if (Build.VERSION.SDK_INT >= 23) {
             askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_REQUEST);
         } else {
@@ -322,11 +339,13 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
     public void defineView() {
         tv_toolbar = (TextView) findViewById(R.id.tv_toolbar);
+
         tv_noChanel = (TextView) findViewById(R.id.tv_main_noChanel);
         recyclerView = (RecyclerView) findViewById(R.id.rv_main);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawerlayout);
         navigationView = (NavigationView) findViewById(R.id.navigationview);
         toolbar = (Toolbar) findViewById(R.id.toolbar_main);
+        setSupportActionBar(toolbar);
     }
 
     public void defineClasees() {
@@ -501,12 +520,12 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                        intentt.putExtra(DownloadService.POSITION, download.getPosition());
                        intentt.putExtra(DownloadService.DIRPATH, download.getDirpath());
                        intentt.putExtra(DownloadService.FILENAME, download.getFilename());
-
                        Message message = json.fromJson(download.getMessage(),Message.class);
                        Bundle bundle = new Bundle();
                        bundle.putParcelable(DownloadService.MESSAGE, message);
                        intentt.putExtra(DownloadService.BUNDLE, bundle);
                        intentt.putExtra(DownloadService.CHANEL_ID, download.getChanel_id());
+
                        startService(intentt);
 
                    }
@@ -529,7 +548,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
         if (user.getPic_thumb() != null) {
 
-            Glide.with(MainActivity.this).load(Config.PROFILE_PIC_THUMB_ADDRESS + user.getPic_thumb()).apply(new RequestOptions().placeholder(R.drawable.profile).error(R.drawable.profile)
+            Glide.with(MainActivity.this).load(Config.PROFILE_PIC_THUMB_ADDRESS_ONLINE_FINAL + user.getPic_thumb()).apply(new RequestOptions().placeholder(R.drawable.profile).error(R.drawable.profile)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
             ).into(iv_profile);
         }
@@ -552,9 +571,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
             btn_send.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (!InternetCheck.isOnline(MainActivity.this)) {
-                        Toast.makeText(getApplication(), "عدم دسترسی به اینترنت", Toast.LENGTH_SHORT).show();
-                    } else {
+
                         final String typed_username = et_username.getText().toString();
                         if (TextUtils.isEmpty(typed_username)) {
                             Toast.makeText(getApplication(), "نام کاربری نمیتواند خالی بماند", Toast.LENGTH_SHORT).show();
@@ -569,9 +586,11 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                                 public void onResponse(Call<SimpleResponse> call, Response<SimpleResponse> response) {
                                     if (!response.isSuccessful()) {
                                         try {
+
                                             JSONObject jsonObject = new JSONObject(response.errorBody().string());
                                             String message = jsonObject.getString("message");
                                             Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                                            Log.e("MyError" , response.errorBody().string());
 
                                         } catch (JSONException e) {
                                             e.printStackTrace();
@@ -579,6 +598,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                                             e.printStackTrace();
                                         }
                                     } else {
+                                        Log.e("MyError" ,"to response");
                                         if (response.body().isError()) {
                                             Toast.makeText(MainActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
                                         } else {
@@ -592,11 +612,11 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
                                 @Override
                                 public void onFailure(Call<SimpleResponse> call, Throwable t) {
-
-                                    Toast.makeText(getApplicationContext(), "خطای برقراری ارتباط", Toast.LENGTH_SHORT).show();
+                                    Log.e("MyError" ,"to failute");
+                                    Repetetive.handleFailureError(t,MainActivity.this,"MainActivity");
                                 }
                             });
-                        }
+
 
 
                     }

@@ -1,8 +1,12 @@
 package com.developer.hrg.noralsalehin.Helps;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -10,6 +14,7 @@ import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.developer.hrg.noralsalehin.InsideChanel.InsideActivity;
@@ -63,6 +68,21 @@ public class DownloadService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        int NOTIFICATION_ID = (int) (System.currentTimeMillis()%10000);
+        if (Build.VERSION.SDK_INT >= 26) {
+            String CHANNEL_ID = "New Download";
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
+                    "Download is Strting...",
+                    NotificationManager.IMPORTANCE_DEFAULT);
+
+            ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
+
+            Notification notification = new NotificationCompat.Builder(this)
+                    .setContentTitle("")
+                    .setContentText("").build();
+            startForeground(NOTIFICATION_ID,notification);
+        }
         userData=new UserData(this);
         context=this;
     }
@@ -163,4 +183,15 @@ public class DownloadService extends Service {
 
         return START_NOT_STICKY;
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            stopForeground(true); //true will remove notification
+        }
+    }
+
+
 }

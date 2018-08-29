@@ -126,8 +126,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     }else
                         {
                             Log.e("Backeee" , "backeee");
-
-
                             if (MyApplication.getInstance().getUserData().getChanelNotifyState(message.getChanel_id())==1) {
                                 Log.e("okeye","okeyee");
                                 String chanel_name = MyApplication.getInstance().getUserData().getChanelNameByid(message.getChanel_id());
@@ -166,7 +164,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     String timestamp = shamsi_date + " : " +  curTime;
                     Intent resultIntent = new Intent(getApplicationContext(), MainActivity.class);
                     resultIntent.putExtra(Config.PUSH_NOTIFICATION,1);
-                    showNotificationMessageWithBigImage(this,title,message,timestamp,resultIntent,Config.NOTIFY_ADDRESS+imageURL);
+                    showNotificationMessageWithBigImage(this,title,message,timestamp,resultIntent,Config.NOTIFY_ADDRESS_ONLINE_FINAL+imageURL);
                 }
 
 

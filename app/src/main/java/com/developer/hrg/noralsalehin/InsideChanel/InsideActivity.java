@@ -1,6 +1,7 @@
 package com.developer.hrg.noralsalehin.InsideChanel;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -9,6 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 
 import android.media.MediaPlayer;
@@ -135,7 +137,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         }
 
         tv_chanelName.setText(chanel.getName());
-        Glide.with(InsideActivity.this).load(Config.CHANEL_THUMB_BASE_OFFLINE + chanel.getThumb()).apply(new RequestOptions().placeholder(R.drawable.broadcast)
+        Glide.with(InsideActivity.this).load(Config.CHANEL_THUMB_BASE_ONLINE_FINAL + chanel.getThumb()).apply(new RequestOptions().placeholder(R.drawable.broadcast)
                 .error(R.drawable.broadcast)
         ).into(iv_thumb);
 
@@ -431,6 +433,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     protected void onResume() {
         super.onResume();
 
+
         LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(Config.PUSH_NEW_MESSAGE));
         LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(DownloadService.BROADCAST_PROGRESS));
         LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(DownloadService.BROADCAST_DL_FINISH));
@@ -595,7 +598,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                 if (messages.get(position).getDl_state() == 0) {
                     messages.get(position).setDl_state(1);
                     adapter_message.notifyItemChanged(position);
-                    download_service(position, Config.MESSAGE_PIC_ADDRES, Config.Folders.IMAGES);
+                    download_service(position, Config.MESSAGE_PIC_ADDRES_ONLINE_FINAL, Config.Folders.IMAGES);
 
                 } else {
 
@@ -655,7 +658,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
         }else {
-                reDownload_ifFile_Deleted(position,Config.MESSAGE_VIDEO_ADDRESS,Config.Folders.VIDEOS);
+                reDownload_ifFile_Deleted(position,Config.MESSAGE_VIDEO_ADDRESS_ONLINE_FINAL,Config.Folders.VIDEOS);
             }
         } else {
 
@@ -666,7 +669,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                 if (messages.get(position).getDl_state() == 0) {
                     messages.get(position).setDl_state(1);
                     adapter_message.notifyItemChanged(position);
-                    download_service(position, Config.MESSAGE_VIDEO_ADDRESS, Config.Folders.VIDEOS);
+                    download_service(position, Config.MESSAGE_VIDEO_ADDRESS_ONLINE_FINAL, Config.Folders.VIDEOS);
                 } else {
                     pauseDownload(position);
                 }
@@ -702,7 +705,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                  playAudioFile(InsideActivity.this,getFile(Config.Folders.AUDIOS,messages.get(position).getUrl()));
              }else {
 
-                 reDownload_ifFile_Deleted(position,Config.MESSAGE_AUDIO_ADDRESS,Config.Folders.AUDIOS);
+                 reDownload_ifFile_Deleted(position,Config.MESSAGE_AUDIO_ADDRESS_ONLINE_FINAL,Config.Folders.AUDIOS);
              }
          }
       else {
@@ -714,7 +717,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                 if (messages.get(position).getDl_state() == 0) {
                     messages.get(position).setDl_state(1);
                     adapter_message.notifyItemChanged(position);
-                    download_service(position, Config.MESSAGE_AUDIO_ADDRESS, Config.Folders.AUDIOS);
+                    download_service(position, Config.MESSAGE_AUDIO_ADDRESS_ONLINE_FINAL, Config.Folders.AUDIOS);
 
                 } else {
                     pauseDownload(position);
@@ -755,7 +758,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
               }
 
           }else {
-              reDownload_ifFile_Deleted(position,Config.MESSAGE_File_ADDRESS,Config.Folders.DOCUMENTS);
+              reDownload_ifFile_Deleted(position,Config.MESSAGE_File_ADDRESS_ONLINE_FINAL,Config.Folders.DOCUMENTS);
           }
       }
 
@@ -769,7 +772,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                 if (messages.get(position).getDl_state() == 0) {
                     messages.get(position).setDl_state(1);
                     adapter_message.notifyItemChanged(position);
-                    download_service(position, Config.MESSAGE_File_ADDRESS, Config.Folders.DOCUMENTS);
+                    download_service(position, Config.MESSAGE_File_ADDRESS_ONLINE_FINAL, Config.Folders.DOCUMENTS);
                 } else {
                     pauseDownload(position);
                 }
@@ -819,7 +822,13 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                 position,getPath(folderAddress),messages.get(position).getUrl(),message,chanel.getChanel_id()
                 );
         userdata.insertDownload(download);
-        startService(intent);
+
+        if (Build.VERSION.SDK_INT < 26) {
+            startService(intent);
+        }else if (Build.VERSION.SDK_INT >= 26) {
+           startForegroundService(intent);
+        }
+
     }
 
     public void pauseDownload(int position) {

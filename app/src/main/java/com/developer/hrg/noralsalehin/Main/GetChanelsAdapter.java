@@ -110,7 +110,7 @@ public class GetChanelsAdapter extends RecyclerView.Adapter<GetChanelsAdapter.Ho
 
 
 
-        Glide.with(context).load(Config.CHANEL_THUMB_BASE_OFFLINE+chanel.getThumb()).apply(new RequestOptions().placeholder(drawable).error(drawable)
+        Glide.with(context).load(Config.CHANEL_THUMB_BASE_ONLINE_FINAL+chanel.getThumb()).apply(new RequestOptions().placeholder(drawable).error(drawable)
         .diskCacheStrategy(DiskCacheStrategy.ALL)
         ).into(holder.iv_profile);
 

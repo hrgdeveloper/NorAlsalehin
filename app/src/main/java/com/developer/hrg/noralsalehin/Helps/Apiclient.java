@@ -24,7 +24,7 @@ public class Apiclient {
                     .build();
 
             retrofit=new Retrofit.Builder()
-                    .baseUrl(Config.OFFLINE_URL)
+                    .baseUrl(Config.ONLINE_URL_FINAL)
                     .client(okHttpClient)
                     .addConverterFactory(ScalarsConverterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create())

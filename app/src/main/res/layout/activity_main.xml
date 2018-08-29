@@ -4,8 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawerlayout"
-
     xmlns:android="http://schemas.android.com/apk/res/android">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/container_main_compelete"
+        >
 
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -54,6 +58,7 @@
     <include layout="@layout/content_main"/>
 </FrameLayout>
 </android.support.design.widget.CoordinatorLayout>
+    </FrameLayout>
 
     <android.support.design.widget.NavigationView
         android:layout_width="wrap_content"
