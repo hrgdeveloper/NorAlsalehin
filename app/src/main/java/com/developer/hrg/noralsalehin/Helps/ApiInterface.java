@@ -30,10 +30,24 @@ public interface ApiInterface {
     @POST("verify")
     Call<SimpleResponse> verify(@Field("mobile") String mobile , @Field("otp") String otp);
 
+    @GET("getDeletedCount")
+    Call<SimpleResponse> getDeletedCount();
+
+    @GET("getDeletedList")
+    Call<SimpleResponse> getDeletedList();
+
+    @GET("noorFirebase")
+    Call<SimpleResponse> checkFirebase();
+
     @FormUrlEncoded
     @PUT("updateUsername")
     Call<SimpleResponse> updateUsername(@Header("Authorization") String header ,@Field("username") String username );
 
+
+    @FormUrlEncoded
+    @PUT("deleteMessage/{message_id}")
+    Call<SimpleResponse> deleteMessage(@Header("AuthorizationInside") String header ,@Path("message_id") int message_id ,
+                                       @Field("file_name") String fileName,@Field("type") int type);
 
     @GET("getAllChanelsUser")
     Call<SimpleResponse> getAllChanels(@Header("Authorization") String header);

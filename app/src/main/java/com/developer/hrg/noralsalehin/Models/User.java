@@ -22,18 +22,24 @@ public class User {
     @SerializedName("pic_thumb")
     String pic_thumb;
 
+    @SerializedName("active")
+    int active ;
+
+    public int getActive() {
+        return active;
+    }
+    public void setActive(int active) {
+        this.active = active;
+    }
     public String getPic() {
         return pic;
     }
-
     public void setPic(String pic) {
         this.pic = pic;
     }
-
     public String getPic_thumb() {
         return pic_thumb;
     }
-
     public void setPic_thumb(String pic_thumb) {
         this.pic_thumb = pic_thumb;
     }
@@ -78,7 +84,7 @@ public class User {
         this.created_at = created_at;
     }
 
-    public User(int id, String mobile, String apikey, String created_at , String username, String pic , String pic_thumb) {
+    public User(int id, String mobile, String apikey, String created_at , String username, String pic , String pic_thumb , int active) {
         this.id = id;
         this.mobile = mobile;
         this.apikey = apikey;
@@ -86,5 +92,6 @@ public class User {
         this.username=username;
         this.pic=pic;
         this.pic_thumb=pic_thumb;
+        this.active=active;
     }
 }

@@ -15,14 +15,10 @@ public class MyApplication extends Application {
 
     public static final String TAG = MyApplication.class
             .getSimpleName();
-
-
     private static MyApplication mInstance;
-      UserInfo userInfo ;
+    UserInfo userInfo ;
     UserData userData ;
     SettingPref settingPref;
-
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -33,7 +29,6 @@ public class MyApplication extends Application {
                 .build();
         PRDownloader.initialize(this, config);
     }
-
     public static synchronized MyApplication getInstance() {
         return mInstance;
     }
@@ -43,16 +38,13 @@ public class MyApplication extends Application {
         }
         return settingPref;
     }
-
-
     public UserInfo getUserInfo () {
         if (userInfo==null) {
             userInfo=new UserInfo(this);
         }
         return userInfo;
     }
-
-       public UserData getUserData() {
+    public UserData getUserData() {
            if (userData==null) {
                userData=new UserData(this);
            }

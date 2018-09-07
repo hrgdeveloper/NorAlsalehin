@@ -46,20 +46,15 @@ public class Message implements Parcelable {
     public Integer getComplete() {
         return complete;
     }
-
     public void setComplete(Integer complete) {
         this.complete = complete;
     }
-
     public Integer getAudio_percent() {
         return audio_percent;
     }
-
     public void setAudio_percent(Integer audio_percent) {
         this.audio_percent = audio_percent;
     }
-
-
 
     public Integer getDl_percent() {
         return dl_percent;

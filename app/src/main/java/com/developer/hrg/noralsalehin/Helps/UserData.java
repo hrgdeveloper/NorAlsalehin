@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.DownloadListener;
 
@@ -13,6 +14,7 @@ import com.developer.hrg.noralsalehin.Models.Chanel;
 import com.developer.hrg.noralsalehin.Models.Download;
 import com.developer.hrg.noralsalehin.Models.DownloadBack;
 import com.developer.hrg.noralsalehin.Models.Message;
+import com.developer.hrg.noralsalehin.Models.Message_id;
 import com.developer.hrg.noralsalehin.Models.Notify;
 import com.developer.hrg.noralsalehin.Models.UnRead;
 import com.developer.hrg.noralsalehin.Models.User;
@@ -35,12 +37,14 @@ public class UserData extends SQLiteOpenHelper {
     public static final String USER_APIKEY="apikey" ;
     public static final String USER_USERNAME="username" ;
     public static final String USER_PIC="pic" ;
+    public static final String USER_ACTIVE="active" ;
     public static final String USER_PIC_THUMB="pic_thumb" ;
     public static final String CREATED_AT="created_At" ;
     String CREATE_TABLE= "CREATE TABLE " + TABLE_USER+ " ("+USER_USER_ID+" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
             +USER_MOBILE+" TEXT NOT NULL , "
             +USER_APIKEY+ " TEXT NOT NULL , " +
             USER_USERNAME+" TEXT , " +
+            USER_ACTIVE+ " INTEGER NOT NULL , " +
             USER_PIC+" TEXT ,"+
             USER_PIC_THUMB+ " TEXT ,"+
             CREATED_AT+" TEXT NOT NULL )";
@@ -70,7 +74,7 @@ public class UserData extends SQLiteOpenHelper {
             CHANEL_NAME+ " TEXT NOT NULL ,"+
             CHANEL_DESCRIPTION+ " TEXT NOT NULL ," +
             CHANEL_THUMB+ " TEXT  NOT NULL , " +
-            CHANEL_USERNAME+ " TEXT NOT NULL , " +
+            CHANEL_USERNAME+ " TEXT , " +
             CHANEL_UPDATED_AT + " TEXT  ," +
             CHANEL_LAST_MESSAGE + " TEXT ," +
             CHANEL_TYPE + " INTEGER ," +
@@ -117,6 +121,7 @@ public class UserData extends SQLiteOpenHelper {
     public static final String MESSAGE_LENTH="lenth";
     public static final String MESSAGE_TIME="time";
     public static final String MESSAGE_URL="url";
+    public static final String MESSAGE_ACTIVE="active";
     public static final String MESSAGE_FILE_NAME="filename";
     public static final String MESSAGE_LIKED="liked";
     public static final String MESSAGE_DOWLOAD_STATE="dl_state";
@@ -136,6 +141,7 @@ public class UserData extends SQLiteOpenHelper {
             MESSAGE_LENTH + " INTEGER ," +
             MESSAGE_TIME + " TEXT ," +
             MESSAGE_URL+" TEXT ," +
+            MESSAGE_ACTIVE+ " INTEGER DEFAULT 1 , "+
             MESSAGE_FILE_NAME+ " TEXT , " +
             MESSAGE_LIKED + " smallint ," +
             MESSAGE_DOWLOAD_STATE+ " smallint DEFAULT 0 , " +
@@ -200,7 +206,7 @@ public static final String TABLE_DOWNLOADS="downloads_table" ;
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-       sqLiteDatabase.execSQL(CREATE_TABLE);
+        sqLiteDatabase.execSQL(CREATE_TABLE);
         sqLiteDatabase.execSQL(CREATE_TABLE_CHANEL);
         sqLiteDatabase.execSQL(CREATE_TABLE_UNREAD);
         sqLiteDatabase.execSQL(CREATE_TABLE_NOTIFY);
@@ -226,7 +232,7 @@ public static final String TABLE_DOWNLOADS="downloads_table" ;
     }
     /////////////////////////////////////////////////////////////DownloadsFunction\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
-     public Long insertDownload(Download download) {
+    public Long insertDownload(Download download) {
          ContentValues contentValues = new ContentValues();
          contentValues.put(DOWNLOADS_MESSAGE_ID,download.getMessage_id());
          contentValues.put(DOWNLOADS_ADDRESS,download.getAddress());
@@ -269,14 +275,13 @@ public static final String TABLE_DOWNLOADS="downloads_table" ;
     public Integer deleteSingleDownload(int message_id) {
         return sqLiteDatabase.delete(TABLE_DOWNLOADS,message_id+ " LIKE ? ",new String[]{String.valueOf(message_id)});
     }
-
     public Integer deleteDownloas(){
         return sqLiteDatabase.delete(TABLE_DOWNLOADS,null,null);
     }
 ///////////////////////////////////////////////////////////////DownloadBackFunctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 
-        public Long insertDownloadBACK(DownloadBack downloadBack) {
+    public Long insertDownloadBACK(DownloadBack downloadBack) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DOWNLOADS_BACK_CHANEL_ID,downloadBack.getChanel_id());
         contentValues.put(DOWNLOADS_BACK_POSITION,downloadBack.getPosition());
@@ -303,12 +308,9 @@ public static final String TABLE_DOWNLOADS="downloads_table" ;
         }
 
     }
-
     public Integer deleteDownloasBack(){
         return sqLiteDatabase.delete(TABLE_BACKGROUND_DOWNLOADS,null,null);
     }
-
-
     ////////////////////////////////////////////////////////////////USerFunctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     public void addUser(User user) {
         ContentValues contentValues = new ContentValues();
@@ -317,13 +319,15 @@ public static final String TABLE_DOWNLOADS="downloads_table" ;
         contentValues.put(USER_APIKEY,user.getApikey());
         contentValues.put(USER_USERNAME,user.getUsername());
         contentValues.put(USER_PIC,user.getPic());
+        contentValues.put(USER_ACTIVE,user.getActive());
         contentValues.put(USER_PIC_THUMB,user.getPic_thumb());
         contentValues.put(CREATED_AT,user.getCreated_at());
         sqLiteDatabase.insert(TABLE_USER,null,contentValues);
 
     }
     public User getUser() {
-        Cursor cursor = sqLiteDatabase.query(TABLE_USER,new String[]{USER_USER_ID,USER_MOBILE,USER_APIKEY,USER_USERNAME,USER_PIC,USER_PIC_THUMB, CREATED_AT},null,null,null,null,null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_USER,new String[]{USER_USER_ID,USER_MOBILE,USER_APIKEY,USER_USERNAME,USER_ACTIVE,
+                USER_PIC,USER_PIC_THUMB, CREATED_AT},null,null,null,null,null);
         cursor.moveToFirst();
         User user = new User(cursor.getInt(cursor.getColumnIndexOrThrow(USER_USER_ID)),
                 cursor.getString(cursor.getColumnIndexOrThrow(USER_MOBILE)),
@@ -331,7 +335,8 @@ public static final String TABLE_DOWNLOADS="downloads_table" ;
                 cursor.getString(cursor.getColumnIndexOrThrow(CREATED_AT)
                 ),cursor.getString(cursor.getColumnIndexOrThrow(USER_USERNAME)
                 ),cursor.getString(cursor.getColumnIndexOrThrow(USER_PIC)),
-                cursor.getString(cursor.getColumnIndexOrThrow(USER_PIC_THUMB))
+                cursor.getString(cursor.getColumnIndexOrThrow(USER_PIC_THUMB)
+                ),cursor.getInt(cursor.getColumnIndexOrThrow(USER_ACTIVE))
                 );
 
         return user;
@@ -506,6 +511,11 @@ public static final String TABLE_DOWNLOADS="downloads_table" ;
         contentValues.put(UNREAD_COUNT,0);
         sqLiteDatabase.update(TABLE_UNREAD,contentValues,UNREAD_CHANEL_ID+ " LIKE ? " ,new String[]{String.valueOf(chanel_id)});
     }
+    public void updateReadForDelete(int count , int chanel_id) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(READ_COUNT,count);
+        sqLiteDatabase.update(TABLE_UNREAD,contentValues,UNREAD_CHANEL_ID+ " LIKE ? " ,new String[]{String.valueOf(chanel_id)});
+    }
 
 
 /////////////////////////////////////////////////////////////////NotifyFunctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -592,7 +602,8 @@ public static final String TABLE_DOWNLOADS="downloads_table" ;
                 "                sub."+MESSAGE_MESSAGE+" , sub."+MESSAGE_TYPE+",sub."+MESSAGE_THUMB+",sub."+MESSAGE_LENTH+"" +
                 ",sub."+MESSAGE_TIME+",sub."+MESSAGE_FILE_NAME+",sub."+MESSAGE_URL+",sub."+MESSAGE_UPDATED_AT+" ,sub."+MESSAGE_DOWLOAD_STATE+
              " ,sub."+MESSAGE_DOWNLOAD_PERCENT  +  ", sub."+MESSAGE_DOWLOAD_ID+ " , sub."+MESSAGE_AUDIO_PERCENT +" ,sub."+MESSAGE_COMPELETE+ " , sub."+MESSAGE_LIKED+" from\n" +
-                "                (select * from " +  TABLE_MESSAGE + " where " + MESSAGE_CHANEL_ID + " like "+ chanel_id+ "  ORDER by "  +  MESSAGE_MESSAGE_ID+ " DESC) sub\n" +
+                "                (select * from " +  TABLE_MESSAGE + " where " + MESSAGE_CHANEL_ID + " like "+ chanel_id+ " AND " +MESSAGE_ACTIVE+" = 1"+
+                "  ORDER by "  +  MESSAGE_MESSAGE_ID+ " DESC) sub\n" +
                 "         order by sub." + MESSAGE_MESSAGE_ID+" ASC",null,null);
 
 //        Cursor cursor = sqLiteDatabase.query(TABLE_MESSAGE,new String[]{MESSAGE_MESSAGE_ID,MESSAGE_ADMIN_ID,MESSAGE_CHANEL_ID,MESSAGE_MESSAGE
@@ -631,7 +642,9 @@ public static final String TABLE_DOWNLOADS="downloads_table" ;
 
     }
     public  int getLastMessage_id(int chanel_id) {
-        Cursor cursor = sqLiteDatabase.query(TABLE_MESSAGE,new String[]{MESSAGE_MESSAGE_ID},MESSAGE_CHANEL_ID+" LIKE ? " ,new String[]{String.valueOf(chanel_id)},null
+        Cursor cursor = sqLiteDatabase.query(TABLE_MESSAGE,new String[]{MESSAGE_MESSAGE_ID},MESSAGE_CHANEL_ID+" LIKE ? AND " +MESSAGE_ACTIVE
+                +" = 1"
+                ,new String[]{String.valueOf(chanel_id)},null
                 ,null,MESSAGE_MESSAGE_ID+" DESC","0,1"
                 );
         cursor.moveToFirst();
@@ -675,12 +688,36 @@ public static final String TABLE_DOWNLOADS="downloads_table" ;
         sqLiteDatabase.update(TABLE_MESSAGE,contentValues,MESSAGE_MESSAGE_ID+" LIKE ? " , new String[]{String.valueOf(message_id)});
 
     }
-
     public void setLikeState(int likeState,int message_id) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MESSAGE_LIKED,likeState);
         sqLiteDatabase.update(TABLE_MESSAGE,contentValues,MESSAGE_MESSAGE_ID+" LIKE ? " , new String[]{String.valueOf(message_id)});
     }
+    public void updateMessageActive(int message_id) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MESSAGE_ACTIVE,0);
+        sqLiteDatabase.update(TABLE_MESSAGE,contentValues,MESSAGE_MESSAGE_ID+" LIKE ? " , new String[]{String.valueOf(message_id)});
+
+    }
+    public Integer updateMessageActives(ArrayList<Integer> idis) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MESSAGE_ACTIVE,0);
+        String all_id = TextUtils.join(", ", idis);
+        String Where=  MESSAGE_MESSAGE_ID+" IN "+"(" +all_id+")" ;
+        return    sqLiteDatabase.update(TABLE_MESSAGE,contentValues, Where,null);
+    }
+//    public Integer UpdateGroups(int user_id,ArrayList<Integer> ids,String name){
+//        ContentValues contentValues = new ContentValues();
+//        contentValues.put(GP,name);
+//        String all_id = TextUtils.join(", ", ids);
+//        String Where=  WORD_ID+" IN "+"(" +all_id+")"+  " AND "+USER_ID_FOREIGN+" LIKE "+user_id;
+//        Log.e("hamiiiiid",Where);
+//        return    sqLiteDatabase.update(WORD_TABLE,contentValues, Where,null);
+//
+//
+//
+//    }
+
     ////////////////////////////////////////////////////////////////positionFunction\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
   //  check mikonim mibinim age dash ke update she age nadasht besaze
     public Long addPosition(int chanel_id , int position , boolean updateshe) {
@@ -707,7 +744,6 @@ public static final String TABLE_DOWNLOADS="downloads_table" ;
                 );
         return cnt > 0;
     }
-
     public Integer getLastPosition(int chanel_id) {
         Cursor cursor = sqLiteDatabase.query(TABLE_POSITION,new String[]{POSITION_NUMBER},
                 POSITION_CHANEL_ID+ " LIKE ? ",new String[]{String.valueOf(chanel_id)},

@@ -10,6 +10,8 @@ import android.content.SharedPreferences;
 public class SettingPref {
     public static final String SHARED_TYPE="setting";
     public static final String TEXT_SIZE="setting";
+    public static final String DELETED_COUNT="count";
+
     Context context ;
 
     SharedPreferences sharedPreferences ;
@@ -28,5 +30,16 @@ public class SettingPref {
     public int getTextSize() {
     return    sharedPreferences.getInt(TEXT_SIZE,14);
     }
+
+
+    public void setDeletedCount(int count ) {
+        editor.putInt(DELETED_COUNT,count);
+        editor.apply();
+    }
+
+    public int getDeletedCount(){
+     return    sharedPreferences.getInt(DELETED_COUNT,-1);
+    }
+
 
 }

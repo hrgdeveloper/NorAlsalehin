@@ -96,12 +96,12 @@ public class Fragment_insideToolbar extends Fragment implements View.OnClickList
         ((InsideActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ((InsideActivity)getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
         fb_back.setOnClickListener(this);
-        Glide.with(getActivity()).load(Config.CHANEL_PIC_BASE_ONLINE_FINAL+chanel.getThumb())
+        Glide.with(getActivity()).load(Config.CHANEL_PIC_BASE_OFFLINE+chanel.getThumb())
                 .apply(new RequestOptions().placeholder(R.drawable.broadcast).error(R.drawable.broadcast)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
         ).into(iv_pic);
 
-        Glide.with(getActivity()).load(Config.CHANEL_THUMB_BASE_ONLINE_FINAL+chanel.getThumb())
+        Glide.with(getActivity()).load(Config.CHANEL_THUMB_BASE_OFFLINE+chanel.getThumb())
                 .apply(new RequestOptions().placeholder(R.drawable.broadcast).error(R.drawable.broadcast)
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                 ).into(iv_thumb);
@@ -141,9 +141,6 @@ public class Fragment_insideToolbar extends Fragment implements View.OnClickList
                 currentState = 1;
             }
             MyApplication.getInstance().getUserData().updateChanelnotifyState(chanel.getChanel_id(),currentState);
-
-            int currentStateafterChange = MyApplication.getInstance().getUserData().getChanelNotifyState(chanel.getChanel_id());
-            Toast.makeText(getActivity(), currentStateafterChange+ " ", Toast.LENGTH_SHORT).show();
             updateNotifyState();
         }else if (view==iv_pic) {
 

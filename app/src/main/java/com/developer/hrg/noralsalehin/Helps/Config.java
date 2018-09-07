@@ -21,12 +21,13 @@ public class Config {
     public static final String CHANEL_PIC_BASE_ONLINE_FINAL = "http://nooresalehin.ir/uploads/chanel_pics/";
 
 
-    public static final String MESSAGE_PIC_ADDRES = "http://192.168.1.147/noor/uploads/message/pic/";
-    public static final String MESSAGE_THUMB_ADDRESS = "http://192.168.1.147/noor/uploads/message/pic_thumb/";
 
+
+    public static final String MESSAGE_PIC_ADDRES = "http://192.168.1.147/noor/uploads/message/pic/";
     public static final String MESSAGE_PIC_ADDRES_ONLINE = "http://keepwords.ir/noor/uploads/message/pic/";
     public static final String MESSAGE_PIC_ADDRES_ONLINE_FINAL = "http://nooresalehin.ir/uploads/message/pic/";
 
+    public static final String MESSAGE_THUMB_ADDRESS = "http://192.168.1.147/noor/uploads/message/pic_thumb/";
     public static final String MESSAGE_THUMB_ADDRESS_ONLINE  = "http://keepwords.ir/noor/uploads/message/pic_thumb/";
     public static final String MESSAGE_THUMB_ADDRESS_ONLINE_FINAL  = "http://nooresalehin.ir/uploads/message/pic_thumb/";
 
@@ -54,6 +55,7 @@ public class Config {
 
 
     public static final String PROFILE_PIC_ADDRESS = "http://192.168.1.147/noor/uploads/user_profile/pic/";
+    public static final String FIREBASE_PIC_ADDRESS = "http://www.keepwords.ir/v1/";
 
     public static final String PROFILE_PIC_THUMB_ADDRESS  = "http://192.168.1.147/noor/uploads/user_profile/thumb/";
     public static final String PROFILE_PIC_THUMB_ADDRESS_ONLINE  = "http://keepwords.ir//noor/uploads/user_profile/thumb/";

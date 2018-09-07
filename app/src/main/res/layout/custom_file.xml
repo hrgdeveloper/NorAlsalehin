@@ -17,11 +17,10 @@
         android:layout_height="match_parent">
 
         <FrameLayout
-            android:layout_width="65dp"
+            android:layout_width="@dimen/_50sdp"
             android:id="@+id/frame_file"
-            android:layout_height="65dp"
-            tools:layout_editor_absoluteY="30dp"
-            tools:layout_editor_absoluteX="10dp">
+            android:layout_height="@dimen/_50sdp"
+           >
 
             <com.mikhaellopez.circularprogressbar.CircularProgressBar
                 android:id="@+id/cp_file"

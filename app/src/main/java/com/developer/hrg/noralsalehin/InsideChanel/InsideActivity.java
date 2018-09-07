@@ -1,7 +1,4 @@
 package com.developer.hrg.noralsalehin.InsideChanel;
-
-import android.Manifest;
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -10,10 +7,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
+
 import android.content.pm.PackageManager;
 
-import android.media.MediaPlayer;
+
 import android.net.Uri;
 
 import android.os.Build;
@@ -31,9 +28,11 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -51,10 +50,8 @@ import com.developer.hrg.noralsalehin.Helps.Apiclient;
 
 import com.developer.hrg.noralsalehin.Helps.Config;
 import com.developer.hrg.noralsalehin.Helps.DownloadService;
-import com.developer.hrg.noralsalehin.Helps.InternetCheck;
-
 import com.developer.hrg.noralsalehin.Helps.MyApplication;
-
+import com.developer.hrg.noralsalehin.Helps.Repetetive;
 import com.developer.hrg.noralsalehin.Helps.SimpleResponse;
 import com.developer.hrg.noralsalehin.Helps.UserData;
 import com.developer.hrg.noralsalehin.InsideChanel.comment.CommentFragment;
@@ -78,8 +75,13 @@ import org.json.JSONObject;
 
 import java.io.File;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 
@@ -106,7 +108,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     int like_state;
     public static final int STORAGE_REQUEST = 102;
     int download_id = 0;
-    MediaPlayer mediaPlayer;
+
     boolean executeOnResumeTask;
     LocalBroadcastManager localBroadcastManager;
 
@@ -115,7 +117,6 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inside);
         executeOnResumeTask = false;
-        mediaPlayer = new MediaPlayer();
         defineViews();
         defineClass();
         setSupportActionBar(toolbar);
@@ -137,11 +138,11 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         }
 
         tv_chanelName.setText(chanel.getName());
-        Glide.with(InsideActivity.this).load(Config.CHANEL_THUMB_BASE_ONLINE_FINAL + chanel.getThumb()).apply(new RequestOptions().placeholder(R.drawable.broadcast)
+        Glide.with(InsideActivity.this).load(Config.CHANEL_THUMB_BASE_OFFLINE + chanel.getThumb()).apply(new RequestOptions().placeholder(R.drawable.broadcast)
                 .error(R.drawable.broadcast)
         ).into(iv_thumb);
 
-        if (InternetCheck.isOnline(InsideActivity.this)) {
+
             ApiInterface api = Apiclient.getClient().create(ApiInterface.class);
             Call<SimpleResponse> call_getMemberCount = api.getUserCount();
             call_getMemberCount.enqueue(new Callback<SimpleResponse>() {
@@ -256,12 +257,9 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
             });
 
 
-        } else {
-            int user_count = MyApplication.getInstance().getUserInfo().getUserCount();
-            tv_tedad.setText("تعداد اعضا : " + user_count);
-            progressBar.setVisibility(View.INVISIBLE);
-            adapter_message.notifyDataSetChanged();
-        }
+
+
+
 
         toolbar.setOnClickListener(this);
         btn_mute.setOnClickListener(this);
@@ -325,10 +323,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                     //this is the top of the RecyclerView
 
 
-                    int top_id = messages.get(0).getMessage_id();
-
-                    if (InternetCheck.isOnline(InsideActivity.this)) {
-
+                        int top_id = messages.get(0).getMessage_id();
                         progressBar.setVisibility(View.VISIBLE);
                         ApiInterface api = Apiclient.getClient().create(ApiInterface.class);
                         Call<SimpleResponse> call_Messages = api.getAllMessagesTop(user.getApikey(), chanel.getChanel_id(), top_id);
@@ -378,13 +373,12 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
                             @Override
                             public void onFailure(Call<SimpleResponse> call, Throwable t) {
-
                                 progressBar.setVisibility(View.GONE);
                             }
                         });
                     }
 
-                }
+
 
                 int totalItemCount = layoutManager.getItemCount();
                 int lastVisible = layoutManager.findLastVisibleItemPosition();
@@ -432,14 +426,10 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     protected void onResume() {
         super.onResume();
-
-
         LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(Config.PUSH_NEW_MESSAGE));
         LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(DownloadService.BROADCAST_PROGRESS));
         LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(DownloadService.BROADCAST_DL_FINISH));
         LocalBroadcastManager.getInstance(InsideActivity.this).registerReceiver(reciverChanelsTask, new IntentFilter(DownloadService.BROADCAST_PAUSE));
-
-
         //vase raftan be ye akharin positon
         if (messages.size() > 0 && last_position != 0) {
             ((LinearLayoutManager) recyclerView.getLayoutManager()).scrollToPositionWithOffset(last_position, 0);
@@ -460,6 +450,7 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
             }
             userdata.deleteDownloasBack();
         }
+        creatFolders();
 
     }
 
@@ -591,24 +582,16 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
 
         } else {
-
-            if (ActivityCompat.checkSelfPermission(InsideActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_REQUEST);
-            } else {
                 if (messages.get(position).getDl_state() == 0) {
                     messages.get(position).setDl_state(1);
                     adapter_message.notifyItemChanged(position);
-                    download_service(position, Config.MESSAGE_PIC_ADDRES_ONLINE_FINAL, Config.Folders.IMAGES);
+                    download_service(position, Config.MESSAGE_PIC_ADDRES, Config.Folders.IMAGES);
 
                 } else {
-
                     pauseDownload(position);
-
                 }
 
             }
-
-        }
     }
 
     @Override
@@ -628,6 +611,14 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
             showTextAlert(position);
     }
 
+    @Override
+    public void picture_long_clicked(int position) {
+        if (user.getActive()==2) {
+            deleteMessage(position, messages.get(position).getMessage_id(),messages.get(position).getUrl(),messages.get(position).getType());
+        }
+
+    }
+
     /////////////////////////////////////////////////////simpleFunction\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
     public void simple_likeClicked(int position) {
@@ -644,6 +635,13 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         showTextAlert(position);
     }
 
+    @Override
+    public void simple_long_clicked(int position) {
+        if (user.getActive()==2) {
+            deleteMessage(position, messages.get(position).getMessage_id(),messages.get(position).getUrl(),messages.get(position).getType());
+        }
+    }
+
     /////////////////////////////////////////////////////videoFuctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
     public void video_imageClicked(final int position, final CircularProgressBar circularProgressBar, final ImageView iv_download
@@ -658,23 +656,19 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
         }else {
-                reDownload_ifFile_Deleted(position,Config.MESSAGE_VIDEO_ADDRESS_ONLINE_FINAL,Config.Folders.VIDEOS);
+                reDownload_ifFile_Deleted(position,Config.MESSAGE_VIDEO_ADDRESS,Config.Folders.VIDEOS);
             }
         } else {
 
-            if (ActivityCompat.checkSelfPermission(InsideActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_REQUEST);
-            } else {
+
 
                 if (messages.get(position).getDl_state() == 0) {
                     messages.get(position).setDl_state(1);
                     adapter_message.notifyItemChanged(position);
-                    download_service(position, Config.MESSAGE_VIDEO_ADDRESS_ONLINE_FINAL, Config.Folders.VIDEOS);
+                    download_service(position, Config.MESSAGE_VIDEO_ADDRESS, Config.Folders.VIDEOS);
                 } else {
                     pauseDownload(position);
                 }
-
-            }
         }
     }
 
@@ -694,6 +688,13 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         showTextAlert(position);
     }
 
+    @Override
+    public void video_long_clicked(int position) {
+        if (user.getActive()==2) {
+            deleteMessage(position, messages.get(position).getMessage_id(),messages.get(position).getUrl(),messages.get(position).getType());
+        }
+    }
+
     //////////////////////////////////////////////////////////////AduioFunctions\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
     @Override
@@ -705,27 +706,18 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
                  playAudioFile(InsideActivity.this,getFile(Config.Folders.AUDIOS,messages.get(position).getUrl()));
              }else {
 
-                 reDownload_ifFile_Deleted(position,Config.MESSAGE_AUDIO_ADDRESS_ONLINE_FINAL,Config.Folders.AUDIOS);
+                 reDownload_ifFile_Deleted(position,Config.MESSAGE_AUDIO_ADDRESS,Config.Folders.AUDIOS);
              }
          }
       else {
 
-            if (ActivityCompat.checkSelfPermission(InsideActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_REQUEST);
-            } else {
-
                 if (messages.get(position).getDl_state() == 0) {
                     messages.get(position).setDl_state(1);
                     adapter_message.notifyItemChanged(position);
-                    download_service(position, Config.MESSAGE_AUDIO_ADDRESS_ONLINE_FINAL, Config.Folders.AUDIOS);
-
+                    download_service(position, Config.MESSAGE_AUDIO_ADDRESS, Config.Folders.AUDIOS);
                 } else {
                     pauseDownload(position);
-
                 }
-
-
-            }
         }
 
     }
@@ -745,6 +737,43 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         showTextAlert(position);
     }
 
+    @Override
+    public void audio_moreClicked(final int position, View view) {
+        PopupMenu popup = new PopupMenu(InsideActivity.this, view);
+        //Inflating the Popup using xml file
+        popup.getMenuInflater()
+                .inflate(R.menu.audio_menu, popup.getMenu());
+
+        //registering popup with OnMenuItemClickListener
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                 if (item.getItemId()==R.id.mu_audio) {
+                     if (isFileExists(Config.Folders.AUDIOS, messages.get(position).getUrl())) {
+                         try {
+                             copy(getFile(Config.Folders.AUDIOS, messages.get(position).getUrl()),getDestenestionFile(messages.get(position).getFilename()));
+                         } catch (IOException e) {
+                             e.printStackTrace();
+                             Toast.makeText(InsideActivity.this, "خطا در انتقال", Toast.LENGTH_SHORT).show();
+                         }
+
+                     }else {
+                         Toast.makeText(InsideActivity.this, "موسیقی مورد نظر یافت نشد", Toast.LENGTH_SHORT).show();
+                     }
+                 }
+                return true;
+            }
+        });
+
+        popup.show(); //showing popup menu
+    }
+
+    @Override
+    public void audio_long_clicked(int position) {
+        if (user.getActive()==2) {
+            deleteMessage(position, messages.get(position).getMessage_id(),messages.get(position).getUrl(),messages.get(position).getType());
+        }
+    }
+
     //////////////////////////////////////////////////////////////FileFunction\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @Override
     public void file_imageClicked(final int position, CircularProgressBar circularProgressBar, ImageView iv_download) {
@@ -758,26 +787,20 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
               }
 
           }else {
-              reDownload_ifFile_Deleted(position,Config.MESSAGE_File_ADDRESS_ONLINE_FINAL,Config.Folders.DOCUMENTS);
+              reDownload_ifFile_Deleted(position,Config.MESSAGE_File_ADDRESS,Config.Folders.DOCUMENTS);
           }
       }
 
         else {
-
-            if (ActivityCompat.checkSelfPermission(InsideActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_REQUEST);
-            } else {
-
-
                 if (messages.get(position).getDl_state() == 0) {
                     messages.get(position).setDl_state(1);
                     adapter_message.notifyItemChanged(position);
-                    download_service(position, Config.MESSAGE_File_ADDRESS_ONLINE_FINAL, Config.Folders.DOCUMENTS);
+                    download_service(position, Config.MESSAGE_File_ADDRESS, Config.Folders.DOCUMENTS);
                 } else {
                     pauseDownload(position);
                 }
             }
-        }
+
 
     }
 
@@ -794,6 +817,13 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void file_text_clicked(int position) {
         showTextAlert(position);
+    }
+
+    @Override
+    public void file_long_clicked(int position) {
+        if (user.getActive()==2) {
+            deleteMessage(position, messages.get(position).getMessage_id(),messages.get(position).getUrl(),messages.get(position).getType());
+        }
     }
 
 
@@ -941,11 +971,8 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     public void likeFunction(final int position) {
-        if (!InternetCheck.isOnline(InsideActivity.this)) {
-            Toast.makeText(this, "عدم دسترسی به اینترنت", Toast.LENGTH_SHORT).show();
-        } else {
-            like_state = messages.get(position).getLiked() > 0 ? 0 : 1;
 
+            like_state = messages.get(position).getLiked() > 0 ? 0 : 1;
             ApiInterface api = Apiclient.getClient().create(ApiInterface.class);
             Call<SimpleResponse> call_setlike = api.setLike(user.getApikey(), messages.get(position).getMessage_id(), like_state);
             call_setlike.enqueue(new Callback<SimpleResponse>() {
@@ -972,11 +999,11 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
 
                 @Override
                 public void onFailure(Call<SimpleResponse> call, Throwable t) {
-
+                    Repetetive.handleFailureError(t,InsideActivity.this,"insideActivity");
                 }
             });
         }
-    }
+
 
     @Override
     protected void onDestroy() {
@@ -1117,6 +1144,143 @@ public class InsideActivity extends AppCompatActivity implements View.OnClickLis
         }
 
     }
+
+    public void deleteMessage(final int position , final int message_id , final String filename , final int type) {
+
+        AlertDialog.Builder alert = new AlertDialog.Builder(InsideActivity.this);
+        alert.setTitle("حذف پیام");
+        alert.setMessage("آیا مایل به حذف این پیام میباشید ");
+        alert.setPositiveButton("بلی", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+              ApiInterface api = Apiclient.getClient().create(ApiInterface.class);
+                Call<SimpleResponse> call_delete = api.deleteMessage(user.getApikey(),
+                        message_id,filename,type
+                        );
+                call_delete.enqueue(new Callback<SimpleResponse>() {
+                    @Override
+                    public void onResponse(Call<SimpleResponse> call, Response<SimpleResponse> response) {
+                        if (!response.isSuccessful()) {
+                            Repetetive.handleResonseError(response,InsideActivity.this);
+                        }else {
+                           if (type > 1 ) {
+                               if (type==2) {
+                                if (isFileExists(Config.Folders.IMAGES,filename)){
+                                       getFile(Config.Folders.IMAGES,filename).delete();
+                                   }
+                               }else if (type==3) {
+                                   if (isFileExists(Config.Folders.VIDEOS,filename)){
+                                       getFile(Config.Folders.VIDEOS,filename).delete();
+                                   }
+
+                               }else if (type==4) {
+                                   if (isFileExists(Config.Folders.AUDIOS,filename)){
+                                       getFile(Config.Folders.AUDIOS,filename).delete();
+                                   }
+
+                               }else if (type==5) {
+                                   if (isFileExists(Config.Folders.DOCUMENTS,filename)){
+                                       getFile(Config.Folders.DOCUMENTS,filename).delete();
+                                   }
+
+                               }
+                           }
+
+                            userdata.updateMessageActive(message_id);
+                            messages.remove(position);
+                            adapter_message.notifyItemRemoved(position);
+                            Toast.makeText(InsideActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<SimpleResponse> call, Throwable t) {
+                        Repetetive.handleFailureError(t,InsideActivity.this,"InsideActivity");
+                    }
+                });
+            }
+        });
+
+        alert.setNegativeButton("خیر", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                 dialogInterface.dismiss();
+            }
+        });
+
+        alert.show();
+    }
+
+    private void moveFile(String inputPath, String inputFile, String outputPath) {
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+
+            //create output directory if it doesn't exist
+            File dir = new File (outputPath);
+            if (!dir.exists())
+            {
+                dir.mkdirs();
+            }
+
+
+            in = new FileInputStream(inputPath + inputFile);
+            out = new FileOutputStream(outputPath + inputFile);
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            in.close();
+            in = null;
+
+            // write the output file
+            out.flush();
+            out.close();
+            out = null;
+        }
+
+        catch (FileNotFoundException fnfe1) {
+            Log.e("tag", fnfe1.getMessage());
+        }
+        catch (Exception e) {
+            Log.e("tag", e.getMessage());
+        }
+
+    }
+
+    public  void copy(File src, File dst) throws IOException {
+        InputStream in = new FileInputStream(src);
+        try {
+            OutputStream out = new FileOutputStream(dst);
+            try {
+                // Transfer bytes from in to out
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+            } finally {
+                out.close();
+            }
+        } finally {
+            in.close();
+            Toast.makeText(this, "انتقال انجام شد", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public File  getDestenestionFile(String filename) {
+
+        File musicDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
+        if (!musicDirectory.exists()) {
+            musicDirectory.mkdir();
+        }
+        File MusicFile = new File(musicDirectory+"/"+filename);
+        return MusicFile;
+    }
+
 
 }
 

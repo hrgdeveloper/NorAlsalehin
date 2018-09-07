@@ -3,6 +3,7 @@ package com.developer.hrg.noralsalehin.Helps;
 import com.developer.hrg.noralsalehin.Models.Chanel;
 import com.developer.hrg.noralsalehin.Models.Comment;
 import com.developer.hrg.noralsalehin.Models.Message;
+import com.developer.hrg.noralsalehin.Models.Message_id;
 import com.developer.hrg.noralsalehin.Models.Profile;
 import com.developer.hrg.noralsalehin.Models.UnRead;
 import com.developer.hrg.noralsalehin.Models.User;
@@ -36,6 +37,29 @@ public class SimpleResponse {
 
     @SerializedName("photos")
     ArrayList<Profile> profiles;
+
+    @SerializedName("count")
+    int count ;
+
+    @SerializedName("message_ids")
+    ArrayList<Message_id> message_ids ;
+
+
+    public ArrayList<Message_id> getMessage_ids() {
+        return message_ids;
+    }
+
+    public void setMessage_ids(ArrayList<Message_id> message_ids) {
+        this.message_ids = message_ids;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
 
     public ArrayList<Profile> getProfiles() {
         return profiles;

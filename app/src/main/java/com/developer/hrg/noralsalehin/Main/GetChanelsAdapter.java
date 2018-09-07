@@ -90,7 +90,12 @@ public class GetChanelsAdapter extends RecyclerView.Adapter<GetChanelsAdapter.Ho
 
 
         holder.tv_name.setText(chanel.getName());
-        holder.tv_admin_name.setText(chanel.getUsername() + " : ");
+        if (chanel.getLast_message()==null && chanel.getType()==null) {
+            holder.tv_admin_name.setText("");
+        }else  {
+            holder.tv_admin_name.setText(chanel.getUsername() + " : ");
+        }
+
         holder.tv_time.setText(time);
         // inja 3 ta halat dare ya ham maseeage khalie ham type ke yani hanooz payami vase kanal ersal nashode
         // ya message khalie ke yani ye file bedone matn ersal shode
@@ -110,7 +115,7 @@ public class GetChanelsAdapter extends RecyclerView.Adapter<GetChanelsAdapter.Ho
 
 
 
-        Glide.with(context).load(Config.CHANEL_THUMB_BASE_ONLINE_FINAL+chanel.getThumb()).apply(new RequestOptions().placeholder(drawable).error(drawable)
+        Glide.with(context).load(Config.CHANEL_THUMB_BASE_OFFLINE+chanel.getThumb()).apply(new RequestOptions().placeholder(drawable).error(drawable)
         .diskCacheStrategy(DiskCacheStrategy.ALL)
         ).into(holder.iv_profile);
 

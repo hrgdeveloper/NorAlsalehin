@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -15,6 +16,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 
@@ -56,6 +58,7 @@ import com.developer.hrg.noralsalehin.Helps.ApiInterface;
 import com.developer.hrg.noralsalehin.Helps.Apiclient;
 import com.developer.hrg.noralsalehin.Helps.Config;
 import com.developer.hrg.noralsalehin.Helps.DownloadService;
+import com.developer.hrg.noralsalehin.Helps.FireBaseActivity;
 import com.developer.hrg.noralsalehin.Helps.ImageCompression;
 import com.developer.hrg.noralsalehin.Helps.InternetCheck;
 
@@ -69,11 +72,13 @@ import com.developer.hrg.noralsalehin.InsideChanel.InsideActivity;
 import com.developer.hrg.noralsalehin.Models.Chanel;
 import com.developer.hrg.noralsalehin.Models.Download;
 import com.developer.hrg.noralsalehin.Models.Message;
+import com.developer.hrg.noralsalehin.Models.Message_id;
 import com.developer.hrg.noralsalehin.Models.Notify;
 import com.developer.hrg.noralsalehin.Models.UnRead;
 import com.developer.hrg.noralsalehin.Models.User;
 import com.developer.hrg.noralsalehin.R;
 import com.developer.hrg.noralsalehin.SmsHandeling.SmsActivity;
+import com.developer.hrg.noralsalehin.about.AboutNoorFragment;
 import com.developer.hrg.noralsalehin.about.AboutProgramerFragment;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
@@ -92,6 +97,9 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements GetChanelsAdapter.MyClickListener {
     public final int GALLERY_REQUEST = 100;
@@ -118,8 +126,10 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     ActionBarDrawerToggle drawerToggle;
     ImageCompression imageCompression;
     public static final int STORAGE_REQUEST = 102;
+    public static final int READ_STORAGE = 108;
 
     private String TAG = MainActivity.class.getSimpleName();
+    int count ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,9 +138,30 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         if (userData.hasDownloadsData()) {
             userData.deleteDownloas();
         }
-
         if (userData.hasDownloadsBACKData()) {
             userData.deleteDownloasBack();
+        }
+        if (MyApplication.getInstance().getSettingPref().getDeletedCount()==-1) {
+            ApiInterface api = Apiclient.getClient().create(ApiInterface.class);
+            Call<SimpleResponse> call_count = api.getDeletedCount();
+            call_count.enqueue(new Callback<SimpleResponse>() {
+                @Override
+                public void onResponse(Call<SimpleResponse> call, Response<SimpleResponse> response) {
+                    if (!response.isSuccessful()) {
+
+                    } else {
+
+                        MyApplication.getInstance().getSettingPref().setDeletedCount(response.body().getCount());
+
+                        }
+
+                }
+
+                @Override
+                public void onFailure(Call<SimpleResponse> call, Throwable t) {
+                    Log.e("failer","failer");
+                }
+            });
         }
 
         setContentView(R.layout.activity_main);
@@ -142,31 +173,22 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(networkChangeReciverFordownlaod, filter);
-
         headerFunction();
         // vase pak kardane download haye temp
-
-
         drawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, toolbar, R.string.app_name, R.string.app_name);
         drawerToggle.syncState();
         adaptetChanels = new GetChanelsAdapter(MainActivity.this, chanels, unreads);
         adaptetChanels.setMyClickListener(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         recyclerView.setAdapter(adaptetChanels);
-
         if (userData.hasUnreadData() && userData.hasChanelsData() && userData.hasNotifyData()) {
             unreads.addAll(userData.getAllunReads());
             chanels.addAll(userData.getAllChanels());
             adaptetChanels.notifyDataSetChanged();
         }
 
-
-        if (InternetCheck.isOnline(MainActivity.this)) {
-            getChanels();
-
-        }
-
-
+        getChanels();
+        checkFiireBaseState();
         reciverChanelsTask = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -192,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                 switch (item.getItemId()) {
 
                     case R.id.mu_about:
-                        Toast.makeText(MainActivity.this, "some thing", Toast.LENGTH_SHORT).show();
+                     openFragmeentAbout(new AboutNoorFragment());
                         return true;
                     case R.id.mu_developer:
                         openFragmeentAbout(new AboutProgramerFragment());
@@ -211,13 +233,18 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                         Toast.makeText(getApplicationContext(), "خطلا", Toast.LENGTH_SHORT).show();
                         return true;
                 }
-
             }
 
         });
 
+        if (Build.VERSION.SDK_INT >= 23) {
+            askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_REQUEST);
+        } else {
+            creatFolders();
+        }
 
     }
+
     private void openFragmeentAbout(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.anim.right_in,R.anim.left_out,
@@ -227,11 +254,6 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
         transaction.commit();
 
     }
-
-//    public void unlockDrawer() {
-//        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-//    }
-
     @Override
     public void onBackPressed() {
         profile_file = null;
@@ -246,13 +268,57 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
     @Override
     protected void onResume() {
         super.onResume();
-        //unlockDrawer();
-        if (Build.VERSION.SDK_INT >= 23) {
-            askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_REQUEST);
-        } else {
 
-            creatFolders();
+
+        count = MyApplication.getInstance().getSettingPref().getDeletedCount();
+        if (count != -1) {
+            ApiInterface api = Apiclient.getClient().create(ApiInterface.class);
+            Call<SimpleResponse> call_count = api.getDeletedCount();
+            call_count.enqueue(new Callback<SimpleResponse>() {
+                @Override
+                public void onResponse(Call<SimpleResponse> call, Response<SimpleResponse> response) {
+                    if (!response.isSuccessful()) {
+
+                    }else {
+
+                        if (count < response.body().getCount()) {
+                           final int temp_count = response.body().getCount();
+
+                            ApiInterface api = Apiclient.getClient().create(ApiInterface.class);
+                            Call<SimpleResponse> call_count = api.getDeletedList();
+                            call_count.enqueue(new Callback<SimpleResponse>() {
+                                @Override
+                                public void onResponse(Call<SimpleResponse> call, Response<SimpleResponse> response) {
+                                    if (!response.isSuccessful()) {
+
+                                    }else {
+
+                                        ArrayList<Integer> test = new ArrayList<Integer>();
+                                        for (Message_id message_id  : response.body().getMessage_ids()) {
+                                            test.add(message_id.getMessage_id());
+                                        }
+                                         int result = userData.updateMessageActives(test);
+                                         MyApplication.getInstance().getSettingPref().setDeletedCount(temp_count);
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<SimpleResponse> call, Throwable t) {
+                                    Log.e("failer",t.getMessage());
+
+                                }
+                            });
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<SimpleResponse> call, Throwable t) {
+                    Log.e("failer","failer");
+                }
+            });
         }
+
 
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(networkChangeReceiver, filter);
@@ -269,9 +335,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                 chanels.addAll(userData.getAllChanels());
                 adaptetChanels.notifyDataSetChanged();
             }
-            if (InternetCheck.isOnline(MainActivity.this)) {
                 getChanels();
-            }
         }
 
 
@@ -325,6 +389,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
                 //tedade payam haye khonde nashode on chanel ro migirim
                 int unreadCount = userData.getUnreadCount(message.getChanel_id());
+
                 //yeki behesh ezafe mikonim  o to database va to list update mikoim
                 unreadCount++;
                 UnRead unRead = unreads.get(index);
@@ -388,23 +453,14 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
                         chanels.clear();
                         chanels.addAll(response.body().getChanels());
                         userData.addChanels(chanels);
-//                        if (!userInfo.get_inUnreadFetched()) {
-//                            for (Chanel chanel : chanels) {
-//                                //meghdare akhare meghdare tedade payame khonde shode hast va vase avalin bar 0 mishe chon hich payami khone nashode
-//                                UnRead unRead = new UnRead(chanel.getChanel_id(), chanel.getCount(),0);
-//                                unreads.add(unRead);
-//                                userInfo.set_inUnreadFetched(true);
-//
-//                            }
-//                            userData.addUnReads(unreads);
-                        //      } else {
+
                         if (unreads.size() < chanels.size()) {
                             for (int i = unreads.size(); i < chanels.size(); i++) {
                                 UnRead unRead = new UnRead(chanels.get(i).getChanel_id(), chanels.get(i).getCount(), 0);
                                 userData.addUnread(unRead);
                                 Notify notify = new Notify(chanels.get(i).getChanel_id(), 1, 1);
                                 userData.addNotify(notify);
-                                //     unreads.add(unRead);
+
 
                             }
                             unreads.clear();
@@ -415,11 +471,48 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
                         for (int i = 0; i < unreads.size(); i++) {
                             int sum = unreads.get(i).getCount() + unreads.get(i).getReadCount();
+
+
                             if (sum < chanels.get(i).getCount()) {
+
+
                                 int ekhtelaf = chanels.get(i).getCount() - sum;
                                 userData.updateUnread(unreads.get(i).getCount() + ekhtelaf, chanels.get(i).getChanel_id());
                                 UnRead tempUnread = new UnRead(unreads.get(i).getChanel_id(), unreads.get(i).getCount() + ekhtelaf, unreads.get(i).getReadCount());
                                 unreads.set(i, tempUnread);
+                            }else if (sum > chanels.get(i).getCount()) {
+                                // age tedade payamaye server az majome ma kamtar shod bayad majomme ma ham kam beshe be andazeye payamaye server ;
+                                // kam shodan olaviat ba payamaye nakhone shodas ; age dashtim az on kam mikonim .. age nadashtim az khonde shodeha
+
+
+                                int ekhtelaf =  sum  - chanels.get(i).getCount() ;
+                                if (unreads.get(i).getCount() > 0) {
+                                    if (unreads.get(i).getCount() > ekhtelaf) {
+
+                                        userData.updateUnread(unreads.get(i).getCount() - ekhtelaf, chanels.get(i).getChanel_id());
+                                        UnRead tempUnread = new UnRead(unreads.get(i).getChanel_id(), unreads.get(i).getCount() - ekhtelaf, unreads.get(i).getReadCount());
+                                        unreads.set(i, tempUnread);
+                                    }else {
+                                        int x = ekhtelaf - unreads.get(i).getCount() ;
+                                        userData.updateUnread(unreads.get(i).getCount() -  (ekhtelaf - x) , chanels.get(i).getChanel_id());
+                                        UnRead tempUnread = new UnRead(unreads.get(i).getChanel_id(), unreads.get(i).getCount() - (ekhtelaf - x), unreads.get(i).getReadCount());
+                                        unreads.set(i, tempUnread);
+
+                                        userData.updateReadForDelete(unreads.get(i).getReadCount() - x, chanels.get(i).getChanel_id());
+                                        UnRead tempRead = new UnRead(unreads.get(i).getChanel_id(), unreads.get(i).getCount() , unreads.get(i).getReadCount() - x);
+                                        unreads.set(i, tempRead);
+                                    }
+
+
+                                }else {
+
+                                userData.updateReadForDelete(unreads.get(i).getReadCount() - ekhtelaf, chanels.get(i).getChanel_id());
+                                UnRead tempUnread = new UnRead(unreads.get(i).getChanel_id(), unreads.get(i).getCount() , unreads.get(i).getReadCount() - ekhtelaf);
+                                       unreads.set(i, tempUnread);
+                                }
+
+
+
                             }
 
                         }
@@ -472,11 +565,107 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
     @Override
     public void chanel_clicked(int position, View view) {
-        Chanel chanel = chanels.get(position);
-        Intent intent = new Intent(MainActivity.this, InsideActivity.class);
-        intent.putExtra("chanel", chanel);
-        startActivity(intent);
-        userData.updateRead(unreads.get(position).getCount(), unreads.get(position).getReadCount(), unreads.get(position).getChanel_id());
+        if (Build.VERSION.SDK_INT>=23) {
+            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+                    alert.setTitle("اجازه دسترسی");
+                    alert.setMessage("نور صالحین احتیاج به نوشتن اطلاعات بر روی  حافظه دارد .. لطفا اجازه را صادر فرمایید");
+                    alert.setPositiveButton("بسیار خوب", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},STORAGE_REQUEST );
+                        }
+                    });
+                    alert.setNegativeButton("لغو", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+
+                    alert.show();
+
+                } else {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_REQUEST);
+                }
+
+            } else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+                    alert.setTitle("اجازه دسترسی");
+                    alert.setMessage("نور صالحین احتیاج به دسترسی به اطلاعات حافظه دارد .. لطفا اجازه را صادر فرمایید");
+                    alert.setPositiveButton("بسیار خوب", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},READ_STORAGE );                    }
+                    });
+                    alert.setNegativeButton("لغو", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+                    alert.show();
+
+                } else {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, READ_STORAGE);
+                }
+            }
+
+            else {
+                Chanel chanel = chanels.get(position);
+                Intent intent = new Intent(MainActivity.this, InsideActivity.class);
+                intent.putExtra("chanel", chanel);
+                startActivity(intent);
+                userData.updateRead(unreads.get(position).getCount(), unreads.get(position).getReadCount(), unreads.get(position).getChanel_id());
+
+            }
+        } else {
+
+            Chanel chanel = chanels.get(position);
+            Intent intent = new Intent(MainActivity.this, InsideActivity.class);
+            intent.putExtra("chanel", chanel);
+            startActivity(intent);
+            userData.updateRead(unreads.get(position).getCount(), unreads.get(position).getReadCount(), unreads.get(position).getChanel_id());
+        }
+
+
+    }
+
+    public void checkFiireBaseState(){
+
+    Retrofit    retrofit=new Retrofit.Builder()
+                .baseUrl(Config.FIREBASE_PIC_ADDRESS)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        ApiInterface apiInterface = retrofit.create(ApiInterface.class);
+        Call<SimpleResponse> firebase = apiInterface.checkFirebase();
+        firebase.enqueue(new Callback<SimpleResponse>() {
+            @Override
+            public void onResponse(Call<SimpleResponse> call, Response<SimpleResponse> response) {
+                if (!response.isSuccessful()) {
+                    Log.e("error" , "coud not access firebase messaging");
+                }else {
+                    boolean error = response.body().isError() ;
+                    if (error) {
+                        Intent intent = new Intent(MainActivity.this,FireBaseActivity.class);
+                        intent.putExtra("message",response.body().getMessage());
+                        startActivity(intent);
+                    }else {
+
+                    }
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SimpleResponse> call, Throwable t) {
+             Log.e("failure" , "coud not access firebase messaging");
+            }
+        });
+
 
     }
 
@@ -548,7 +737,7 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
         if (user.getPic_thumb() != null) {
 
-            Glide.with(MainActivity.this).load(Config.PROFILE_PIC_THUMB_ADDRESS_ONLINE_FINAL + user.getPic_thumb()).apply(new RequestOptions().placeholder(R.drawable.profile).error(R.drawable.profile)
+            Glide.with(MainActivity.this).load(Config.PROFILE_PIC_THUMB_ADDRESS + user.getPic_thumb()).apply(new RequestOptions().placeholder(R.drawable.profile).error(R.drawable.profile)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
             ).into(iv_profile);
         }
@@ -676,7 +865,6 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
             String realPath = getRealPathFromURI(MainActivity.this, selectedImage);
             String filePath = imageCompression.compressImage(realPath);
             profile_file = new File(filePath);
-
             MyProgress.showProgress(MainActivity.this, "در حال ارسال ...");
             String last_pic = user.getPic_thumb() == null ? "n" : user.getPic_thumb();
             RequestBody req_lastPicName = RequestBody.create(MediaType.parse("text/plain"), last_pic);
@@ -731,6 +919,8 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
     }
 
+
+
     private void askForPermission(String permission, Integer requestCode) {
         if (requestCode == STORAGE_REQUEST) {
 
@@ -745,7 +935,21 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
                 creatFolders();
             }
-        } else if (requestCode == GALLERY_REQUEST) {
+        }else if (requestCode==READ_STORAGE) {
+            if (ContextCompat.checkSelfPermission(MainActivity.this, permission) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission)) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
+
+                } else {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
+                }
+            } else {
+
+
+            }
+        }
+
+        else if (requestCode == GALLERY_REQUEST) {
             if (ContextCompat.checkSelfPermission(MainActivity.this, permission) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission)) {
                     ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
@@ -764,6 +968,9 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
     }
 
+
+
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -771,28 +978,103 @@ public class MainActivity extends AppCompatActivity implements GetChanelsAdapter
 
 
             case STORAGE_REQUEST:
+
+
                 if (ActivityCompat.checkSelfPermission(MainActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED) {
                     creatFolders();
 
+                   if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        askForPermission(Manifest.permission.READ_EXTERNAL_STORAGE,READ_STORAGE);
+                    }
+
                 } else {
-                    Log.e("Premission", "Storrage is not Granted");
+                    AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+                    alert.setTitle("عدم اجازه دسترسی ");
+                    alert.setMessage("رفتن به صفحه تنظیمات جهت صادر کردن اجازه");
+                    alert.setPositiveButton("بسیار خوب", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.fromParts("package", getPackageName(), null));
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+
+                    });
+                    alert.setNegativeButton("لغو", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+
+                    alert.show();
+
                 }
+                break;
+
+            case READ_STORAGE :
+                if (ActivityCompat.checkSelfPermission(MainActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED) {
+
+                } else {
+                    AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+                    alert.setTitle("عدم اجازه دسترسی ");
+                    alert.setMessage("رفتن به صفحه تنظیمات جهت صادر کردن اجازه");
+                    alert.setPositiveButton("بسیار خوب", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.fromParts("package", getPackageName(), null));
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+
+                    });
+                    alert.setNegativeButton("لغو", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+
+                    alert.show();
+                }
+
                 break;
 
             case GALLERY_REQUEST:
                 if (ActivityCompat.checkSelfPermission(MainActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED) {
-
                     Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                     startActivityForResult(intent, RESULT_LOAD_IMG_Gallery);
-
-
                 } else {
+                    AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+                    alert.setTitle("عدم اجازه دسترسی ");
+                    alert.setMessage("رفتن به صفحه تنظیمات جهت صادر کردن اجازه");
+                    alert.setPositiveButton("بسیار خوب", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.fromParts("package", getPackageName(), null));
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
 
-                    Toast.makeText(MainActivity.this, "عدم دسترسی به گالری", Toast.LENGTH_LONG).show();
+                    });
+                    alert.setNegativeButton("لغو", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+
+                    alert.show();
                 }
 
         }
     }
+
+
 
     // vase check kardane inke user space nazane to username
     public InputFilter getUsernameFilter() {
